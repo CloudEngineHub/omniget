@@ -180,7 +180,7 @@
         class:active={activeTab === tab.key}
         role="tab"
         aria-selected={activeTab === tab.key}
-        onclick={() => pickTab(tab.key)}
+        onclick={() => pickTab(tab.key as TabKey)}
       >
         {tab.label}
       </button>

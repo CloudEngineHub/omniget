@@ -303,14 +303,14 @@
       <article class="hero" class:continue={hero.kind === "continue"} class:review={hero.kind === "review"} class:focus={hero.kind === "focus"}>
         {#if hero.kind === "continue"}
           <span class="hero-label">{$t("study.hub.continue_title")}</span>
-          <h2 class="hero-title">{hero.course.title}</h2>
+          <h2 class="hero-title">{hero.course?.title}</h2>
           <div class="hero-progress">
             <div class="progress-track">
-              <div class="progress-fill" style:width="{Math.round(hero.course.progress_pct ?? 0)}%"></div>
+              <div class="progress-fill" style:width="{Math.round(hero.course?.progress_pct ?? 0)}%"></div>
             </div>
-            <span class="mono hero-pct">{Math.round(hero.course.progress_pct ?? 0)}%</span>
+            <span class="mono hero-pct">{Math.round(hero.course?.progress_pct ?? 0)}%</span>
           </div>
-          <button class="hero-cta" onclick={() => openCourse(hero.course)}>
+          <button class="hero-cta" onclick={() => hero.course && openCourse(hero.course)}>
             {$t("study.hub.continue_cta")}
             <span aria-hidden="true">→</span>
           </button>

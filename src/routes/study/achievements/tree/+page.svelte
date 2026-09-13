@@ -27,7 +27,7 @@
     requires?: string;
   };
 
-  const TREE_NODES = $derived([
+  const TREE_NODES = $derived.by((): TreeNode[] => [
     { code: "xp:100", label: $t("study.achv.tree.xp_100_label"), description: $t("study.achv.tree.xp_100_desc"), family: "xp", tier: "bronze", threshold: 100, icon: "✨" },
     { code: "xp:500", label: $t("study.achv.tree.xp_500_label"), description: $t("study.achv.tree.xp_500_desc"), family: "xp", tier: "bronze", threshold: 500, icon: "⭐", requires: "xp:100" },
     { code: "xp:1000", label: $t("study.achv.tree.xp_1000_label"), description: $t("study.achv.tree.xp_1000_desc"), family: "xp", tier: "silver", threshold: 1000, icon: "🌟", requires: "xp:500" },

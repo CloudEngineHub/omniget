@@ -125,7 +125,7 @@ class SpotifySdkController {
           this.unavailableReason =
             get(t)("study.music.sdk.widevine_unavailable");
           this.loading = false;
-          reject(new Error(this.unavailableReason));
+          reject(new Error(this.unavailableReason ?? ""));
           return;
         }
 
@@ -133,7 +133,7 @@ class SpotifySdkController {
           if (!window.Spotify) {
             this.unavailableReason = get(t)("study.music.sdk.sdk_no_global");
             this.loading = false;
-            reject(new Error(this.unavailableReason));
+            reject(new Error(this.unavailableReason ?? ""));
             return;
           }
 
@@ -218,7 +218,7 @@ class SpotifySdkController {
           script.onerror = () => {
             this.unavailableReason = "Falha ao carregar SDK do Spotify (offline?)";
             this.loading = false;
-            reject(new Error(this.unavailableReason));
+            reject(new Error(this.unavailableReason ?? ""));
           };
           document.head.appendChild(script);
         }

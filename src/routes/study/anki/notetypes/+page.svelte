@@ -142,7 +142,7 @@
     };
   }
 
-  const stockOptions = $derived([
+  const stockOptions = $derived.by((): { value: StockKind; label: string; hint: string }[] => [
     {
       value: "basic",
       label: $t("study.anki.notetypes.stock_basic"),
@@ -701,9 +701,9 @@
                   {#each draft.templates as tpl (tpl.ord)}
                     <button
                       role="tab"
-                      aria-selected={activeTemplateOrd === t.ord}
-                      class:active={activeTemplateOrd === t.ord}
-                      onclick={() => (activeTemplateOrd = t.ord)}
+                      aria-selected={activeTemplateOrd === tpl.ord}
+                      class:active={activeTemplateOrd === tpl.ord}
+                      onclick={() => (activeTemplateOrd = tpl.ord)}
                     >
                       {tpl.name}
                     </button>
@@ -711,7 +711,7 @@
                 </div>
               {/if}
               {#each draft.templates as tpl (tpl.ord)}
-                {#if t.ord === activeTemplateOrd || draft.templates.length === 1}
+                {#if tpl.ord === activeTemplateOrd || draft.templates.length === 1}
                   <div class="tpl-edit">
                     <label class="lbl">
                       <span>{$t("study.anki.notetypes.name_label")}</span>
@@ -725,7 +725,7 @@
                       <div class="tpl-col">
                         <span class="tpl-label">{$t("study.anki.notetypes.front_q")}</span>
                         <textarea
-                          bind:value={t.config.q_format}
+                          bind:value={tpl.config.q_format}
                           rows="8"
                           spellcheck="false"
                           disabled={saving}
@@ -734,7 +734,7 @@
                       <div class="tpl-col">
                         <span class="tpl-label">{$t("study.anki.notetypes.back_a")}</span>
                         <textarea
-                          bind:value={t.config.a_format}
+                          bind:value={tpl.config.a_format}
                           rows="8"
                           spellcheck="false"
                           disabled={saving}
@@ -744,7 +744,7 @@
                     {#if draft.templates.length > 1}
                       <button
                         class="btn ghost danger small"
-                        onclick={() => removeTemplate(t.ord)}
+                        onclick={() => removeTemplate(tpl.ord)}
                         disabled={saving}
                       >
                         {$t("study.anki.notetypes.remove_this_template")}
@@ -804,9 +804,9 @@
                   {#each selected.templates as tpl (tpl.ord)}
                     <button
                       role="tab"
-                      aria-selected={activeTemplateOrd === t.ord}
-                      class:active={activeTemplateOrd === t.ord}
-                      onclick={() => (activeTemplateOrd = t.ord)}
+                      aria-selected={activeTemplateOrd === tpl.ord}
+                      class:active={activeTemplateOrd === tpl.ord}
+                      onclick={() => (activeTemplateOrd = tpl.ord)}
                     >
                       {tpl.name}
                     </button>

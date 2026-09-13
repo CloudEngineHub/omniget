@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "Название профиля",
         "save_profile": "Сохранить профиль",
         "removing": "Удаление...",
-        "remove_profile": "Удалить профиль"
+        "remove_profile": "Удалить профиль",
+        "manage_aria": "Управление аккаунтами"
       },
       "transfer": {
         "aria": "Передачи",
@@ -8005,7 +8006,14 @@
         "transfers": "Передачи",
         "new_drive_folder": "Новая папка Drive",
         "new_drive_folder_a": "Создаёт канал Telegram с суффиксом",
-        "new_drive_folder_b": "для использования как приватная папка медиа."
+        "new_drive_folder_b": "для использования как приватная папка медиа.",
+        "manage_accounts": "Управление аккаунтами",
+        "global_search": "Глобальный поиск",
+        "global_search_hint": "Глобальный поиск (Ctrl+K)",
+        "manage_chat_aria": "Управление {{name}}",
+        "manage": "Управление",
+        "manage_channel": "Управление каналом",
+        "folder_name_placeholder": "Название папки"
       },
       "browser": {
         "media_error": "Похоже, у канала нет медиа, доступных через API (защищённый broadcast или контент без медиа). Проверьте в официальном Telegram, видны ли видео."

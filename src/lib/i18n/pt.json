@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "Nome do perfil",
         "save_profile": "Salvar perfil",
         "removing": "Removendo...",
-        "remove_profile": "Remover perfil"
+        "remove_profile": "Remover perfil",
+        "manage_aria": "Gerenciar contas"
       },
       "transfer": {
         "aria": "Transferências",
@@ -8005,7 +8006,14 @@
         "transfers": "Transferências",
         "new_drive_folder": "Nova pasta Drive",
         "new_drive_folder_a": "Cria um canal Telegram com sufixo",
-        "new_drive_folder_b": "para você usar como pasta privada de mídias."
+        "new_drive_folder_b": "para você usar como pasta privada de mídias.",
+        "manage_accounts": "Gerenciar contas",
+        "global_search": "Busca global",
+        "global_search_hint": "Busca global (Ctrl+K)",
+        "manage_chat_aria": "Gerenciar {{name}}",
+        "manage": "Gerenciar",
+        "manage_channel": "Gerenciar canal",
+        "folder_name_placeholder": "Nome da pasta"
       },
       "browser": {
         "media_error": "Channel parece não ter mídia acessível via API (broadcast protegido ou content sem media). Verifique no Telegram oficial se vê os videos."

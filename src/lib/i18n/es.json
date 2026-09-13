@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "Nombre del perfil",
         "save_profile": "Guardar perfil",
         "removing": "Eliminando...",
-        "remove_profile": "Eliminar perfil"
+        "remove_profile": "Eliminar perfil",
+        "manage_aria": "Gestionar cuentas"
       },
       "transfer": {
         "aria": "Transferencias",
@@ -8005,7 +8006,14 @@
         "transfers": "Transferencias",
         "new_drive_folder": "Nueva carpeta Drive",
         "new_drive_folder_a": "Crea un canal de Telegram con el sufijo",
-        "new_drive_folder_b": "para que lo uses como carpeta privada de multimedia."
+        "new_drive_folder_b": "para que lo uses como carpeta privada de multimedia.",
+        "manage_accounts": "Gestionar cuentas",
+        "global_search": "Búsqueda global",
+        "global_search_hint": "Búsqueda global (Ctrl+K)",
+        "manage_chat_aria": "Gestionar {{name}}",
+        "manage": "Gestionar",
+        "manage_channel": "Gestionar canal",
+        "folder_name_placeholder": "Nombre de la carpeta"
       },
       "browser": {
         "media_error": "El canal parece no tener medios accesibles vía API (broadcast protegido o contenido sin media). Verifica en el Telegram oficial si ves los vídeos."

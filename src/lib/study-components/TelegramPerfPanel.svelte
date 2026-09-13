@@ -158,7 +158,7 @@
           <h2>{$t("study.telegram.perf.title")}</h2>
           <p class="subtitle">{$t("study.telegram.perf.subtitle")}</p>
         </div>
-        <button type="button" class="icon-btn" onclick={close} aria-label="Fechar">
+        <button type="button" class="icon-btn" onclick={close} aria-label={$t("study.common.close")}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6L6 18" />
             <path d="M6 6l12 12" />
@@ -309,7 +309,7 @@
                 onclick={saveSync}
                 disabled={syncSaving || (draftSyncEnabled === sync.enabled && draftSyncIntervalMin === sync.interval_min)}
               >
-                {syncSaving ? "Salvando..." : "Salvar"}
+                {syncSaving ? $t("study.common.saving") : $t("study.common.save")}
               </button>
             </div>
           </section>
@@ -323,7 +323,7 @@
             onclick={save}
             disabled={saving || draftMax === perf.max_threads}
           >
-            {saving ? "Salvando..." : "Salvar"}
+            {saving ? $t("study.common.saving") : $t("study.common.save")}
           </button>
         </footer>
       {/if}

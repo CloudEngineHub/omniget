@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "نام نمایه",
         "save_profile": "ذخیره نمایه",
         "removing": "در حال حذف...",
-        "remove_profile": "حذف نمایه"
+        "remove_profile": "حذف نمایه",
+        "manage_aria": "مدیریت حساب‌ها"
       },
       "transfer": {
         "aria": "انتقال‌ها",
@@ -8005,7 +8006,14 @@
         "transfers": "انتقال‌ها",
         "new_drive_folder": "پوشه Drive جدید",
         "new_drive_folder_a": "یک کانال تلگرام با پسوند",
-        "new_drive_folder_b": "می‌سازد تا به‌عنوان پوشه خصوصی رسانه استفاده کنید."
+        "new_drive_folder_b": "می‌سازد تا به‌عنوان پوشه خصوصی رسانه استفاده کنید.",
+        "manage_accounts": "مدیریت حساب‌ها",
+        "global_search": "جستجوی سراسری",
+        "global_search_hint": "جستجوی سراسری (Ctrl+K)",
+        "manage_chat_aria": "مدیریت {{name}}",
+        "manage": "مدیریت",
+        "manage_channel": "مدیریت کانال",
+        "folder_name_placeholder": "نام پوشه"
       },
       "browser": {
         "media_error": "به نظر می‌رسد کانال رسانه‌ای قابل دسترسی از طریق API ندارد (پخش محافظت‌شده یا محتوای بدون رسانه). در تلگرام رسمی بررسی کنید ویدیوها را می‌بینید."

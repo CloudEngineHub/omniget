@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "設定檔名稱",
         "save_profile": "儲存設定檔",
         "removing": "移除中...",
-        "remove_profile": "移除設定檔"
+        "remove_profile": "移除設定檔",
+        "manage_aria": "管理帳號"
       },
       "transfer": {
         "aria": "傳輸",
@@ -8005,7 +8006,14 @@
         "transfers": "傳輸",
         "new_drive_folder": "新 Drive 資料夾",
         "new_drive_folder_a": "建立一個帶有後綴",
-        "new_drive_folder_b": "的 Telegram 頻道，作為你的私有媒體資料夾。"
+        "new_drive_folder_b": "的 Telegram 頻道，作為你的私有媒體資料夾。",
+        "manage_accounts": "管理帳號",
+        "global_search": "全域搜尋",
+        "global_search_hint": "全域搜尋 (Ctrl+K)",
+        "manage_chat_aria": "管理 {{name}}",
+        "manage": "管理",
+        "manage_channel": "管理頻道",
+        "folder_name_placeholder": "資料夾名稱"
       },
       "browser": {
         "media_error": "該頻道似乎沒有可透過 API 存取的媒體（受保護的廣播或無媒體內容）。請在官方 Telegram 確認是否看得到影片。"

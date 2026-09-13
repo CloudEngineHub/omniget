@@ -178,13 +178,13 @@
     onclick={(e) => { if (e.target === e.currentTarget) close(); }}
     onkeydown={(e) => { if (e.key === "Escape") close(); }}
   >
-    <aside class="panel" role="dialog" aria-modal="true" aria-label="Gerenciar contas">
+    <aside class="panel" role="dialog" aria-modal="true" aria-label={$t("study.telegram.account.manage_aria")}>
       <header class="panel-header">
         <div>
           <h2>{$t("study.telegram.account.title")}</h2>
           <p class="subtitle">{$t("study.telegram.account.subtitle")}</p>
         </div>
-        <button type="button" class="icon-btn" onclick={close} aria-label="Fechar">
+        <button type="button" class="icon-btn" onclick={close} aria-label={$t("study.telegram.account.close")}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6L6 18" />
             <path d="M6 6l12 12" />

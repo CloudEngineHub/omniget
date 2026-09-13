@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "配置文件名称",
         "save_profile": "保存配置文件",
         "removing": "移除中...",
-        "remove_profile": "移除配置文件"
+        "remove_profile": "移除配置文件",
+        "manage_aria": "管理账号"
       },
       "transfer": {
         "aria": "传输",
@@ -8005,7 +8006,14 @@
         "transfers": "传输",
         "new_drive_folder": "新建 Drive 文件夹",
         "new_drive_folder_a": "创建一个带后缀",
-        "new_drive_folder_b": "的 Telegram 频道，用作你的私有媒体文件夹。"
+        "new_drive_folder_b": "的 Telegram 频道，用作你的私有媒体文件夹。",
+        "manage_accounts": "管理账号",
+        "global_search": "全局搜索",
+        "global_search_hint": "全局搜索（Ctrl+K）",
+        "manage_chat_aria": "管理 {{name}}",
+        "manage": "管理",
+        "manage_channel": "管理频道",
+        "folder_name_placeholder": "文件夹名称"
       },
       "browser": {
         "media_error": "该频道似乎没有可通过 API 访问的媒体（受保护的广播或无媒体内容）。请在官方 Telegram 中确认是否能看到视频。"

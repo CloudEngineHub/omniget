@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "プロフィール名",
         "save_profile": "プロフィールを保存",
         "removing": "削除中...",
-        "remove_profile": "プロフィールを削除"
+        "remove_profile": "プロフィールを削除",
+        "manage_aria": "アカウントを管理"
       },
       "transfer": {
         "aria": "転送",
@@ -8005,7 +8006,14 @@
         "transfers": "転送",
         "new_drive_folder": "新しい Drive フォルダ",
         "new_drive_folder_a": "接尾辞付きの Telegram チャンネルを作成し、",
-        "new_drive_folder_b": "非公開のメディアフォルダとして使えます。"
+        "new_drive_folder_b": "非公開のメディアフォルダとして使えます。",
+        "manage_accounts": "アカウントを管理",
+        "global_search": "グローバル検索",
+        "global_search_hint": "グローバル検索 (Ctrl+K)",
+        "manage_chat_aria": "{{name}} を管理",
+        "manage": "管理",
+        "manage_channel": "チャンネルを管理",
+        "folder_name_placeholder": "フォルダ名"
       },
       "browser": {
         "media_error": "チャンネルには API 経由でアクセスできるメディアがないようです (保護されたブロードキャスト、またはメディアなし)。公式 Telegram で動画が見えるか確認してください。"

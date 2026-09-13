@@ -1153,8 +1153,8 @@
         <button
           class="button account-btn"
           onclick={() => (accountPanelOpen = true)}
-          aria-label="Gerenciar contas"
-          title="Gerenciar contas"
+          aria-label={$t("study.telegram.page.manage_accounts")}
+          title={$t("study.telegram.page.manage_accounts")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
@@ -1164,8 +1164,8 @@
         <button
           class="button"
           onclick={() => (cloneWizardOpen = true)}
-          aria-label="Clonar canais"
-          title="Clonar canais"
+          aria-label={$t("study.telegram.clone.title")}
+          title={$t("study.telegram.clone.title")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" />
@@ -1188,8 +1188,8 @@
         <button
           class="button"
           onclick={() => (globalSearchOpen = true)}
-          aria-label="Busca global"
-          title="Busca global (Ctrl+K)"
+          aria-label={$t("study.telegram.page.global_search")}
+          title={$t("study.telegram.page.global_search_hint")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8" />
@@ -1199,8 +1199,8 @@
         <button
           class="button"
           onclick={() => (perfPanelOpen = true)}
-          aria-label="Performance"
-          title="Performance de download"
+          aria-label={$t("study.telegram.perf.title")}
+          title={$t("study.telegram.perf.title")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
@@ -1314,8 +1314,8 @@
               type="button"
               class="chat-info-btn"
               onclick={(e) => openDrawer(chat, e)}
-              aria-label="Gerenciar {chat.title}"
-              title="Gerenciar"
+              aria-label={$t("study.telegram.page.manage_chat_aria", { name: chat.title })}
+              title={$t("study.telegram.page.manage")}
             >
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="5" r="1.5" />
@@ -1342,7 +1342,7 @@
         type="button"
         class="button manage-btn"
         onclick={(e) => openDrawer(selectedChat!, e)}
-        aria-label="Gerenciar canal"
+        aria-label={$t("study.telegram.page.manage_channel")}
       >
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="5" r="1.5" />
@@ -1584,7 +1584,7 @@
         <input
           type="text"
           class="input"
-          placeholder="Nome da pasta"
+          placeholder={$t("study.telegram.page.folder_name_placeholder")}
           bind:value={createFolderName}
           disabled={createFolderBusy}
           autofocus

@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "Profile name",
         "save_profile": "Save profile",
         "removing": "Removing…",
-        "remove_profile": "Remove profile"
+        "remove_profile": "Remove profile",
+        "manage_aria": "Manage accounts"
       },
       "transfer": {
         "aria": "Transfers",
@@ -8005,7 +8006,14 @@
         "transfers": "Transfers",
         "new_drive_folder": "New Drive folder",
         "new_drive_folder_a": "Creates a Telegram channel with the",
-        "new_drive_folder_b": "suffix for you to use as a private media folder."
+        "new_drive_folder_b": "suffix for you to use as a private media folder.",
+        "manage_accounts": "Manage accounts",
+        "global_search": "Global search",
+        "global_search_hint": "Global search (Ctrl+K)",
+        "manage_chat_aria": "Manage {{name}}",
+        "manage": "Manage",
+        "manage_channel": "Manage channel",
+        "folder_name_placeholder": "Folder name"
       },
       "browser": {
         "media_error": "The channel seems to have no media accessible via the API (protected broadcast or content without media). Check the official Telegram to see the videos."

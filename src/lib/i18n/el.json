@@ -7975,7 +7975,8 @@
         "profile_name_placeholder": "Όνομα προφίλ",
         "save_profile": "Αποθήκευση προφίλ",
         "removing": "Αφαίρεση...",
-        "remove_profile": "Αφαίρεση προφίλ"
+        "remove_profile": "Αφαίρεση προφίλ",
+        "manage_aria": "Διαχείριση λογαριασμών"
       },
       "transfer": {
         "aria": "Μεταφορές",
@@ -8005,7 +8006,14 @@
         "transfers": "Μεταφορές",
         "new_drive_folder": "Νέος φάκελος Drive",
         "new_drive_folder_a": "Δημιουργεί κανάλι Telegram με την κατάληξη",
-        "new_drive_folder_b": "για να το χρησιμοποιείτε ως ιδιωτικό φάκελο μέσων."
+        "new_drive_folder_b": "για να το χρησιμοποιείτε ως ιδιωτικό φάκελο μέσων.",
+        "manage_accounts": "Διαχείριση λογαριασμών",
+        "global_search": "Καθολική αναζήτηση",
+        "global_search_hint": "Καθολική αναζήτηση (Ctrl+K)",
+        "manage_chat_aria": "Διαχείριση {{name}}",
+        "manage": "Διαχείριση",
+        "manage_channel": "Διαχείριση καναλιού",
+        "folder_name_placeholder": "Όνομα φακέλου"
       },
       "browser": {
         "media_error": "Το κανάλι φαίνεται να μην έχει μέσα προσβάσιμα μέσω API (προστατευμένη εκπομπή ή περιεχόμενο χωρίς μέσα). Ελέγξτε στο επίσημο Telegram αν βλέπετε τα βίντεο."

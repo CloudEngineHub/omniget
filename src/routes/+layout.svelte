@@ -44,7 +44,7 @@
 
   let pluginNavItems = $state<NavItem[]>([]);
 
-  let leagueNavItems = $derived(
+  let leagueNavItems = $derived<NavItem[]>(
     (getSettings()?.league?.enabled ?? true)
       ? [{ href: "/league", labelKey: "league.nav", icon: "league", group: "app", order: 45 }]
       : []

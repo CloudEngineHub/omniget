@@ -1,17 +1,17 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
+
   type Props = {
     open: boolean;
     onClose: () => void;
   };
-
-  import { t } from "$lib/i18n";
 
   let { open, onClose }: Props = $props();
 
   type Shortcut = { keys: string[]; label: string };
   type Group = { title: string; items: Shortcut[] };
 
-  const groups = $derived([
+  const groups = $derived<Group[]>([
     {
       title: $t("study.player.keys.g_playback"),
       items: [

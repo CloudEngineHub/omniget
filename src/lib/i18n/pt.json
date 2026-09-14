@@ -5374,7 +5374,8 @@
         "created_inside": "Será criado dentro de",
         "initial_ease": "Ease inicial",
         "learn_steps_space": "Learning steps (minutos, separados por espaço)",
-        "relearn_steps_min": "Relearning steps (minutos)"
+        "relearn_steps_min": "Relearning steps (minutos)",
+        "config_title": "Configuração de deck"
       },
       "tags": {
         "no_unused": "Nenhuma tag não usada",
@@ -5388,7 +5389,9 @@
         "loading": "Carregando tags…",
         "no_tags": "Nenhuma tag ainda.",
         "no_tags_hint": "Tags são criadas quando você adiciona uma a uma nota.",
-        "no_match": "Nenhuma tag combina com \"{{filter}}\"."
+        "no_match": "Nenhuma tag combina com \"{{filter}}\".",
+        "reparent_move": "Mover",
+        "reparent_hint": "Novo parent (deixe vazio para mover pra raiz). Use :: para encadear níveis."
       },
       "revlog": {
         "err_cardid": "Informe um cardId numérico",
@@ -5418,7 +5421,8 @@
         "space": "Espaço",
         "answer": "Resposta",
         "question": "Pergunta",
-        "show_answer": "Mostrar resposta"
+        "show_answer": "Mostrar resposta",
+        "done": "Você respondeu {{n}} cards. Bom trabalho!"
       },
       "browse": {
         "p_due": "Pendentes",
@@ -5457,7 +5461,16 @@
         "tags_input_hint": "Tags (separadas por espaço; use :: para hierarquia)",
         "delete_note_title": "Excluir nota",
         "delete_note_confirm": "A nota e todos os cards associados serão removidos. Não pode ser desfeito.",
-        "delete_note_confirm_label": "Excluir nota"
+        "delete_note_confirm_label": "Excluir nota",
+        "search_placeholder": "deck:Inglês is:due tag:vocab",
+        "next_page": "Próxima",
+        "bury_hint": "Reverte o estado de enterro de cards do deck selecionado, retornando-os às filas normais.",
+        "tags_separator": "Tags (espaço como separador)",
+        "content": "Conteúdo",
+        "only_card": "Esta nota tem só essa card.",
+        "avg_time": "Tempo médio",
+        "first_review": "Primeiro review",
+        "history": "Histórico ({{n}})"
       },
       "import": {
         "notes_added": "Notes adicionadas",
@@ -5496,7 +5509,8 @@
         "export_csv": "Exportar .csv",
         "import_done": "Importação concluída",
         "error_rows": "{{n}} linhas com erro",
-        "more_n": "… e mais {{n}}"
+        "more_n": "… e mais {{n}}",
+        "bad_format": "Formato não reconhecido: {{name}}"
       },
       "filtered": {
         "subtitle": "Cards selecionados por uma query — bom para revisão dirigida",
@@ -5526,7 +5540,30 @@
         "returned_one": "1 card devolvido pro deck original",
         "returned_many": "{{n}} cards devolvidos",
         "delete_title": "Apagar deck filtrado",
-        "delete_confirm": "O deck \"{{name}}\" será removido. Os cards voltam pro deck original — nada é perdido."
+        "delete_confirm": "O deck \"{{name}}\" será removido. Os cards voltam pro deck original — nada é perdido.",
+        "create_title": "Criar deck filtrado",
+        "create_hint": "O deck puxa cards que casam com a query. Use sintaxe Anki:",
+        "name_placeholder": "Ex: Revisão hoje",
+        "limit": "Limite"
+      },
+      "presets": {
+        "subtitle": "Configurações reutilizáveis (limites, FSRS, learning steps)",
+        "default_undeletable": "Preset padrão não pode ser apagado",
+        "default_badge": "padrão",
+        "retention": "Retenção desejada (FSRS)",
+        "disable_media_autoplay": "Desativar autoplay de mídia",
+        "delete_title": "Apagar preset",
+        "delete_confirm": "Apagar o preset \"{{name}}\"? Decks que usam vão pro preset padrão."
+      },
+      "sync": {
+        "connection_ok": "Conexão OK",
+        "title": "Sincronização",
+        "files_desc": "Sync por arquivos: collection.anki2 + media via WebDAV, pasta local ou backup .colpkg. Não usa servidor AnkiWeb.",
+        "local_changes": "Mudanças locais",
+        "webdav_hint": "Compatível com Nextcloud, ownCloud, Synology, Apache mod_dav. Use HTTPS sempre que possível.",
+        "user": "Usuário",
+        "export_hint": "Você pode importar de volta via Importar.",
+        "test_connection": "Testar conexão"
       }
     },
     "common": {
@@ -5598,7 +5635,8 @@
       "secondary_explore": "Explorar biblioteca",
       "review_subtitle": "cards due hoje",
       "focus_hint_default": "25 min · foco profundo",
-      "made_by": "Feito por:"
+      "made_by": "Feito por:",
+      "xp_tooltip": "{{xp}} XP · {{pct}}% para nível {{lvl}}"
     },
     "search": {
       "placeholder": "Buscar cursos, aulas, notas, flashcards...",
@@ -5848,7 +5886,7 @@
       "genres_subtitle": "Navegue por gênero musical detectado nos seus arquivos.",
       "no_genres": "Nenhum gênero encontrado. Faixas precisam ter tag de gênero.",
       "eyebrow_genre": "Gênero",
-      "albums_count": "{{count}} álbuns",
+      "albums_count": "{{n}} álbum(ns)",
       "artists_count": "{{count}} artistas",
       "activity_title": "Sua atividade",
       "activity_subtitle": "O que você ouviu, quando, quanto.",
@@ -6431,8 +6469,32 @@
         "open_aria": "Abrir álbum"
       },
       "sc": {
-        "login_failed": "Não consegui completar o login. Tenta de novo."
-      }
+        "login_failed": "Não consegui completar o login. Tenta de novo.",
+        "login_title": "Entrar com SoundCloud",
+        "login_btn": "Entrar com SoundCloud",
+        "login_hint": "Vai abrir uma janelinha do SoundCloud. Faça login e ela fecha sozinha quando você terminar.",
+        "opening": "Abrindo SoundCloud…",
+        "why_fail": "Por que pode falhar?",
+        "fail_new_account": "Conta nova: confirme o email primeiro no SoundCloud",
+        "fail_2fa": "2FA: termine o segundo passo antes de fechar a janela",
+        "fail_captcha": "Captcha: resolva no site, a janela espera você"
+      },
+      "spotify": {
+        "dev_mode_warn": "Em apps em Development mode, o Spotify pode bloquear o acesso às tracks dessas playlists (403)",
+        "in_local_library": "Já está na sua biblioteca local",
+        "remove_from_albums": "Remover dos seus álbuns",
+        "save_album": "Salvar álbum",
+        "restricted_playlist": "Esta playlist é restrita pelo Spotify para apps de terceiros (geralmente é uma playlist curada pelo Spotify, como Discover Weekly ou Daily Mix).",
+        "connect_title": "Conectar sua conta Spotify",
+        "connect_body": "Veja sua biblioteca, playlists e histórico do Spotify dentro do OmniGet. Você pode tocar em qualquer dispositivo Spotify ativo (celular, app oficial). Em breve, tocar direto aqui também.",
+        "no_client_id": "⚠️ Client ID do Spotify não configurado. Reinstale ou rebuilde o plugin study.",
+        "waiting_auth": "Aguardando autorização no navegador…",
+        "free_mode": "Modo Free: faixas tocam via YouTube em tempo real (match automático por título/artista).",
+        "no_widevine": "Widevine DRM indisponível. Vai usar fallback YouTube.",
+        "premium_required": "Spotify Premium é obrigatório ({{msg}})"
+      },
+      "your_spotify_albums": "Seus álbuns Spotify",
+      "clear_done": "Limpar concluídos"
     },
     "library": {
       "title": "Biblioteca",
@@ -6831,7 +6893,57 @@
     },
     "player": {
       "title": "Player",
-      "placeholder": "Selecione uma aula na biblioteca para começar."
+      "placeholder": "Selecione uma aula na biblioteca para começar.",
+      "keys": {
+        "g_playback": "Reprodução",
+        "key_space": "Espaço",
+        "play_pause": "Play / Pausar",
+        "fullscreen": "Tela cheia",
+        "mute_unmute": "Mutar / Desmutar",
+        "cinema_mode": "Modo cinema",
+        "exit_fullscreen": "Sair do fullscreen / Fechar",
+        "g_navigation": "Navegação",
+        "back_10": "Voltar 10s",
+        "fwd_10": "Avançar 10s",
+        "back_3": "Voltar 3s (fine seek)",
+        "fwd_3": "Avançar 3s (fine seek)",
+        "prev_frame": "Frame anterior (pausado)",
+        "next_frame": "Próximo frame (pausado)",
+        "jump_pct": "Pular pra 0%, 10%, … 90%",
+        "g_speed": "Velocidade",
+        "speed_down": "Diminuir velocidade",
+        "speed_up": "Aumentar velocidade",
+        "g_subs_notes": "Legendas / Notas",
+        "next_subtitle": "Próxima legenda (cycle)",
+        "add_note_ts": "Adicionar nota no timestamp",
+        "g_general": "Geral",
+        "show_panel": "Mostrar este painel",
+        "search_anywhere": "Buscar (em qualquer rota)"
+      },
+      "shell": {
+        "aria": "Reprodutor de vídeo",
+        "chapters": "Capítulos",
+        "close_chapters": "Fechar capítulos",
+        "credits": "Créditos",
+        "audio": "Áudio"
+      },
+      "seek_eyebrow": "Análise",
+      "seek_dist_title": "Distribuição de retornos",
+      "seek_dist_hint": "Cada barra representa 10 segundos. Barras altas indicam onde você (ou outros) voltaram mais — provavelmente trecho mais difícil.",
+      "seek_count": "{{n}} seeks",
+      "quality_default": "Padrão",
+      "sponsor": {
+        "sponsor": "patrocinado",
+        "selfpromo": "auto-promoção",
+        "intro": "intro",
+        "outro": "encerramento",
+        "interaction": "pedido de interação",
+        "preview": "prévia",
+        "music_offtopic": "trecho não-musical",
+        "filler": "enrolação",
+        "skip": "Pular {{cat}}"
+      },
+      "seek_analysis": "Análise de seeks na aula"
     },
     "course": {
       "back": "Voltar para a biblioteca",
@@ -6854,13 +6966,25 @@
       "subjects_updated": "Matérias atualizadas",
       "lesson": {
         "video_not_loaded": "Vídeo ainda não carregou",
-        "panels_aria": "painéis da aula"
+        "panels_aria": "painéis da aula",
+        "lesson_label": "Aula",
+        "position": "Posição",
+        "duration": "Duração"
       },
       "subjects_edit_aria": "Editar matérias",
       "subjects_list_aria": "Lista de matérias",
       "you_may_like": "Você pode gostar",
       "suggestions": "Sugestões",
-      "completed_aria": "Curso concluído"
+      "completed_aria": "Curso concluído",
+      "durations_probed": "{{n}} durações detectadas",
+      "subjects": "Matérias",
+      "actions": "Ações",
+      "probe_ok": "{{n}} probadas",
+      "probe_skipped": "{{n}} já tinham",
+      "probe_failed": "{{n}} falharam",
+      "probe_of": "de {{n}} aulas",
+      "subjects_edit_title": "Matérias do curso",
+      "subjects_empty": "Nenhuma matéria criada. Vá para a aba Foco e crie uma primeiro."
     },
     "attachments": {
       "title": "Anexos ({{count}})"
@@ -7067,14 +7191,20 @@
         "delete_confirm": "Excluir \"{{name}}\" remove {{n}} página(s) para sempre. Continuar?",
         "icon_hint": "Ícone (lucide name, ex: book, briefcase). Vazio = sem ícone.",
         "filter_pages": "Filtrar páginas…",
-        "new_page_here": "Nova página neste notebook"
+        "new_page_here": "Nova página neste notebook",
+        "pick_icon": "Ícone…",
+        "new_page": "+ Nova página"
       },
       "maintenance": {
         "recalc_hint": "Recalcula a tabela de refs/backlinks varrendo todo o conteúdo.",
         "cache_hint": "Limpa cache de queries. Inofensivo; queries serão recalculadas.",
         "graph_hint": "Baixa o grafo de notes (nodes + edges) como JSON pra inspeção/backup.",
-        "import_hint": "Lê um .md do disco e cria uma página com o conteúdo.",
-        "import_aria": "Confirmar importação"
+        "import_hint": "Vai criar uma página chamada {{name}} e parsear o markdown em blocos hierárquicos.",
+        "import_aria": "Confirmar importação",
+        "backlinks_done": "Backlinks reconstruídos: {{n}} refs",
+        "title": "Manutenção",
+        "desc": "Tarefas de housekeeping. Reconstruir índices é seguro mas pode levar alguns segundos em databases grandes.",
+        "import_exists": "Se já existir uma página com esse nome, o backend devolve erro e nada é importado."
       },
       "history_modal": {
         "block_aria": "Histórico do bloco",
@@ -7082,7 +7212,14 @@
         "restoring": "Restaurando…",
         "restore_this": "Restaurar esta versão",
         "clear_aria": "Limpar histórico",
-        "clear_warn": "Isso apaga o snapshot deste bloco. Não dá pra desfazer."
+        "clear_warn": "Isso apaga o snapshot deste bloco. Não dá pra desfazer.",
+        "title": "Histórico do bloco",
+        "select": "Selecione um bloco para ver seu histórico.",
+        "none_yet": "Nenhum snapshot ainda. O backend grava snapshots automaticamente em edições; abra esta página em sessões diferentes para acumular versões.",
+        "choose": "Escolha uma versão.",
+        "clear_count": "Limpar histórico ({{n}})",
+        "clear_question": "Limpar histórico?",
+        "clear_warn_multi": "Isso apaga {{n}} snapshots deste bloco. Não dá pra desfazer."
       },
       "nb": {
         "open_new_tab": "Abrir página em nova tab",
@@ -7108,7 +7245,45 @@
         "activity_90": "Atividade nos últimos 90 dias",
         "abc_source_aria": "Source da partitura (notação ABC)"
       },
-      "new_page_prompt": "Nome da nova página:"
+      "new_page_prompt": "Nome da nova página:",
+      "calendar": {
+        "month": "Mês"
+      },
+      "cover": {
+        "title": "Capa da página",
+        "hint": "Cole uma URL externa (https://...). Upload local de arquivo entra em sessão futura."
+      },
+      "diff": {
+        "none": "Sem diferenças."
+      },
+      "embed": {
+        "page_not_found": "Página \"{{name}}\" não encontrada",
+        "cycle_blocked": "Embed cíclico bloqueado"
+      },
+      "oplog": {
+        "title": "Histórico de operações (op-log)",
+        "hint": "Últimas 50 operações. Você pode desfazer ops antigas, não só a última.",
+        "empty": "Sem operações registradas ainda."
+      },
+      "pagepopover": {
+        "empty": "Página vazia"
+      },
+      "legacy_blocks_hint": "Esta página tem múltiplos blocos antigos. C1 edita só o primeiro; os demais ficam preservados no DB e voltam visíveis em C1.5.",
+      "search": {
+        "title": "Buscar em notas",
+        "fts_intro": "Busca FTS5 (full-text) sobre conteúdo dos blocos. Suporta operadores",
+        "start_a": "Pesquise por blocos e páginas. Use",
+        "start_b": "para wildcards e",
+        "start_c": "para busca exata.",
+        "pages": "Páginas"
+      },
+      "tag": {
+        "desc_empty": "Página de descrição existe mas está vazia.",
+        "no_desc_a": "Não há página descritiva para",
+        "no_desc_b": ". Crie uma para documentar o conceito da tag.",
+        "pages_with": "Páginas com esta tag",
+        "none_a": "Sem páginas ou blocos com tag"
+      }
     },
     "achievements": {
       "title": "Conquistas",
@@ -7484,7 +7659,9 @@
         "yes": "sim",
         "no": "não",
         "test_video": "Testar vídeo",
-        "test_video_desc": "Tenta cada cliente do cascade e mostra qual conseguiu cifra/stream. Útil pra debug."
+        "test_video_desc": "Tenta cada cliente do cascade e mostra qual conseguiu cifra/stream. Útil pra debug.",
+        "valid_for": "válido por {{h}}h{{m}}min",
+        "cache_age": "{{n}}min atrás"
       },
       "behavior": {
         "autoplay_next": "Auto-play da próxima aula",
@@ -7496,11 +7673,40 @@
       "library": {
         "watch_desc": "Detecta automaticamente quando arquivos de curso são adicionados ou removidos",
         "auto_cleanup": "Limpeza automática",
-        "auto_cleanup_desc": "Roda vacuum periódico (apaga seek logs antigos, notificações dispensadas, recents fora do top 50)"
+        "auto_cleanup_desc": "Roda vacuum periódico (apaga seek logs antigos, notificações dispensadas, recents fora do top 50)",
+        "rescan_title": "Re-scanear biblioteca",
+        "rescan_hint": "Força detecção de novos cursos/aulas e dispara notificações"
       },
       "tabs": {
         "music": "Música",
         "maintenance": "Manutenção"
+      },
+      "page_hint": "Ajustes do player, legendas, biblioteca e manutenção.",
+      "maintenance": {
+        "vacuum_done": "Limpeza: {{logs}} logs, {{notifs}} notificações, {{recents}} recents",
+        "import_done": "Importação {{mode}}: {{imported}} importados, {{skipped}} pulados, {{missing}} ausentes",
+        "vacuum_title": "Limpeza",
+        "vacuum_hint": "Apaga: seek logs com mais de 30 dias, notificações dispensadas com mais de 90 dias, recents fora do top 50.",
+        "export_title": "Exportar dados",
+        "export_hint": "Salva um arquivo JSON com state de todos os cursos (progresso, watched, recents). Útil pra backup ou troca de máquina.",
+        "import_title": "Importar dados",
+        "import_hint": "Carrega um backup JSON. Você escolhe o modo de mesclagem antes de aplicar.",
+        "import_confirm": "Importar {{n}} curso(s)?",
+        "importing": "Importando…",
+        "vacuum_confirm_title": "Executar limpeza?",
+        "vacuum_confirm_intro": "Os seguintes itens serão apagados permanentemente:",
+        "vacuum_confirm_logs": "Seek logs com mais de 30 dias",
+        "vacuum_confirm_notifs": "Notificações dispensadas com mais de 90 dias",
+        "vacuum_confirm_recents": "Recents fora do top 50 mais usados",
+        "vacuum_reassure": "Não afeta progresso, notas ou bitfield de aulas vistas.",
+        "skip_desc": "— preserva state existente, só importa cursos sem state local",
+        "merge_desc": "— mantém o maior progresso entre local e backup",
+        "merge_rec": "recomendado",
+        "overwrite_desc": "— sobrescreve TODO state local com o do backup (irreversível)",
+        "overwrite_warn_title": "Tem certeza?",
+        "overwrite_warn": "Isso vai apagar progresso local que não está no backup. Recomendamos exportar primeiro.",
+        "overwrite_next": "Avançar com Overwrite",
+        "overwrite_confirm": "Confirmar Overwrite"
       }
     },
     "read": {
@@ -7549,7 +7755,7 @@
       "open_external": "Abrir no app padrão",
       "loading_book": "Carregando livro…",
       "txt_load_more": "Carregar mais",
-      "page_of": "{{current}} de {{total}}",
+      "page_of": "pág. {{cur}}/{{total}}",
       "prev_page": "Página anterior",
       "next_page": "Próxima página",
       "go_to": "Ir para página",
@@ -7779,7 +7985,27 @@
       "downloads.list_mirrors": "Listar mirrors torrent disponíveis",
       "downloads.clear_finished_title": "Limpar concluídos",
       "downloads.clear_finished_body": "Vai remover entradas de downloads concluídos e cancelados. Os arquivos baixados continuam intactos.",
-      "annas.cache_was_empty": "Cache já estava vazio"
+      "annas.cache_was_empty": "Cache já estava vazio",
+      "page_of_author": "{{author}} · pág. {{cur}}/{{total}}",
+      "no_notes_hint": "Nenhuma nota ainda. Selecione um trecho e tecle N pra anexar uma nota, ou tecle N sem seleção pra criar uma nota solta.",
+      "meta_title": "Editar metadados",
+      "meta_hint": "Atualiza apenas o registro local da biblioteca. O arquivo no disco não é modificado.",
+      "meta_title_label": "Título",
+      "annas": {
+        "cache_title": "Cache de busca",
+        "cache_hint": "Resultados são guardados em memória pra não bombardear os mirrors. Limpe se você está vendo dados desatualizados.",
+        "enabled": "Habilitado",
+        "disabled": "Desabilitado",
+        "not_detected": "· não detectado no sistema"
+      },
+      "downloads": {
+        "finished": "Concluídos"
+      },
+      "search": {
+        "no_results": "Nada encontrado pra \"{{q}}\".",
+        "reindex_hint": "Se você tem certeza que o texto existe, tente",
+        "reindex": "reindexar"
+      }
     },
     "bulk": {
       "select_all": "Selecionar tudo",
@@ -7955,7 +8181,8 @@
         "remove_captions": "Remover legendas",
         "no_sessions": "Nenhuma sessão de clone ainda.",
         "create_new": "Criar nova",
-        "new_channel_name_placeholder": "Nome do novo canal (opcional)"
+        "new_channel_name_placeholder": "Nome do novo canal (opcional)",
+        "sessions": "Sessões"
       },
       "account": {
         "session_activated": "Sessão ativada. Reinicie o app pra entrar nesta conta.",
@@ -7976,7 +8203,13 @@
         "save_profile": "Salvar perfil",
         "removing": "Removendo...",
         "remove_profile": "Remover perfil",
-        "manage_aria": "Gerenciar contas"
+        "manage_aria": "Gerenciar contas",
+        "close": "Fechar",
+        "logout_hint": "Salve sua sessão atual antes de fazer logout — assim você consegue voltar pra ela depois sem refazer login.",
+        "switch_title": "Ativar perfil \"{{name}}\"?",
+        "switch_hint": "Sua sessão atual será preservada como backup automático. O app precisa ser reiniciado para concluir a troca.",
+        "delete_title": "Remover perfil \"{{name}}\"?",
+        "delete_hint": "A sessão deste perfil será apagada permanentemente. Você precisará refazer login pra acessar essa conta novamente."
       },
       "transfer": {
         "aria": "Transferências",
@@ -7986,7 +8219,8 @@
         "history": "Histórico",
         "no_recent": "Sem transferências recentes.",
         "done": "Concluído",
-        "error": "Erro"
+        "error": "Erro",
+        "active_summary": "{{a}} ativa(s) · {{h}} no histórico"
       },
       "perf": {
         "today_reset": "Uso de hoje zerado",
@@ -8000,7 +8234,12 @@
         "daily_quota": "Quota diária",
         "auto_sync": "Sincronização automática",
         "sync_background": "Sincronizar em background",
-        "interval": "Intervalo"
+        "interval": "Intervalo",
+        "max_threads_toast": "Máximo de threads: {{n}}",
+        "threads_hint": "Telegram cobra 1 MiB por chunk. Mais threads = downloads mais rápidos em arquivos grandes, mas pode disparar FLOOD_WAIT em conexões lentas. Padrão: 8.",
+        "cache_refresh_hint": "A cada N minutos o plugin atualiza o cache de canais em background — evita erros CHANNEL_INVALID quando você abre chats antigos.",
+        "last_sync_line": "Última: {{time}} · {{n}} atualizados · {{ms}}ms",
+        "never_synced": "Ainda não sincronizou."
       },
       "page": {
         "transfers": "Transferências",
@@ -8016,7 +8255,10 @@
         "folder_name_placeholder": "Nome da pasta"
       },
       "browser": {
-        "media_error": "Channel parece não ter mídia acessível via API (broadcast protegido ou content sem media). Verifique no Telegram oficial se vê os videos."
+        "media_error": "Channel parece não ter mídia acessível via API (broadcast protegido ou content sem media). Verifique no Telegram oficial se vê os videos.",
+        "media_denied": "Telegram negou acesso: {{err}}",
+        "media_filter_errors": "Telegram retornou erros nos filtros: {{errors}}. Possivelmente este channel é protegido (saving disabled) ou access_hash expirou. Tente sair e entrar novamente no chat pelo Telegram oficial.",
+        "media_none_detectable": "Channel tem {{n}} mensagens mas nenhuma com mídia detectável. Verifique se as mensagens têm videos anexados (não apenas links)."
       }
     },
     "achv": {
@@ -8040,11 +8282,11 @@
         "lessons_100_label": "100 aulas",
         "lessons_100_desc": "Cem aulas",
         "focus_60_label": "1h focado",
-        "focus_60_desc": "{h}h de foco",
+        "focus_60_desc": "1h de foco",
         "focus_600_label": "10h focado",
-        "focus_600_desc": "{h}h de foco",
+        "focus_600_desc": "10h de foco",
         "focus_6000_label": "100h focado",
-        "focus_6000_desc": "{h}h de foco",
+        "focus_6000_desc": "100h de foco",
         "streak_3_label": "3 dias",
         "streak_3_desc": "Streak de 3 dias",
         "streak_7_label": "7 dias",
@@ -8055,17 +8297,25 @@
         "streak_100_desc": "Hábito de aço",
         "fam_lessons": "Aulas",
         "fam_focus": "Foco",
-        "subtitle": "Pré-requisitos visuais por família"
+        "subtitle": "Pré-requisitos visuais por família",
+        "d_ago": "{{n}}d atrás",
+        "mo_ago": "{{n}}mês(es) atrás",
+        "y_ago": "{{n}}a atrás",
+        "available": "disponível",
+        "prereq": "Pré-requisito:",
+        "unlocked": "desbloqueado",
+        "locked": "bloqueado"
       },
       "charts": {
         "p_1y": "1a",
         "title": "Charts de progressão",
         "subtitle": "XP, levels, streak, unlocks ao longo do tempo",
-        "d_ago": "{{n}}d atrás",
-        "mo_ago": "{{n}}mês(es) atrás",
-        "y_ago": "{{n}}a atrás",
-        "available": "disponível",
-        "prereq": "Pré-requisito:"
+        "link": "Charts de progressão",
+        "no_xp_history": "Sem histórico de XP no período selecionado.",
+        "level_ups": "{{n}} level-up(s) no período",
+        "no_levelups": "Nenhum level-up no período",
+        "unlocks": "{{n}} unlock(s) no período",
+        "no_unlocks": "Nenhum unlock no período"
       }
     },
     "spotify": {
@@ -8099,6 +8349,9 @@
           "wd_sab": "sáb"
         }
       }
+    },
+    "layout": {
+      "palette_hint": "{{pct}}% até L{{lvl}} · {{xp}} XP"
     }
   },
   "tracking": {

@@ -163,14 +163,14 @@
   </header>
 
   {#if loading}
-    <div class="state">Carregando…</div>
+    <div class="state">{$t("study.common.loading")}</div>
   {:else if error}
     <div class="state err">{error}</div>
   {:else}
     <div class="legend">
-      <span class="leg unlocked"><span class="dot"></span>desbloqueado</span>
+      <span class="leg unlocked"><span class="dot"></span>{$t("study.achv.tree.unlocked")}</span>
       <span class="leg available"><span class="dot"></span>{$t("study.achv.tree.available")}</span>
-      <span class="leg locked"><span class="dot"></span>bloqueado</span>
+      <span class="leg locked"><span class="dot"></span>{$t("study.achv.tree.locked")}</span>
     </div>
 
     <div class="trees">

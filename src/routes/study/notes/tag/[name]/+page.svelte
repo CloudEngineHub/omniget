@@ -127,7 +127,7 @@
           >Editar →</a>
         </header>
         {#if descriptionBlocks.length === 0}
-          <p class="muted">Página de descrição existe mas está vazia.</p>
+          <p class="muted">{$t("study.notes.tag.desc_empty")}</p>
         {:else}
           <ul class="snippet-list">
             {#each flattenFirst(descriptionBlocks, 5) as n (n.id)}
@@ -140,8 +140,7 @@
       <section class="description description-empty">
         <h2>Sobre esta tag</h2>
         <p class="muted">
-          Não há página descritiva para <code>#{tagName}</code>. Crie uma para
-          documentar o conceito da tag.
+          {$t("study.notes.tag.no_desc_a")} <code>#{tagName}</code>{$t("study.notes.tag.no_desc_b")}
         </p>
         <button
           type="button"
@@ -156,7 +155,7 @@
 
     {#if pages.length > 0}
       <section class="pages">
-        <h2>Páginas com esta tag</h2>
+        <h2>{$t("study.notes.tag.pages_with")}</h2>
         <ul>
           {#each pages as p (p.id)}
             <li>
@@ -193,7 +192,7 @@
     {/if}
 
     {#if pages.length === 0 && blocksTagged.length === 0}
-      <p class="state">Sem páginas ou blocos com tag <code>#{tagName}</code>.</p>
+      <p class="state">{$t("study.notes.tag.none_a")} <code>#{tagName}</code>.</p>
     {/if}
   {/if}
 </div>

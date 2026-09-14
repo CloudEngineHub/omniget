@@ -263,7 +263,7 @@
         class:active={filter === "finished"}
         onclick={() => (filter = "finished")}
       >
-        Concluídos <span class="count">{counts.finished}</span>
+        {$t("study.read.downloads.finished")} <span class="count">{counts.finished}</span>
       </button>
       <button
         type="button"

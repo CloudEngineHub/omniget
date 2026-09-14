@@ -148,10 +148,9 @@
 
 <div class="sync-page">
   <header class="page-head">
-    <h1>Sincronização</h1>
+    <h1>{$t("study.anki.sync.title")}</h1>
     <p class="muted">
-      Sync por <strong>arquivos</strong>: collection.anki2 + media via WebDAV, pasta local ou backup .colpkg.
-      Não usa servidor AnkiWeb.
+      {$t("study.anki.sync.files_desc")}
     </p>
   </header>
 
@@ -175,7 +174,7 @@
             <strong class="kpi">{info ? fmtDate(info.last_sync_secs) : "—"}</strong>
           </div>
           <div>
-            <span class="kpi-tag">Mudanças locais</span>
+            <span class="kpi-tag">{$t("study.anki.sync.local_changes")}</span>
             <strong class="kpi">{pending?.total ?? 0}</strong>
           </div>
         </div>
@@ -231,14 +230,14 @@
           </label>
         {:else if chosen === "webdav"}
           <p class="hint">
-            Compatível com Nextcloud, ownCloud, Synology, Apache mod_dav. Use HTTPS sempre que possível.
+            {$t("study.anki.sync.webdav_hint")}
           </p>
           <label class="field">
             <span>URL</span>
             <input class="input" type="url" placeholder="https://nuvem.exemplo.com/remote.php/dav/files/me/anki/" bind:value={webdavUrl} />
           </label>
           <label class="field">
-            <span>Usuário</span>
+            <span>{$t("study.anki.sync.user")}</span>
             <input class="input" type="text" autocomplete="username" bind:value={webdavUser} />
           </label>
           <label class="field">
@@ -248,7 +247,7 @@
         {:else}
           <p class="hint">
             Backup manual em <code>.colpkg</code>. Cada sync gera um arquivo novo timestamped.
-            Você pode importar de volta via Importar.
+            {$t("study.anki.sync.export_hint")}
           </p>
           <label class="field">
             <span>Pasta de destino</span>
@@ -258,7 +257,7 @@
 
         <div class="actions">
           <AnkiButton variant="outline" onclick={test} disabled={busy || !isFormValid()}>
-            Testar conexão
+            {$t("study.anki.sync.test_connection")}
           </AnkiButton>
           <AnkiButton variant="primary" onclick={save} disabled={busy || !isFormValid()}>
             Salvar provedor

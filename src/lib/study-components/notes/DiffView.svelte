@@ -81,7 +81,7 @@
     {/if}
   </header>
   {#if diff.length === 0}
-    <p class="empty">Sem diferenças.</p>
+    <p class="empty">{$t("study.notes.diff.none")}</p>
   {:else}
     <pre class="diff-body"><code>{#each diff as d (d.type + ":" + d.line)}<span
             class="line {d.type === '+' ? 'add' : d.type === '-' ? 'rem' : 'eq'}"

@@ -432,7 +432,7 @@
   {#if chapters.length > 0 && chaptersOpen}
     <aside class="chapters-drawer" aria-label={$t("study.player.shell.chapters")}>
       <header class="chapters-drawer__header">
-        <span>Capítulos</span>
+        <span>{$t("study.player.shell.chapters")}</span>
         <button type="button" class="icon-btn" onclick={() => (chaptersOpen = false)} aria-label={$t("study.player.shell.close_chapters")}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -611,7 +611,7 @@
             class="icon-btn"
             class:active={toolbarPickerOpen === "audio"}
             onclick={(e) => { e.stopPropagation(); pickerToggle("audio"); }}
-            aria-label="Áudio"
+            aria-label={$t("study.player.shell.audio")}
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M11 5L6 9H2v6h4l5 4z" />
@@ -703,7 +703,7 @@
     </div>
   {/if}
   {#if toolbarPickerOpen === "audio"}
-    <div class="picker-pop audio-pop" role="listbox" aria-label="Áudio">
+    <div class="picker-pop audio-pop" role="listbox" aria-label={$t("study.player.shell.audio")}>
       {#each audioTracks as t (t.lang + t.path)}
         {@const sel = t.lang === selectedAudioLang}
         <button

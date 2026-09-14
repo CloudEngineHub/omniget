@@ -92,8 +92,8 @@
 
   <div class="actions">
     <div>
-      <strong>Re-scanear biblioteca</strong>
-      <p class="hint">Força detecção de novos cursos/aulas e dispara notificações</p>
+      <strong>{$t("study.settings.library.rescan_title")}</strong>
+      <p class="hint">{$t("study.settings.library.rescan_hint")}</p>
       {#if rescanReport}
         <p class="report">{rescanReport}</p>
       {/if}

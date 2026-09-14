@@ -242,7 +242,7 @@
               <div class="empty-state">
                 <p class="empty-title">{$t("study.telegram.account.no_profiles")}</p>
                 <p class="empty-desc">
-                  Salve sua sessão atual antes de fazer logout — assim você consegue voltar pra ela depois sem refazer login.
+                  {$t("study.telegram.account.logout_hint")}
                 </p>
               </div>
             {:else}
@@ -360,9 +360,9 @@
       onkeydown={() => {}}
     >
       <div class="dialog" role="dialog" aria-modal="true">
-        <h3>Ativar perfil "{p?.label}"?</h3>
+        <h3>{$t("study.telegram.account.switch_title", { name: p?.label })}</h3>
         <p>
-          Sua sessão atual será preservada como backup automático. O app precisa ser reiniciado para concluir a troca.
+          {$t("study.telegram.account.switch_hint")}
         </p>
         <div class="dialog-actions">
           <button type="button" class="ghost-btn" onclick={() => (confirmRestoreId = null)} disabled={actionBusy}>{$t("study.common.cancel")}</button>
@@ -383,9 +383,9 @@
       onkeydown={() => {}}
     >
       <div class="dialog" role="dialog" aria-modal="true">
-        <h3>Remover perfil "{p?.label}"?</h3>
+        <h3>{$t("study.telegram.account.delete_title", { name: p?.label })}</h3>
         <p class="warn">
-          A sessão deste perfil será apagada permanentemente. Você precisará refazer login pra acessar essa conta novamente.
+          {$t("study.telegram.account.delete_hint")}
         </p>
         <div class="dialog-actions">
           <button type="button" class="ghost-btn" onclick={() => (confirmDeleteId = null)} disabled={actionBusy}>{$t("study.common.cancel")}</button>

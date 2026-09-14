@@ -332,7 +332,7 @@ import { t } from "$lib/i18n";
                 onclick={() => startCreatePage(nb.id)}
                 title={$t("study.notes.files.new_page_here")}
               >
-                <span class="page-name">+ Nova página</span>
+                <span class="page-name">{$t("study.notes.files.new_page")}</span>
               </button>
             </li>
           </ul>
@@ -415,7 +415,7 @@ import { t } from "$lib/i18n";
         Cor…
       </button>
       <button class="ctx-item" onclick={() => void pickIcon(nb.id)}>
-        Ícone…
+        {$t("study.notes.files.pick_icon")}
       </button>
       <hr />
       {#if nb.closed}

@@ -93,7 +93,7 @@ import { t } from "$lib/i18n";
         </svg>
         <span>
           {data.target.kind === "page"
-            ? `Página "${data.target.name}" não encontrada`
+            ? $t("study.notes.embed.page_not_found", { name: data.target.name })
             : $t("study.notes.nb.block_not_found")}
         </span>
       </div>
@@ -102,7 +102,7 @@ import { t } from "$lib/i18n";
         <svg class="warning-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 3l10 18H2z M12 10v5 M12 18v.5" />
         </svg>
-        <span>Embed cíclico bloqueado</span>
+        <span>{$t("study.notes.embed.cycle_blocked")}</span>
       </div>
     {:else if data.kind === "block"}
       <div class="embed-block">

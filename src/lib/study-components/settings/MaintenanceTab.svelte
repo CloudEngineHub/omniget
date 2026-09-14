@@ -36,7 +36,7 @@
       lastVacuum = r;
       onToast(
         "ok",
-        `Limpeza: ${r.seek_logs_deleted} logs, ${r.notifications_deleted} notificações, ${r.recents_deleted} recents`,
+        $t("study.settings.maintenance.vacuum_done", { logs: r.seek_logs_deleted, notifs: r.notifications_deleted, recents: r.recents_deleted }),
       );
     } catch (e) {
       onToast("err", e instanceof Error ? e.message : String(e));
@@ -110,7 +110,7 @@
       lastImport = r;
       onToast(
         "ok",
-        `Importação ${r.mode}: ${r.imported} importados, ${r.skipped} pulados, ${r.missing} ausentes`,
+        $t("study.settings.maintenance.import_done", { mode: r.mode, imported: r.imported, skipped: r.skipped, missing: r.missing }),
       );
       importPreview = null;
       importDoubleConfirm = false;
@@ -135,17 +135,15 @@
   <article class="card">
     <header class="card-head">
       <div>
-        <h3>Limpeza</h3>
+        <h3>{$t("study.settings.maintenance.vacuum_title")}</h3>
         <p class="hint">
-          Apaga: seek logs com mais de 30 dias, notificações dispensadas com mais de 90 dias,
-          recents fora do top 50.
+          {$t("study.settings.maintenance.vacuum_hint")}
         </p>
       </div>
     </header>
     {#if lastVacuum}
       <p class="report">
-        Última: {lastVacuum.seek_logs_deleted} logs · {lastVacuum.notifications_deleted} notificações
-        · {lastVacuum.recents_deleted} recents
+        {$t("study.settings.maintenance.vacuum_done", { logs: lastVacuum.seek_logs_deleted, notifs: lastVacuum.notifications_deleted, recents: lastVacuum.recents_deleted })}
       </p>
     {/if}
     <div class="actions">
@@ -163,10 +161,9 @@
   <article class="card">
     <header class="card-head">
       <div>
-        <h3>Exportar dados</h3>
+        <h3>{$t("study.settings.maintenance.export_title")}</h3>
         <p class="hint">
-          Salva um arquivo JSON com state de todos os cursos (progresso, watched, recents).
-          Útil pra backup ou troca de máquina.
+          {$t("study.settings.maintenance.export_hint")}
         </p>
       </div>
     </header>
@@ -185,9 +182,9 @@
   <article class="card">
     <header class="card-head">
       <div>
-        <h3>Importar dados</h3>
+        <h3>{$t("study.settings.maintenance.import_title")}</h3>
         <p class="hint">
-          Carrega um backup JSON. Você escolhe o modo de mesclagem antes de aplicar.
+          {$t("study.settings.maintenance.import_hint")}
         </p>
       </div>
     </header>
@@ -216,14 +213,14 @@
   <div class="modal-bg" role="dialog" aria-modal="true" aria-label="Confirmar limpeza">
     <button type="button" class="bg-btn" aria-label="Fechar" onclick={() => (vacuumConfirmOpen = false)}></button>
     <div class="modal" role="document">
-      <h3>Executar limpeza?</h3>
-      <p>Os seguintes itens serão apagados permanentemente:</p>
+      <h3>{$t("study.settings.maintenance.vacuum_confirm_title")}</h3>
+      <p>{$t("study.settings.maintenance.vacuum_confirm_intro")}</p>
       <ul>
-        <li>Seek logs com mais de 30 dias</li>
-        <li>Notificações dispensadas com mais de 90 dias</li>
-        <li>Recents fora do top 50 mais usados</li>
+        <li>{$t("study.settings.maintenance.vacuum_confirm_logs")}</li>
+        <li>{$t("study.settings.maintenance.vacuum_confirm_notifs")}</li>
+        <li>{$t("study.settings.maintenance.vacuum_confirm_recents")}</li>
       </ul>
-      <p class="reassure">Não afeta progresso, notas ou bitfield de aulas vistas.</p>
+      <p class="reassure">{$t("study.settings.maintenance.vacuum_reassure")}</p>
       <div class="modal-actions">
         <button type="button" class="btn ghost" onclick={() => (vacuumConfirmOpen = false)}>Cancelar</button>
         <button type="button" class="btn primary" onclick={runVacuum}>Confirmar</button>
@@ -236,7 +233,7 @@
   <div class="modal-bg" role="dialog" aria-modal="true" aria-label={$t("study.notes.maintenance.import_aria")}>
     <button type="button" class="bg-btn" aria-label="Fechar" onclick={cancelImport}></button>
     <div class="modal" role="document">
-      <h3>Importar {importPreview.courses.length} {importPreview.courses.length === 1 ? "curso" : "cursos"}?</h3>
+      <h3>{$t("study.settings.maintenance.import_confirm", { n: importPreview.courses.length })}</h3>
       <p class="hint">Backup exportado em {fmtExportedAt(importPreview.exported_at)}</p>
 
       <fieldset class="modes">
@@ -253,7 +250,7 @@
             }}
           />
           <span>
-            <strong>Skip</strong> — preserva state existente, só importa cursos sem state local
+            <strong>Skip</strong> {$t("study.settings.maintenance.skip_desc")}
           </span>
         </label>
         <label class="mode-row recommended" class:selected={importMode === "merge"}>
@@ -268,7 +265,7 @@
             }}
           />
           <span>
-            <strong>Merge</strong> <span class="rec-tag">recomendado</span> — mantém o maior progresso entre local e backup
+            <strong>Merge</strong> <span class="rec-tag">{$t("study.settings.maintenance.merge_rec")}</span> {$t("study.settings.maintenance.merge_desc")}
           </span>
         </label>
         <label class="mode-row danger" class:selected={importMode === "overwrite"}>
@@ -283,15 +280,14 @@
             }}
           />
           <span>
-            <strong>Overwrite</strong> — sobrescreve TODO state local com o do backup (irreversível)
+            <strong>Overwrite</strong> {$t("study.settings.maintenance.overwrite_desc")}
           </span>
         </label>
       </fieldset>
 
       {#if importMode === "overwrite" && importDoubleConfirm}
         <div class="warning">
-          <strong>Tem certeza?</strong> Isso vai apagar progresso local que não está no backup.
-          Recomendamos exportar primeiro.
+          <strong>{$t("study.settings.maintenance.overwrite_warn_title")}</strong> {$t("study.settings.maintenance.overwrite_warn")}
         </div>
       {/if}
 
@@ -306,11 +302,11 @@
           onclick={confirmImport}
         >
           {#if importing}
-            Importando…
+            {$t("study.settings.maintenance.importing")}
           {:else if importMode === "overwrite" && !importDoubleConfirm}
-            Avançar com Overwrite
+            {$t("study.settings.maintenance.overwrite_next")}
           {:else if importMode === "overwrite"}
-            Confirmar Overwrite
+            {$t("study.settings.maintenance.overwrite_confirm")}
           {:else}
             Importar ({importMode})
           {/if}

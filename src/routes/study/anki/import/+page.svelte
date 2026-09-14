@@ -132,7 +132,7 @@
       lastSourcePath = picked;
       const kind = detectKind(picked);
       if (!kind) {
-        error = `Formato não reconhecido: ${picked}`;
+        error = $t("study.anki.import.bad_format", { name: picked });
         return;
       }
       busy = true;
@@ -391,8 +391,8 @@
             <select bind:value={exportDelimiter} disabled={exporting !== null}>
               <option value="">Auto</option>
               <option value={"\t"}>Tab</option>
-              <option value=",">Vírgula</option>
-              <option value=";">Ponto-e-vírgula</option>
+              <option value=",">{$t("study.anki.import.comma")}</option>
+              <option value=";">{$t("study.anki.import.semicolon")}</option>
             </select>
           </label>
         </div>

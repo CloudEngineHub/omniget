@@ -1098,8 +1098,7 @@
             ></div>
           </div>
           <span class="palette-hint"
-            >{xpState.level_progress_pct}% até L{xpState.level + 1} ·
-            {xpState.xp_to_next} XP</span
+            >{$t("study.layout.palette_hint", { pct: xpState.level_progress_pct, lvl: xpState.level + 1, xp: xpState.xp_to_next })}</span
           >
         </footer>
       {/if}

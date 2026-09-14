@@ -405,7 +405,7 @@
             class="btn ghost sm danger"
             onclick={() => (confirmDeletePageOpen = true)}
           >
-            Excluir página
+            {$t("study.notes.delete_page")}
           </button>
         </div>
       </header>
@@ -436,8 +436,7 @@
       {@const firstBlock = blockTree.length > 0 ? blockTree[0] : null}
       {#if blockTree.length > 1}
         <p class="editor-banner">
-          Esta página tem múltiplos blocos antigos. C1 edita só o primeiro;
-          os demais ficam preservados no DB e voltam visíveis em C1.5.
+          {$t("study.notes.legacy_blocks_hint")}
         </p>
       {/if}
       <Editor

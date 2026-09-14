@@ -380,10 +380,9 @@
       onclick={(e) => e.stopPropagation()}
       onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); reparentTarget = null; } }}
     >
-      <h3 id="reparent-title">Mover <code>{reparentTarget.full_name}</code></h3>
+      <h3 id="reparent-title">{$t("study.anki.tags.reparent_move")} <code>{reparentTarget.full_name}</code></h3>
       <p class="modal-hint">
-        Novo parent (deixe vazio para mover pra raiz). Use <code>::</code> para
-        encadear níveis.
+        {$t("study.anki.tags.reparent_hint")}
       </p>
       <input
         class="modal-input"

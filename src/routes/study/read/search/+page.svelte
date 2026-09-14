@@ -144,11 +144,11 @@
     </div>
   {:else if results.length === 0}
     <div class="empty">
-      <p>Nada encontrado pra "{query}".</p>
+      <p>{$t("study.read.search.no_results", { q: query })}</p>
       <p class="hint">
-        Se você tem certeza que o texto existe, tente
+        {$t("study.read.search.reindex_hint")}
         <button type="button" class="btn-link" onclick={rebuildIndex}>
-          reindexar
+          {$t("study.read.search.reindex")}
         </button>.
       </p>
     </div>

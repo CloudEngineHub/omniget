@@ -113,9 +113,9 @@
 <section class="search-page">
   <header class="head">
     <a href="/study/notes" class="back">← Notas</a>
-    <h1>Buscar em notas</h1>
+    <h1>{$t("study.notes.search.title")}</h1>
     <p class="hint">
-      Busca FTS5 (full-text) sobre conteúdo dos blocos. Suporta operadores
+      {$t("study.notes.search.fts_intro")}
       <code>palavra*</code>, <code>"frase exata"</code>,
       <code>palavra1 OR palavra2</code>.
     </p>
@@ -148,8 +148,8 @@
     <div class="empty-state">
       <h2>Comece a digitar</h2>
       <p>
-        Pesquise por blocos e páginas. Use <code>*</code> para wildcards e
-        <code>"frase"</code> para busca exata.
+        {$t("study.notes.search.start_a")} <code>*</code> {$t("study.notes.search.start_b")}
+        <code>"frase"</code> {$t("study.notes.search.start_c")}
       </p>
     </div>
   {:else}
@@ -157,7 +157,7 @@
       {#if pageHits.length > 0}
         <section>
           <h2>
-            Páginas
+            {$t("study.notes.search.pages")}
             <span class="count">{pageHits.length}</span>
           </h2>
           <ul>

@@ -82,7 +82,7 @@
 {#if activeSegment && !autoSkip}
   <div class="sb-overlay" role="region" aria-label="SponsorBlock">
     <button type="button" class="skip-btn" onclick={handleSkip}>
-      <span>Pular {label(activeSegment.category)}</span>
+      <span>{$t("study.player.sponsor.skip", { cat: label(activeSegment.category) })}</span>
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="13 17 18 12 13 7" />
         <polyline points="6 17 11 12 6 7" />

@@ -103,7 +103,7 @@
       class="month-btn"
       onclick={onShowMonth}
       title={$t("study.notes.nb.view_full_month")}
-    >Mês</button>
+    >{$t("study.notes.calendar.month")}</button>
   {/if}
 </div>
 

@@ -248,7 +248,7 @@
             <div class="preset-name">
               {p.name}
               {#if p.id === DEFAULT_PRESET_ID}
-                <span class="badge">padrão</span>
+                <span class="badge">{$t("study.anki.presets.default_badge")}</span>
               {/if}
             </div>
             <div class="preset-meta">
@@ -311,7 +311,7 @@
           />
         </label>
         <label class="field">
-          <span>Retenção desejada (FSRS)</span>
+          <span>{$t("study.anki.presets.retention")}</span>
           <input
             type="number"
             step="0.01"
@@ -358,7 +358,7 @@
         </label>
         <label class="check">
           <input type="checkbox" bind:checked={editForm.disable_autoplay} />
-          <span>Desativar autoplay de mídia</span>
+          <span>{$t("study.anki.presets.disable_media_autoplay")}</span>
         </label>
         <label class="check">
           <input type="checkbox" bind:checked={editForm.show_timer} />
@@ -390,11 +390,11 @@
 
 <ConfirmDialog
   bind:open={confirmDeleteOpen}
-  title="Apagar preset"
+  title={$t("study.anki.presets.delete_title")}
   message={deleteTarget
-    ? `Apagar o preset "${deleteTarget.name}"? Decks que usam vão pro preset padrão.`
+    ? $t("study.anki.presets.delete_confirm", { name: deleteTarget.name })
     : ""}
-  confirmLabel="Apagar"
+  confirmLabel={$t("study.common.delete")}
   variant="danger"
   onConfirm={confirmDelete}
 />

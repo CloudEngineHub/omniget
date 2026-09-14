@@ -244,7 +244,7 @@
           aria-selected={view === "list"}
           onclick={() => (view = "list")}
         >
-          Sessões {sessions.length > 0 ? `(${sessions.length})` : ""}
+          {$t("study.telegram.clone.sessions")} {sessions.length > 0 ? `(${sessions.length})` : ""}
         </button>
         <button
           type="button"

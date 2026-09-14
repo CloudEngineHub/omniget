@@ -101,17 +101,17 @@ import { t } from "$lib/i18n";
     ></button>
     <div class="modal" role="document">
       <header class="head">
-        <h2>Matérias do curso</h2>
-        <button type="button" class="close" onclick={onClose} aria-label="Fechar">×</button>
+        <h2>{$t("study.course.subjects_edit_title")}</h2>
+        <button type="button" class="close" onclick={onClose} aria-label={$t("study.common.close")}>×</button>
       </header>
       <div class="body">
         {#if loading}
-          <p class="muted">Carregando…</p>
+          <p class="muted">{$t("study.common.loading")}</p>
         {:else if error}
           <p class="error">{error}</p>
         {:else if allSubjects.length === 0}
           <p class="muted">
-            Nenhuma matéria criada. Vá para a aba Foco e crie uma primeiro.
+            {$t("study.course.subjects_empty")}
           </p>
         {:else}
           <ul class="list" aria-label={$t("study.course.subjects_list_aria")}>

@@ -121,7 +121,7 @@
     try {
       const r = await telegramPerfSet({ maxThreads: draftMax });
       if (perf) perf = { ...perf, max_threads: r.max_threads };
-      showToast("info", `Máximo de threads: ${r.max_threads}`);
+      showToast("info", $t("study.telegram.perf.max_threads_toast", { n: r.max_threads }));
       await load();
     } catch (e: any) {
       showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
@@ -189,8 +189,7 @@
               class="slider"
             />
             <span class="field-hint">
-              Telegram cobra 1 MiB por chunk. Mais threads = downloads mais rápidos em arquivos grandes,
-              mas pode disparar FLOOD_WAIT em conexões lentas. Padrão: 8.
+              {$t("study.telegram.perf.threads_hint")}
             </span>
           </label>
         </section>
@@ -271,7 +270,7 @@
           <section class="sync-section">
             <span class="section-label">{$t("study.telegram.perf.auto_sync")}</span>
             <p class="info-msg">
-              A cada N minutos o plugin atualiza o cache de canais em background — evita erros CHANNEL_INVALID quando você abre chats antigos.
+              {$t("study.telegram.perf.cache_refresh_hint")}
             </p>
             <label class="toggle-row">
               <input type="checkbox" bind:checked={draftSyncEnabled} />
@@ -296,11 +295,9 @@
             <div class="sync-status-row">
               <span class="sync-meta">
                 {#if sync.last_success_at > 0}
-                  Última: {new Date(sync.last_success_at * 1000).toLocaleTimeString()}
-                  · {sync.last_updated_count} atualizados
-                  · {sync.last_duration_ms}ms
+                  {$t("study.telegram.perf.last_sync_line", { time: new Date(sync.last_success_at * 1000).toLocaleTimeString(), n: sync.last_updated_count, ms: sync.last_duration_ms })}
                 {:else}
-                  Ainda não sincronizou.
+                  {$t("study.telegram.perf.never_synced")}
                 {/if}
               </span>
               <button

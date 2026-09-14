@@ -278,7 +278,7 @@
       {#if initialTotal === 0}
         <p>{$t("study.anki.review.no_pending")}</p>
       {:else}
-        <p>Você respondeu {answered} cards. Bom trabalho!</p>
+        <p>{$t("study.anki.review.done", { n: answered })}</p>
       {/if}
       <div class="complete-actions">
         <a class="btn-primary" href="/study/anki">{$t("study.anki.sidebar.dashboard")}</a>

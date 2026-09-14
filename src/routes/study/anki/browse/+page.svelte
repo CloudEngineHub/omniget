@@ -740,7 +740,7 @@
         onclick={nextPage}
         disabled={offset + limit >= total || loading}
       >
-        Próxima →
+        {$t("study.anki.browse.next_page")} →
       </button>
     </div>
   {/if}
@@ -846,8 +846,7 @@
     <div class="modal" role="dialog" aria-modal="true">
       <h3>Reativar cards enterrados</h3>
       <p class="modal-hint">
-        Reverte o estado de enterro de cards do deck selecionado, retornando-os
-        às filas normais.
+        {$t("study.anki.browse.bury_hint")}
       </p>
       <label>
         <span>Deck</span>
@@ -895,7 +894,7 @@
           </label>
         {/each}
         <label class="edit-field">
-          <span>Tags (espaço como separador)</span>
+          <span>{$t("study.anki.browse.tags_separator")}</span>
           <input type="text" bind:value={editNoteTags} />
         </label>
       </div>
@@ -950,7 +949,7 @@
       {:else}
         <section class="drawer-section">
           <div class="drawer-section-head">
-            <h4>Conteúdo</h4>
+            <h4>{$t("study.anki.browse.content")}</h4>
             {#if drawerNote}
               <div class="drawer-section-actions">
                 <button
@@ -992,9 +991,9 @@
         <section class="drawer-section">
           <h4>Outras cards desta nota</h4>
           {#if siblingsLoading}
-            <p class="muted small">Carregando…</p>
+            <p class="muted small">{$t("study.common.loading")}</p>
           {:else if siblingCards.length <= 1}
-            <p class="muted small">Esta nota tem só essa card.</p>
+            <p class="muted small">{$t("study.anki.browse.only_card")}</p>
           {:else}
             <ul class="sibling-list">
               {#each siblingCards as sib (sib.id)}
@@ -1026,9 +1025,9 @@
             <dd class="mono">{drawerStats.reviews_count}</dd>
             <dt>Lapsos</dt>
             <dd class="mono">{drawerStats.lapses_count}</dd>
-            <dt>Tempo médio</dt>
+            <dt>{$t("study.anki.browse.avg_time")}</dt>
             <dd class="mono">{drawerStats.avg_seconds.toFixed(1)}s</dd>
-            <dt>Primeiro review</dt>
+            <dt>{$t("study.anki.browse.first_review")}</dt>
             <dd class="mono">{fmtDate(drawerStats.first_review_ms)}</dd>
             <dt>Último review</dt>
             <dd class="mono">{fmtDate(drawerStats.latest_review_ms)}</dd>
@@ -1053,7 +1052,7 @@
 
         {#if drawerStats.revlog.length > 0}
           <section class="drawer-section">
-            <h4>Histórico ({drawerStats.revlog.length})</h4>
+            <h4>{$t("study.anki.browse.history", { n: drawerStats.revlog.length })}</h4>
             <ul class="revlog-list">
               {#each [...drawerStats.revlog].reverse().slice(0, 30) as r (r.id)}
                 <li>

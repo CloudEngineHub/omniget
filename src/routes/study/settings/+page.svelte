@@ -159,7 +159,7 @@
   <header class="head">
     <div class="head-text">
       <h1>{$t("study.hub.settings")}</h1>
-      <p class="hint">Ajustes do player, legendas, biblioteca e manutenção.</p>
+      <p class="hint">{$t("study.settings.page_hint")}</p>
     </div>
     <div class="status">
       {#if savingState === "saving"}

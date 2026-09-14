@@ -36,7 +36,7 @@ import { t } from "$lib/i18n";
     busy = "refs";
     try {
       const r = await notesRefsRebuildAll();
-      onToast("ok", `Backlinks reconstruídos: ${r.total_refs} refs`);
+      onToast("ok", $t("study.notes.maintenance.backlinks_done", { n: r.total_refs }));
     } catch (e) {
       onToast("err", e instanceof Error ? e.message : String(e));
     } finally {
@@ -124,10 +124,9 @@ import { t } from "$lib/i18n";
 </script>
 
 <article class="card">
-  <h3>Manutenção</h3>
+  <h3>{$t("study.notes.maintenance.title")}</h3>
   <p class="hint">
-    Tarefas de housekeeping. Reconstruir índices é seguro mas pode levar alguns segundos
-    em databases grandes.
+    {$t("study.notes.maintenance.desc")}
   </p>
 
   <div class="actions-grid">
@@ -203,13 +202,11 @@ import { t } from "$lib/i18n";
         <span class="muted">· {importPreview.lines} linhas</span>
       </p>
       <p class="hint">
-        Vai criar uma página chamada <code>{importPreview.name}</code> e parsear o markdown
-        em blocos hierárquicos.
+        {$t("study.notes.maintenance.import_hint", { name: importPreview.name })}
       </p>
 
       <p class="warn-soft">
-        Se já existir uma página com esse nome, o backend devolve erro e nada
-        é importado.
+        {$t("study.notes.maintenance.import_exists")}
       </p>
 
       <footer class="foot">

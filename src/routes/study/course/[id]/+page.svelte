@@ -224,7 +224,7 @@
           "ok",
           r.probed === 1
             ? $t("study.course.dur_one", { n: 1 })
-            : `${r.probed} durações detectadas`,
+            : $t("study.course.durations_probed", { n: r.probed }),
         );
         await load();
       } else if (r.failed > 0 && r.probed === 0) {
@@ -473,7 +473,7 @@
       </section>
 
       <section class="meta-subjects">
-        <h3>Matérias</h3>
+        <h3>{$t("study.course.subjects")}</h3>
         <div class="chip-row">
           {#each courseSubjects as subj (subj.id)}
             <span
@@ -495,7 +495,7 @@
       </section>
 
       <section class="meta-actions">
-        <h3>Ações</h3>
+        <h3>{$t("study.course.actions")}</h3>
         <div class="action-row">
           <button
             type="button"
@@ -514,10 +514,10 @@
         </div>
         {#if probeReport}
           <p class="report">
-            ✓ {probeReport.probed} probadas
-            · {probeReport.skipped} já tinham
-            · {probeReport.failed} falharam
-            (de {probeReport.total_lessons} aulas)
+            ✓ {$t("study.course.probe_ok", { n: probeReport.probed })}
+            · {$t("study.course.probe_skipped", { n: probeReport.skipped })}
+            · {$t("study.course.probe_failed", { n: probeReport.failed })}
+            ({$t("study.course.probe_of", { n: probeReport.total_lessons })})
           </p>
         {/if}
       </section>

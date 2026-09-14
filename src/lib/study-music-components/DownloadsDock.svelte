@@ -185,8 +185,8 @@
         Downloads <span class="muted">({jobs.length})</span>
       </span>
       <div class="head-actions">
-        <button type="button" class="link" onclick={clearDone}>Limpar concluídos</button>
-        <button type="button" class="close" onclick={toggleDrawer} aria-label="Fechar">×</button>
+        <button type="button" class="link" onclick={clearDone}>{$t("study.music.clear_done")}</button>
+        <button type="button" class="close" onclick={toggleDrawer} aria-label={$t("study.common.close")}>×</button>
       </div>
     </header>
 

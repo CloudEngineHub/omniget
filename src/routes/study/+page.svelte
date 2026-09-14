@@ -268,7 +268,7 @@
           <a
             class="xp-pill"
             href="/study/achievements"
-            title={`${gamification.xp.toLocaleString()} XP · ${gamification.level_progress_pct}% para nível ${gamification.level + 1}`}
+            title={$t("study.hub.xp_tooltip", { xp: gamification.xp.toLocaleString(), pct: gamification.level_progress_pct, lvl: gamification.level + 1 })}
           >
             <span class="xp-level">L{gamification.level}</span>
             <span class="xp-bar-mini">

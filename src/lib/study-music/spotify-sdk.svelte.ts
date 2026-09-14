@@ -179,7 +179,7 @@ class SpotifySdkController {
           player.addListener(
             "account_error",
             ({ message }: { message: string }) => {
-              this.unavailableReason = `Spotify Premium é obrigatório (${message})`;
+              this.unavailableReason = get(t)("study.music.spotify.premium_required", { msg: message });
             },
           );
           player.addListener(

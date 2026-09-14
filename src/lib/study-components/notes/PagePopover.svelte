@@ -105,7 +105,7 @@ import { t } from "$lib/i18n";
       </button>
     </header>
     {#if snippets.length === 0}
-      <p class="empty">Página vazia</p>
+      <p class="empty">{$t("study.notes.pagepopover.empty")}</p>
     {:else}
       <ul class="blocks">
         {#each snippets as s, i (i)}

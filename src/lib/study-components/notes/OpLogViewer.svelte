@@ -55,7 +55,7 @@ import { t } from "$lib/i18n";
 
 <details class="op-log" ontoggle={onToggle}>
   <summary>
-    <span>Histórico de operações (op-log)</span>
+    <span>{$t("study.notes.oplog.title")}</span>
     <span class="caret" aria-hidden="true">▸</span>
   </summary>
 
@@ -64,13 +64,13 @@ import { t } from "$lib/i18n";
       <button type="button" class="btn ghost sm" onclick={refresh} disabled={loading}>
         {loading ? "Carregando…" : "Atualizar"}
       </button>
-      <span class="hint">Últimas 50 operações. Você pode desfazer ops antigas, não só a última.</span>
+      <span class="hint">{$t("study.notes.oplog.hint")}</span>
     </div>
 
     {#if !loaded && !loading}
       <p class="muted">Expanda para carregar.</p>
     {:else if ops.length === 0}
-      <p class="muted">Sem operações registradas ainda.</p>
+      <p class="muted">{$t("study.notes.oplog.empty")}</p>
     {:else}
       <ul class="list">
         {#each ops as op (op.op_id)}

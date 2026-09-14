@@ -1263,12 +1263,12 @@
         <div class="info-panel">
           {#if lesson}
             <dl class="info-grid">
-              <dt>Aula</dt>
+              <dt>{$t("study.course.lesson.lesson_label")}</dt>
               <dd>{lesson.title}</dd>
-              <dt>Posição</dt>
+              <dt>{$t("study.course.lesson.position")}</dt>
               <dd>#{lesson.position}</dd>
               {#if lesson.duration_ms}
-                <dt>Duração</dt>
+                <dt>{$t("study.course.lesson.duration")}</dt>
                 <dd>{formatTime(lesson.duration_ms / 1000)}</dd>
               {/if}
               <dt>Status</dt>

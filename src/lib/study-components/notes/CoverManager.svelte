@@ -72,10 +72,10 @@ import { t } from "$lib/i18n";
     }}
   >
     <div class="modal" role="dialog" aria-label="Cover image">
-      <h3>Capa da página</h3>
+      <h3>{$t("study.notes.cover.title")}</h3>
 
       <p class="hint">
-        Cole uma URL externa (https://...). Upload local de arquivo entra em sessão futura.
+        {$t("study.notes.cover.hint")}
       </p>
 
       <label class="field">

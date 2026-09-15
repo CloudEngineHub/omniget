@@ -20,6 +20,9 @@ static LAST_ACTIVE: AtomicU32 = AtomicU32::new(0);
 static ICON_COUNT: AtomicU32 = AtomicU32::new(0);
 static LAST_TOOLTIP_MS: AtomicU64 = AtomicU64::new(0);
 static LAST_SPEED_BUCKET: AtomicU64 = AtomicU64::new(u64::MAX);
+/// Last speed handed to the tooltip, as `f64` bits. Kept so a locale change can
+/// re-render the tooltip immediately instead of waiting for the next tick.
+static LAST_SPEED_BPS: AtomicU64 = AtomicU64::new(0);
 
 const SPEED_TOOLTIP_MIN_INTERVAL_MS: u64 = 2000;
 static BADGE_CACHE: OnceLock<Mutex<BadgeCache>> = OnceLock::new();
@@ -208,6 +211,7 @@ pub fn update_active_count(app: &AppHandle, count: u32) {
     }
     if count == 0 {
         LAST_SPEED_BUCKET.store(u64::MAX, Ordering::Relaxed);
+        LAST_SPEED_BPS.store(0, Ordering::Relaxed);
     }
 
     if let Some(tray) = app.tray_by_id("main-tray") {
@@ -270,6 +274,7 @@ pub fn update_speed_tooltip(app: &AppHandle, count: u32, total_speed_bps: f64) {
         return;
     }
     LAST_SPEED_BUCKET.store(bucket, Ordering::Relaxed);
+    LAST_SPEED_BPS.store(total_speed_bps.to_bits(), Ordering::Relaxed);
     LAST_TOOLTIP_MS.store(now, Ordering::Relaxed);
 
     if let Some(tray) = app.tray_by_id("main-tray") {
@@ -287,6 +292,36 @@ pub fn update_speed_tooltip(app: &AppHandle, count: u32, total_speed_bps: f64) {
         };
         let _ = tray.set_tooltip(Some(&tooltip));
     }
+}
+
+/// Re-renders the tooltip from the last known count and speed. Called when the
+/// stored strings change: the count and speed buckets are unchanged in that
+/// case, so `update_speed_tooltip` would return early and leave the tooltip in
+/// the previous language until the next progress tick — indefinitely for a
+/// download that has stalled.
+fn refresh_tooltip(app: &AppHandle) {
+    let Some(tray) = app.tray_by_id("main-tray") else {
+        return;
+    };
+    let count = LAST_ACTIVE.load(Ordering::Relaxed);
+    let tooltip = if count == 0 {
+        "OmniGet".to_string()
+    } else {
+        let strings = tray_strings().read().expect("tray strings poisoned");
+        let speed_bps = f64::from_bits(LAST_SPEED_BPS.load(Ordering::Relaxed));
+        if speed_bps > 0.0 {
+            fill(
+                &strings.tooltip_speed,
+                &[
+                    ("count", count.to_string()),
+                    ("speed", format_speed(speed_bps)),
+                ],
+            )
+        } else {
+            fill(&strings.tooltip_active, &[("count", count.to_string())])
+        }
+    };
+    let _ = tray.set_tooltip(Some(&tooltip));
 }
 
 pub fn compute_total_active(app: &AppHandle) -> u32 {
@@ -322,7 +357,11 @@ fn active_label(count: u32) -> String {
 /// Replaces the compiled-in English defaults with the localized strings the
 /// frontend resolved via `$t`, and refreshes the live items right away so a
 /// language switch updates the tray without a restart.
-pub fn apply_strings(strings: TrayStrings) -> tauri::Result<()> {
+///
+/// The channels submenu title is set from the same i18n key `sync_channels_tray`
+/// uses (`settings.channels.tray_header`), so applying a locale can never
+/// replace a synchronized header with a different string.
+pub fn apply_strings(app: &AppHandle, strings: TrayStrings) -> tauri::Result<()> {
     let (quit, channels) = (strings.quit.clone(), strings.channels.clone());
     *tray_strings().write().expect("tray strings poisoned") = strings;
     if let Some(item) = QUIT_ITEM.get() {
@@ -334,6 +373,7 @@ pub fn apply_strings(strings: TrayStrings) -> tauri::Result<()> {
     if let Some(item) = DOWNLOADS_ITEM.get() {
         item.set_text(active_label(LAST_ACTIVE.load(Ordering::Relaxed)))?;
     }
+    refresh_tooltip(app);
     Ok(())
 }
 

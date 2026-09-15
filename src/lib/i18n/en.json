@@ -6975,7 +6975,6 @@
     "quit": "Quit",
     "downloads_none": "No active downloads",
     "downloads_active": "Downloads: {{count}} active",
-    "channels": "Channels",
     "tooltip_active": "OmniGet — {{count}} active",
     "tooltip_speed": "OmniGet — {{count}} active · {{speed}}"
   }

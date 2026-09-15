@@ -6271,7 +6271,6 @@ export type TranslationKeys =
   | 'tracking.toast.status_changed'
   | 'tracking.toast.unarchived'
 
-  | 'tray.channels'
   | 'tray.downloads_active'
   | 'tray.downloads_none'
   | 'tray.quit'

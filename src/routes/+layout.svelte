@@ -70,12 +70,15 @@
 
   // The tray menu is native, so the frontend owns the translations and pushes
   // them whenever the locale changes (see sync_tray_strings in channels.rs).
+  // The channels submenu title comes from settings.channels.tray_header — the
+  // same key sync_channels_tray sends — so a locale change can never overwrite
+  // a synchronized header with a different string.
   $effect(() => {
     const payload = {
       quit: $t("tray.quit"),
       downloadsNone: $t("tray.downloads_none"),
       downloadsActive: $t("tray.downloads_active"),
-      channels: $t("tray.channels"),
+      channels: $t("settings.channels.tray_header"),
       tooltipActive: $t("tray.tooltip_active"),
       tooltipSpeed: $t("tray.tooltip_speed"),
     };

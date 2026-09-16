@@ -29,7 +29,8 @@
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t, locale, isRtlLocale } from "$lib/i18n";
+  import { rawTranslations, t, locale, isRtlLocale } from "$lib/i18n";
+  import { trayStrings } from "$lib/tray-strings";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import { TOOLS, toolHref } from "$lib/tools/catalog";
@@ -70,18 +71,12 @@
 
   // The tray menu is native, so the frontend owns the translations and pushes
   // them whenever the locale changes (see sync_tray_strings in channels.rs).
-  // The channels submenu title comes from settings.channels.tray_header — the
-  // same key sync_channels_tray sends — so a locale change can never overwrite
-  // a synchronized header with a different string.
+  // The values come from `rawTranslations`, not `$t`: the default parser
+  // substitutes `{{placeholders}}` and would strip the `{{count}}` / `{{speed}}`
+  // tokens the Rust side fills in, leaving the tray without the number and the
+  // speed in every language (see $lib/tray-strings).
   $effect(() => {
-    const payload = {
-      quit: $t("tray.quit"),
-      downloadsNone: $t("tray.downloads_none"),
-      downloadsActive: $t("tray.downloads_active"),
-      channels: $t("settings.channels.tray_header"),
-      tooltipActive: $t("tray.tooltip_active"),
-      tooltipSpeed: $t("tray.tooltip_speed"),
-    };
+    const payload = trayStrings($rawTranslations, $locale);
     invoke("sync_tray_strings", payload).catch(() => {
       // tray sync is best-effort (no backend in browser/dev)
     });

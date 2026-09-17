@@ -1994,7 +1994,25 @@
       "grok_context_hint": "A thread inteira entra no prompt, para o Grok resumir ou responder sobre ela.",
       "grok_summarize_prompt": "Resuma esta thread em 5 tópicos e liste as principais afirmações.",
       "grok_prompt": "Pergunte ao Grok… (⌘↩ para enviar)",
-      "grok_ask": "Perguntar ao Grok"
+      "grok_ask": "Perguntar ao Grok",
+      "archive": {
+        "wd_dom": "dom",
+        "wd_seg": "seg",
+        "wd_ter": "ter",
+        "wd_qua": "qua",
+        "wd_qui": "qui",
+        "wd_sex": "sex",
+        "wd_sab": "sáb"
+      },
+      "profile": {
+        "wd_dom": "dom",
+        "wd_seg": "seg",
+        "wd_ter": "ter",
+        "wd_qua": "qua",
+        "wd_qui": "qui",
+        "wd_sex": "sex",
+        "wd_sab": "sáb"
+      }
     },
     "ig": {
       "common": {
@@ -5510,7 +5528,9 @@
         "import_done": "Importação concluída",
         "error_rows": "{{n}} linhas com erro",
         "more_n": "… e mais {{n}}",
-        "bad_format": "Formato não reconhecido: {{name}}"
+        "bad_format": "Formato não reconhecido: {{name}}",
+        "select_notetype_deck": "Selecione um modelo e um deck antes de importar CSV.",
+        "select_notetype_export": "Selecione um modelo para exportar CSV"
       },
       "filtered": {
         "subtitle": "Cards selecionados por uma query — bom para revisão dirigida",
@@ -5553,7 +5573,11 @@
         "retention": "Retenção desejada (FSRS)",
         "disable_media_autoplay": "Desativar autoplay de mídia",
         "delete_title": "Apagar preset",
-        "delete_confirm": "Apagar o preset \"{{name}}\"? Decks que usam vão pro preset padrão."
+        "delete_confirm": "Apagar o preset \"{{name}}\"? Decks que usam vão pro preset padrão.",
+        "creating": "Criando…",
+        "create": "Criar preset",
+        "none_yet": "Nenhum preset ainda.",
+        "edit_title": "Editar preset · {{name}}"
       },
       "sync": {
         "connection_ok": "Conexão OK",
@@ -6446,7 +6470,10 @@
         "done": "Pronto",
         "pick_folder_again": "Escolhe a pasta de novo no botão de baixar.",
         "failed_count": "{{n}} falha(s)",
-        "download_title": "Baixar (Shift = avançado)"
+        "download_title": "Baixar (Shift = avançado)",
+        "close_downloads": "Fechar downloads",
+        "open_downloads": "Abrir downloads",
+        "downloads": "Downloads"
       },
       "store": {
         "load_failed": "Erro ao carregar áudio",
@@ -6461,7 +6488,8 @@
       },
       "sdk": {
         "widevine_unavailable": "Widevine DRM não está disponível neste sistema. Spotify playback nativo não vai funcionar — use a Fase 1 (transfer pra outro device).",
-        "sdk_no_global": "SDK do Spotify carregou mas Spotify global não foi exposto"
+        "sdk_no_global": "SDK do Spotify carregou mas Spotify global não foi exposto",
+        "load_failed": "Falha ao carregar SDK do Spotify (offline?)"
       },
       "album": {
         "not_specified": "Álbum não especificado.",
@@ -6494,7 +6522,8 @@
         "premium_required": "Spotify Premium é obrigatório ({{msg}})"
       },
       "your_spotify_albums": "Seus álbuns Spotify",
-      "clear_done": "Limpar concluídos"
+      "clear_done": "Limpar concluídos",
+      "open_in_soundcloud": "Abrir no SoundCloud"
     },
     "library": {
       "title": "Biblioteca",
@@ -7204,7 +7233,14 @@
         "backlinks_done": "Backlinks reconstruídos: {{n}} refs",
         "title": "Manutenção",
         "desc": "Tarefas de housekeeping. Reconstruir índices é seguro mas pode levar alguns segundos em databases grandes.",
-        "import_exists": "Se já existir uma página com esse nome, o backend devolve erro e nada é importado."
+        "import_exists": "Se já existir uma página com esse nome, o backend devolve erro e nada é importado.",
+        "import_tooltip": "Lê um .md do disco e cria uma página com o conteúdo.",
+        "clearing": "Limpando…",
+        "clear_qcache": "Limpar cache de queries",
+        "exporting": "Exportando…",
+        "export_graph": "Exportar grafo (JSON)",
+        "import_btn": "Importar markdown",
+        "import_confirm_title": "Importar markdown?"
       },
       "history_modal": {
         "block_aria": "Histórico do bloco",
@@ -7243,7 +7279,13 @@
         "cover_url_error": "URL precisa começar com http:// ou https://",
         "annotate_aria": "Anotação de aula",
         "activity_90": "Atividade nos últimos 90 dias",
-        "abc_source_aria": "Source da partitura (notação ABC)"
+        "abc_source_aria": "Source da partitura (notação ABC)",
+        "close_tab": "Fechar tab",
+        "new_tab": "Nova tab",
+        "new_tab_shortcut": "Nova tab (Ctrl+T)",
+        "edit_source": "Editar source",
+        "back_to_score": "Voltar pra partitura",
+        "back_to_diagram": "Voltar pro diagrama"
       },
       "new_page_prompt": "Nome da nova página:",
       "calendar": {
@@ -7661,7 +7703,12 @@
         "test_video": "Testar vídeo",
         "test_video_desc": "Tenta cada cliente do cascade e mostra qual conseguiu cifra/stream. Útil pra debug.",
         "valid_for": "válido por {{h}}h{{m}}min",
-        "cache_age": "{{n}}min atrás"
+        "cache_age": "{{n}}min atrás",
+        "clear_player_cache": "Limpar cache do player.js",
+        "content_tokens_cached": "Content tokens em cache",
+        "clear_potokens": "Limpar PoTokens",
+        "close_manual_token": "Fechar token manual",
+        "paste_manual_token": "Cole token manual…"
       },
       "behavior": {
         "autoplay_next": "Auto-play da próxima aula",
@@ -7976,16 +8023,6 @@
       "annotations": " — anotações",
       "untitled_placeholder": "(sem título)",
       "untitled": "(sem título)",
-      "search.index_rebuilt": "Índice reconstruído",
-      "search.title": "Buscar nas anotações",
-      "search.subtitle": "Encontre highlights, notas e marcações em todos os livros",
-      "search.rebuild_hint": "Reconstruir índice se busca estiver retornando resultados desatualizados",
-      "downloads.clearing": "Limpando…",
-      "downloads.clear_finished": "Limpar concluídos",
-      "downloads.list_mirrors": "Listar mirrors torrent disponíveis",
-      "downloads.clear_finished_title": "Limpar concluídos",
-      "downloads.clear_finished_body": "Vai remover entradas de downloads concluídos e cancelados. Os arquivos baixados continuam intactos.",
-      "annas.cache_was_empty": "Cache já estava vazio",
       "page_of_author": "{{author}} · pág. {{cur}}/{{total}}",
       "no_notes_hint": "Nenhuma nota ainda. Selecione um trecho e tecle N pra anexar uma nota, ou tecle N sem seleção pra criar uma nota solta.",
       "meta_title": "Editar metadados",
@@ -7996,15 +8033,25 @@
         "cache_hint": "Resultados são guardados em memória pra não bombardear os mirrors. Limpe se você está vendo dados desatualizados.",
         "enabled": "Habilitado",
         "disabled": "Desabilitado",
-        "not_detected": "· não detectado no sistema"
+        "not_detected": "· não detectado no sistema",
+        "cache_was_empty": "Cache já estava vazio"
       },
       "downloads": {
-        "finished": "Concluídos"
+        "finished": "Concluídos",
+        "clearing": "Limpando…",
+        "clear_finished": "Limpar concluídos",
+        "list_mirrors": "Listar mirrors torrent disponíveis",
+        "clear_finished_title": "Limpar concluídos",
+        "clear_finished_body": "Vai remover entradas de downloads concluídos e cancelados. Os arquivos baixados continuam intactos."
       },
       "search": {
         "no_results": "Nada encontrado pra \"{{q}}\".",
         "reindex_hint": "Se você tem certeza que o texto existe, tente",
-        "reindex": "reindexar"
+        "reindex": "reindexar",
+        "index_rebuilt": "Índice reconstruído",
+        "title": "Buscar nas anotações",
+        "subtitle": "Encontre highlights, notas e marcações em todos os livros",
+        "rebuild_hint": "Reconstruir índice se busca estiver retornando resultados desatualizados"
       }
     },
     "bulk": {
@@ -8329,26 +8376,7 @@
       "stopwatch": "Cronômetro"
     },
     "tools": {
-      "x": {
-        "archive": {
-          "wd_dom": "dom",
-          "wd_seg": "seg",
-          "wd_ter": "ter",
-          "wd_qua": "qua",
-          "wd_qui": "qui",
-          "wd_sex": "sex",
-          "wd_sab": "sáb"
-        },
-        "profile": {
-          "wd_dom": "dom",
-          "wd_seg": "seg",
-          "wd_ter": "ter",
-          "wd_qua": "qua",
-          "wd_qui": "qui",
-          "wd_sex": "sex",
-          "wd_sab": "sáb"
-        }
-      }
+      "x": {}
     },
     "layout": {
       "palette_hint": "{{pct}}% até L{{lvl}} · {{xp}} XP"

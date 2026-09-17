@@ -1994,7 +1994,25 @@
       "grok_context_hint": "The whole thread is added to the prompt, so Grok can summarize or answer about it.",
       "grok_summarize_prompt": "Summarize this thread in 5 bullet points and list the main claims.",
       "grok_prompt": "Ask Grok… (⌘↩ to send)",
-      "grok_ask": "Ask Grok"
+      "grok_ask": "Ask Grok",
+      "archive": {
+        "wd_dom": "Sun",
+        "wd_seg": "Mon",
+        "wd_ter": "Tue",
+        "wd_qua": "Wed",
+        "wd_qui": "Thu",
+        "wd_sex": "Fri",
+        "wd_sab": "Sat"
+      },
+      "profile": {
+        "wd_dom": "Sun",
+        "wd_seg": "Mon",
+        "wd_ter": "Tue",
+        "wd_qua": "Wed",
+        "wd_qui": "Thu",
+        "wd_sex": "Fri",
+        "wd_sab": "Sat"
+      }
     },
     "ig": {
       "common": {
@@ -5510,7 +5528,9 @@
         "import_done": "Import complete",
         "error_rows": "{{n}} rows with errors",
         "more_n": "… {{n}} more",
-        "bad_format": "Unrecognized format: {{name}}"
+        "bad_format": "Unrecognized format: {{name}}",
+        "select_notetype_deck": "Select a note type and a deck before importing CSV.",
+        "select_notetype_export": "Select a note type to export CSV"
       },
       "filtered": {
         "subtitle": "Cards selected by a query — good for directed review",
@@ -5553,7 +5573,11 @@
         "retention": "Desired retention (FSRS)",
         "disable_media_autoplay": "Disable media autoplay",
         "delete_title": "Delete preset",
-        "delete_confirm": "Delete preset \"{{name}}\"? Decks using it go to the default preset."
+        "delete_confirm": "Delete preset \"{{name}}\"? Decks using it go to the default preset.",
+        "creating": "Creating…",
+        "create": "Create preset",
+        "none_yet": "No presets yet.",
+        "edit_title": "Edit preset · {{name}}"
       },
       "sync": {
         "connection_ok": "Connection OK",
@@ -6446,7 +6470,10 @@
         "done": "Done",
         "pick_folder_again": "Pick the folder again using the download button.",
         "failed_count": "{{n}} failed",
-        "download_title": "Download (Shift = advanced)"
+        "download_title": "Download (Shift = advanced)",
+        "close_downloads": "Close downloads",
+        "open_downloads": "Open downloads",
+        "downloads": "Downloads"
       },
       "store": {
         "load_failed": "Failed to load audio",
@@ -6461,7 +6488,8 @@
       },
       "sdk": {
         "widevine_unavailable": "Widevine DRM is not available on this system. Native Spotify playback won't work — use Phase 1 (transfer to another device).",
-        "sdk_no_global": "The Spotify SDK loaded but the global Spotify object was not exposed"
+        "sdk_no_global": "The Spotify SDK loaded but the global Spotify object was not exposed",
+        "load_failed": "Failed to load the Spotify SDK (offline?)"
       },
       "album": {
         "not_specified": "Album not specified.",
@@ -6494,7 +6522,8 @@
         "premium_required": "Spotify Premium required ({{msg}})"
       },
       "your_spotify_albums": "Your Spotify albums",
-      "clear_done": "Clear finished"
+      "clear_done": "Clear finished",
+      "open_in_soundcloud": "Open in SoundCloud"
     },
     "library": {
       "title": "Библиотека",
@@ -7204,7 +7233,14 @@
         "backlinks_done": "Backlinks rebuilt: {{n}} refs",
         "title": "Maintenance",
         "desc": "Housekeeping tasks. Rebuilding indexes is safe but can take a few seconds on large databases.",
-        "import_exists": "If a page with that name already exists, the backend returns an error and nothing is imported."
+        "import_exists": "If a page with that name already exists, the backend returns an error and nothing is imported.",
+        "import_tooltip": "Reads a .md file from disk and creates a page with its content.",
+        "clearing": "Clearing…",
+        "clear_qcache": "Clear query cache",
+        "exporting": "Exporting…",
+        "export_graph": "Export graph (JSON)",
+        "import_btn": "Import markdown",
+        "import_confirm_title": "Import markdown?"
       },
       "history_modal": {
         "block_aria": "Block history",
@@ -7243,7 +7279,13 @@
         "cover_url_error": "URL must start with http:// or https://",
         "annotate_aria": "Lesson annotation",
         "activity_90": "Activity in the last 90 days",
-        "abc_source_aria": "Score source (ABC notation)"
+        "abc_source_aria": "Score source (ABC notation)",
+        "close_tab": "Close tab",
+        "new_tab": "New tab",
+        "new_tab_shortcut": "New tab (Ctrl+T)",
+        "edit_source": "Edit source",
+        "back_to_score": "Back to the score",
+        "back_to_diagram": "Back to the diagram"
       },
       "new_page_prompt": "New page name:",
       "calendar": {
@@ -7661,7 +7703,12 @@
         "test_video": "Test video",
         "test_video_desc": "Tries each client in the cascade and shows which one managed to cipher/stream. Useful for debugging.",
         "valid_for": "valid for {{h}}h{{m}}min",
-        "cache_age": "{{n}}min ago"
+        "cache_age": "{{n}}min ago",
+        "clear_player_cache": "Clear player.js cache",
+        "content_tokens_cached": "Cached content tokens",
+        "clear_potokens": "Clear PoTokens",
+        "close_manual_token": "Close manual token",
+        "paste_manual_token": "Paste manual token…"
       },
       "behavior": {
         "autoplay_next": "Auto-play next lesson",
@@ -7976,46 +8023,36 @@
       "annotations": " — notes",
       "untitled_placeholder": "(untitled)",
       "untitled": "(untitled)",
-      "search.index_rebuilt": "Индекс перестроен",
-      "search.title": "Поиск по аннотациям",
-      "search.subtitle": "Находите выделения, заметки и отметки во всех книгах",
-      "search.rebuild_hint": "Перестройте индекс, если поиск возвращает устаревшие результаты",
-      "downloads.clearing": "Очистка…",
-      "downloads.clear_finished": "Очистить завершённые",
-      "downloads.list_mirrors": "Список доступных torrent-зеркал",
-      "downloads.clear_finished_title": "Очистить завершённые",
-      "downloads.clear_finished_body": "Будут удалены записи завершённых и отменённых загрузок. Скачанные файлы останутся нетронутыми.",
-      "annas.cache_was_empty": "Кэш уже был пуст",
-      "search": {
-        "index_rebuilt": "Index rebuilt",
-        "title": "Search annotations",
-        "subtitle": "Find highlights, notes and markings across all books",
-        "rebuild_hint": "Rebuild the index if search is returning outdated results",
-        "no_results": "Nothing found for \"{{q}}\".",
-        "reindex_hint": "If you're sure the text exists, try",
-        "reindex": "reindexing"
-      },
-      "downloads": {
-        "clearing": "Clearing…",
-        "clear_finished": "Clear finished",
-        "list_mirrors": "List available torrent mirrors",
-        "clear_finished_title": "Clear finished",
-        "clear_finished_body": "Will remove entries of completed and cancelled downloads. Downloaded files remain intact.",
-        "finished": "Finished"
-      },
-      "annas": {
-        "cache_was_empty": "Cache was already empty",
-        "cache_title": "Search cache",
-        "cache_hint": "Results are kept in memory to avoid hammering the mirrors. Clear it if you're seeing stale data.",
-        "enabled": "Enabled",
-        "disabled": "Disabled",
-        "not_detected": "· not detected on the system"
-      },
       "page_of_author": "{{author}} · p. {{cur}}/{{total}}",
       "no_notes_hint": "No notes yet. Select a passage and press N to attach a note, or press N with no selection to create a standalone note.",
       "meta_title": "Edit metadata",
       "meta_hint": "Updates only the local library record. The file on disk is not modified.",
-      "meta_title_label": "Title"
+      "meta_title_label": "Title",
+      "annas": {
+        "cache_title": "Search cache",
+        "cache_hint": "Results are kept in memory to avoid hammering the mirrors. Clear it if you're seeing stale data.",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "not_detected": "· not detected on the system",
+        "cache_was_empty": "Cache was already empty"
+      },
+      "downloads": {
+        "finished": "Finished",
+        "clearing": "Clearing…",
+        "clear_finished": "Clear finished",
+        "list_mirrors": "List available torrent mirrors",
+        "clear_finished_title": "Clear finished",
+        "clear_finished_body": "Will remove entries of completed and cancelled downloads. Downloaded files remain intact."
+      },
+      "search": {
+        "no_results": "Nothing found for \"{{q}}\".",
+        "reindex_hint": "If you're sure the text exists, try",
+        "reindex": "reindexing",
+        "index_rebuilt": "Index rebuilt",
+        "title": "Search annotations",
+        "subtitle": "Find highlights, notes and markings across all books",
+        "rebuild_hint": "Rebuild the index if search is returning outdated results"
+      }
     },
     "bulk": {
       "select_all": "Выбрать все",
@@ -8339,26 +8376,7 @@
       "stopwatch": "Stopwatch"
     },
     "tools": {
-      "x": {
-        "archive": {
-          "wd_dom": "Sun",
-          "wd_seg": "Mon",
-          "wd_ter": "Tue",
-          "wd_qua": "Wed",
-          "wd_qui": "Thu",
-          "wd_sex": "Fri",
-          "wd_sab": "Sat"
-        },
-        "profile": {
-          "wd_dom": "Sun",
-          "wd_seg": "Mon",
-          "wd_ter": "Tue",
-          "wd_qua": "Wed",
-          "wd_qui": "Thu",
-          "wd_sex": "Fri",
-          "wd_sab": "Sat"
-        }
-      }
+      "x": {}
     },
     "layout": {
       "palette_hint": "{{pct}}% to L{{lvl}} · {{xp}} XP"

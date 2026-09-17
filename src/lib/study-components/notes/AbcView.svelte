@@ -133,7 +133,7 @@
       type="button"
       class="abc-toggle"
       onclick={toggleMode}
-      title={mode === "render" ? "Editar source" : "Voltar pra partitura"}
+      title={mode === "render" ? $t("study.notes.nb.edit_source") : $t("study.notes.nb.back_to_score")}
     >
       {mode === "render" ? "‹/›" : "▶"}
     </button>
@@ -157,7 +157,7 @@
     <div class="abc-error">
       <p class="abc-error-msg">erro: {renderState.message}</p>
       <button type="button" class="abc-edit-btn" onclick={toggleMode}
-        >Editar source</button>
+        >{$t("study.notes.nb.edit_source")}</button>
     </div>
   {/if}
 

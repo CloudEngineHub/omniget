@@ -207,7 +207,7 @@
       </dl>
     {/if}
     <div class="row">
-      <button class="btn" disabled={loading} onclick={invalidatePlayerCache}>Limpar cache do player.js</button>
+      <button class="btn" disabled={loading} onclick={invalidatePlayerCache}>{$t("study.settings.youtube.clear_player_cache")}</button>
     </div>
   </SettingsField>
 
@@ -216,13 +216,13 @@
       <dl class="status-grid">
         <dt>{$t("study.settings.youtube.mint_available")}</dt><dd><code>{potokenStatus.minting_available ? $t("study.common.confirm") : $t("study.common.cancel")}</code></dd>
         <dt>Visitor token</dt><dd>{formatTokenStatus(potokenStatus.visitor)}</dd>
-        <dt>Content tokens em cache</dt><dd><code>{potokenStatus.content_cached_count}</code></dd>
+        <dt>{$t("study.settings.youtube.content_tokens_cached")}</dt><dd><code>{potokenStatus.content_cached_count}</code></dd>
       </dl>
     {/if}
     <div class="row">
-      <button class="btn" disabled={loading} onclick={clearPotokens}>Limpar PoTokens</button>
+      <button class="btn" disabled={loading} onclick={clearPotokens}>{$t("study.settings.youtube.clear_potokens")}</button>
       <button class="btn ghost" onclick={() => (manualPanelOpen = !manualPanelOpen)}>
-        {manualPanelOpen ? "Fechar token manual" : "Cole token manual…"}
+        {manualPanelOpen ? $t("study.settings.youtube.close_manual_token") : $t("study.settings.youtube.paste_manual_token")}
       </button>
     </div>
     {#if manualPanelOpen}

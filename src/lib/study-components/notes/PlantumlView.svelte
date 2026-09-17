@@ -211,7 +211,7 @@ import { t } from "$lib/i18n";
       type="button"
       class="puml-toggle"
       onclick={toggleMode}
-      title={mode === "render" ? "Editar source" : "Voltar pro diagrama"}
+      title={mode === "render" ? $t("study.notes.nb.edit_source") : $t("study.notes.nb.back_to_diagram")}
     >
       {mode === "render" ? "‹/›" : "▶"}
     </button>
@@ -240,7 +240,7 @@ import { t } from "$lib/i18n";
         <button
           type="button"
           class="puml-edit-btn"
-          onclick={toggleMode}>Editar source</button>
+          onclick={toggleMode}>{$t("study.notes.nb.edit_source")}</button>
         <button
           type="button"
           class="puml-remote-btn"

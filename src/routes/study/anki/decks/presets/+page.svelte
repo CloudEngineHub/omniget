@@ -228,17 +228,17 @@
       onclick={create}
       disabled={creating || !createName.trim()}
     >
-      {creating ? "Criando…" : "Criar preset"}
+      {creating ? $t("study.anki.presets.creating") : $t("study.anki.presets.create")}
     </button>
   </div>
 
   {#if loading}
-    <div class="state">Carregando…</div>
+    <div class="state">{$t("study.common.loading")}</div>
   {:else if error}
     <div class="state err">{error}</div>
   {:else if summaries.length === 0}
     <div class="empty">
-      <p>Nenhum preset ainda.</p>
+      <p>{$t("study.anki.presets.none_yet")}</p>
     </div>
   {:else}
     <ul class="preset-list">
@@ -291,7 +291,7 @@
     onclick={(e) => { if (e.target === e.currentTarget) editing = null; }}
   >
     <div class="modal modal-wide" role="dialog" aria-modal="true">
-      <h3>Editar preset · {editing.name}</h3>
+      <h3>{$t("study.anki.presets.edit_title", { name: editing.name })}</h3>
 
       <div class="form-grid">
         <label class="field">

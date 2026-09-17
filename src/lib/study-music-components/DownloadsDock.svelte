@@ -164,8 +164,8 @@
     class="fab"
     class:active={activeCount > 0}
     onclick={toggleDrawer}
-    aria-label={drawerOpen ? "Fechar downloads" : "Abrir downloads"}
-    title={drawerOpen ? "Fechar downloads" : "Downloads"}
+    aria-label={drawerOpen ? $t("study.music.dock.close_downloads") : $t("study.music.dock.open_downloads")}
+    title={drawerOpen ? $t("study.music.dock.close_downloads") : $t("study.music.dock.downloads")}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -271,8 +271,8 @@
                 type="button"
                 class="ghost-btn"
                 onclick={() => openExternal(job.permalinkUrl)}
-                title="Abrir no SoundCloud"
-                aria-label="Abrir no SoundCloud"
+                title={$t("study.music.open_in_soundcloud")}
+                aria-label={$t("study.music.open_in_soundcloud")}
               >
                 ↗
               </button>

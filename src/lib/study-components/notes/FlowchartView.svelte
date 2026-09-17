@@ -155,7 +155,7 @@ import { t } from "$lib/i18n";
       type="button"
       class="flowchart-toggle"
       onclick={toggleMode}
-      title={mode === "render" ? "Editar source" : "Voltar pro diagrama"}
+      title={mode === "render" ? $t("study.notes.nb.edit_source") : $t("study.notes.nb.back_to_diagram")}
     >
       {mode === "render" ? "‹/›" : "▶"}
     </button>
@@ -179,7 +179,7 @@ import { t } from "$lib/i18n";
     <div class="flowchart-error">
       <p class="flowchart-error-msg">erro: {renderState.message}</p>
       <button type="button" class="flowchart-edit-btn" onclick={toggleMode}
-        >Editar source</button>
+        >{$t("study.notes.nb.edit_source")}</button>
     </div>
   {/if}
 

@@ -216,7 +216,7 @@ class SpotifySdkController {
           script.src = SDK_SCRIPT;
           script.async = true;
           script.onerror = () => {
-            this.unavailableReason = "Falha ao carregar SDK do Spotify (offline?)";
+            this.unavailableReason = get(t)("study.music.sdk.load_failed");
             this.loading = false;
             reject(new Error(this.unavailableReason ?? ""));
           };

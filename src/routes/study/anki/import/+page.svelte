@@ -159,7 +159,7 @@
         result = { kind: "json", data };
       } else {
         if (csvNotetypeId === null || csvDeckId === null) {
-          error = "Selecione um modelo e um deck antes de importar CSV.";
+          error = $t("study.anki.import.select_notetype_deck");
           return;
         }
         const delim = csvDelimiter === "" ? null : csvDelimiter;
@@ -211,7 +211,7 @@
         await pluginInvoke("study", "study:anki:export:json", { targetPath: target });
       } else {
         if (exportNotetypeId == null) {
-          showExportToast("err", "Selecione um modelo para exportar CSV");
+          showExportToast("err", $t("study.anki.import.select_notetype_export"));
           return;
         }
         const delim = exportDelimiter === "" ? null : exportDelimiter;

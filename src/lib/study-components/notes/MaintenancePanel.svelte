@@ -155,7 +155,7 @@ import { t } from "$lib/i18n";
       disabled={busy !== null}
       title={$t("study.notes.maintenance.cache_hint")}
     >
-      {busy === "qcache" ? "Limpando…" : "Limpar cache de queries"}
+      {busy === "qcache" ? $t("study.notes.maintenance.clearing") : $t("study.notes.maintenance.clear_qcache")}
     </button>
     <button
       type="button"
@@ -164,16 +164,16 @@ import { t } from "$lib/i18n";
       disabled={busy !== null}
       title={$t("study.notes.maintenance.graph_hint")}
     >
-      {busy === "graph" ? "Exportando…" : "Exportar grafo (JSON)"}
+      {busy === "graph" ? $t("study.notes.maintenance.exporting") : $t("study.notes.maintenance.export_graph")}
     </button>
     <button
       type="button"
       class="btn"
       onclick={pickImport}
       disabled={busy !== null || importing}
-      title={$t("study.notes.maintenance.import_hint")}
+      title={$t("study.notes.maintenance.import_tooltip")}
     >
-      Importar markdown
+      {$t("study.notes.maintenance.import_btn")}
     </button>
     <input
       type="file"
@@ -196,7 +196,7 @@ import { t } from "$lib/i18n";
     }}
   >
     <div class="modal" role="dialog" aria-label={$t("study.notes.maintenance.import_aria")} aria-modal="true">
-      <h3>Importar markdown?</h3>
+      <h3>{$t("study.notes.maintenance.import_confirm_title")}</h3>
       <p class="meta">
         <strong>{importPreview.name}</strong>
         <span class="muted">· {importPreview.lines} linhas</span>

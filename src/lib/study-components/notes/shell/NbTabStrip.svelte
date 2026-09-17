@@ -232,7 +232,7 @@ import { t } from "$lib/i18n";
         <button
           type="button"
           class="close"
-          aria-label="Fechar tab"
+          aria-label={$t("study.notes.nb.close_tab")}
           onclick={(e) => closeTab(e, tab.id)}
         >
           ×
@@ -245,8 +245,8 @@ import { t } from "$lib/i18n";
     class="add"
     type="button"
     onclick={openPicker}
-    aria-label="Nova tab"
-    title="Nova tab (Ctrl+T)"
+    aria-label={$t("study.notes.nb.new_tab")}
+    title={$t("study.notes.nb.new_tab_shortcut")}
   >
     +
   </button>

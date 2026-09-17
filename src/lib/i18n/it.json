@@ -3862,7 +3862,8 @@
       "lang_fr": "Français",
       "lang_es": "Español",
       "lang_el": "Ελληνικά",
-      "lang_fa": "فارسی"
+      "lang_fa": "فارسی",
+      "lang_lo": "ລາວ"
     },
     "download": {
       "default_output_dir": "Cartella predefinita",
@@ -3888,6 +3889,7 @@
       "section_per_platform": "Per-platform options",
       "section_per_platform_desc": "YouTube, courses, and Bilibili-specific settings.",
       "download_attachments": "Scarica allegati",
+      "download_attachments_desc": "Salva gli allegati del corso insieme alle lezioni scaricate.",
       "download_descriptions": "Salva descrizioni",
       "embed_metadata": "Incorpora metadati",
       "embed_metadata_desc": "Scrivi titolo e artista nei file scaricati",

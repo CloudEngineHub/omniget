@@ -710,9 +710,36 @@ mod tests {
         );
     }
 
+    /// The repository keeps no `.md` file, so every fixture markdown is stored
+    /// as `<name>.md.fixture`. This copies the tree into a scratch folder once
+    /// per test process with the real names, which is what `parse` reads.
     fn fixtures() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("tests")
-            .join("skills_fixtures")
+        static ROOT: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+        ROOT.get_or_init(|| {
+            let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests")
+                .join("skills_fixtures");
+            let target = std::env::temp_dir()
+                .join(format!("omniget-skills-fixtures-{}", std::process::id()));
+            let _ = std::fs::remove_dir_all(&target);
+            copy_fixtures(&source, &target);
+            target
+        })
+        .clone()
+    }
+
+    fn copy_fixtures(from: &Path, to: &Path) {
+        std::fs::create_dir_all(to).unwrap();
+        for entry in std::fs::read_dir(from).unwrap().flatten() {
+            let path = entry.path();
+            let name = entry.file_name().to_string_lossy().to_string();
+            if path.is_dir() {
+                copy_fixtures(&path, &to.join(&name));
+            } else if let Some(real) = name.strip_suffix(".fixture") {
+                std::fs::copy(&path, to.join(real)).unwrap();
+            } else if !name.ends_with(".md") {
+                std::fs::copy(&path, to.join(&name)).unwrap();
+            }
+        }
     }
 }

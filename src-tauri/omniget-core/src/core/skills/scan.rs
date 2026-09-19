@@ -426,6 +426,23 @@ pub fn scan_dir(dir: &Path) -> ScanStatus {
 /// The argument list is fixed here and never goes through a shell: the only
 /// caller-controlled part is the directory, which is one of our own staging
 /// folders.
+/// Kills the scanner and everything it started.
+fn kill_group(child: &mut std::process::Child) {
+    #[cfg(unix)]
+    {
+        // The child leads its own group (see `process_group(0)`), so its pid is
+        // the group id. `kill` the command, not the syscall: no libc in core.
+        let _ = Command::new("kill")
+            .args(["-KILL", &format!("-{}", child.id())])
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+    }
+    let _ = child.kill();
+    let _ = child.wait();
+}
+
 pub fn scan_dir_with(program: &Path, dir: &Path, timeout: Duration) -> ScanStatus {
     let mut cmd = Command::new(program);
     cmd.arg("scan")
@@ -449,6 +466,15 @@ pub fn scan_dir_with(program: &Path, dir: &Path, timeout: Duration) -> ScanStatu
         use std::os::windows::process::CommandExt;
         const CREATE_NO_WINDOW: u32 = 0x0800_0000;
         cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    // Its own process group: the scanner is a script that starts other
+    // processes, and those inherit our pipes. Killing only the script would
+    // leave them holding stdout open long after the timeout.
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        cmd.process_group(0);
     }
 
     let mut child = match cmd.spawn() {
@@ -479,8 +505,7 @@ pub fn scan_dir_with(program: &Path, dir: &Path, timeout: Duration) -> ScanStatu
             Ok(None) => {
                 if Instant::now() >= deadline {
                     timed_out = true;
-                    let _ = child.kill();
-                    let _ = child.wait();
+                    kill_group(&mut child);
                     break None;
                 }
                 std::thread::sleep(POLL);
@@ -495,6 +520,14 @@ pub fn scan_dir_with(program: &Path, dir: &Path, timeout: Duration) -> ScanStatu
         }
     };
 
+    // Reported before the readers are joined: if anything still holds the
+    // pipe, waiting for end-of-file here would undo the timeout.
+    if timed_out {
+        return ScanStatus::Failed {
+            reason: format!("the scanner did not finish within {}s", timeout.as_secs()),
+        };
+    }
+
     let stdout = out_thread
         .and_then(|t| t.join().ok())
         .unwrap_or(Ok(Vec::new()));
@@ -503,11 +536,6 @@ pub fn scan_dir_with(program: &Path, dir: &Path, timeout: Duration) -> ScanStatu
         .unwrap_or(Ok(Vec::new()))
         .unwrap_or_default();
 
-    if timed_out {
-        return ScanStatus::Failed {
-            reason: format!("the scanner did not finish within {}s", timeout.as_secs()),
-        };
-    }
     let stdout = match stdout {
         Ok(bytes) => bytes,
         Err(over) => {

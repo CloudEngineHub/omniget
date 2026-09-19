@@ -8214,7 +8214,7 @@
       "thinking": "Agents think with the LLM",
       "thinking_desc": "Lets the agents in the house plan and reflect through your models. This is the only part of the world that spends tokens; each agent's daily budget still applies.",
       "room_server": "Room server",
-      "room_server_desc": "Where open houses and visits connect. Empty uses this machine (127.0.0.1:7878); point it at your own omniworld-server to self-host."
+      "room_server_desc": "Where open houses and visits connect. Empty uses the public OmniGet room server (chat.tonho.wtf), which only relays; point it at your own omniworld-server to self-host."
     },
     "canvas_label": "The agents' world",
     "creating": "Building the house…",

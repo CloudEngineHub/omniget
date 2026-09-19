@@ -35,7 +35,9 @@ pub const EVENT_CHAT: &str = "house://chat";
 pub const EVENT_CLOSED: &str = "house://closed";
 
 pub const ERR_HOUSE: &str = "ERR_HOUSE";
-pub const DEFAULT_SERVER: &str = "ws://127.0.0.1:7878/v1/room";
+/// The public room server: `omniworld-server` behind the Caddy that already
+/// terminates TLS for the host. Settings → World → room server overrides it.
+pub const DEFAULT_SERVER: &str = "wss://chat.tonho.wtf/v1/room";
 const VISITOR_ENT_BASE: u32 = 1000;
 
 struct Session {

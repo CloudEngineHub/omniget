@@ -8214,7 +8214,7 @@
       "thinking": "Agentes pensam com o LLM",
       "thinking_desc": "Deixa os agentes da casa planejar e refletir pelos seus modelos. É a única parte do mundo que gasta tokens; o orçamento diário de cada agente continua valendo.",
       "room_server": "Servidor de sala",
-      "room_server_desc": "Onde casas abertas e visitas se conectam. Vazio usa esta máquina (127.0.0.1:7878); aponte para o seu omniworld-server para hospedar por conta própria."
+      "room_server_desc": "Onde casas abertas e visitas se conectam. Vazio usa o servidor de sala público do OmniGet (chat.tonho.wtf), que só repassa; aponte para o seu omniworld-server para hospedar por conta própria."
     },
     "canvas_label": "O mundo dos agentes",
     "creating": "Construindo a casa…",

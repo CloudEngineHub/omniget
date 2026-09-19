@@ -129,7 +129,7 @@
     </div>
     {#if showServer}
       <div class="row">
-        <input class="server" type="text" bind:value={server} placeholder="ws://127.0.0.1:7878" spellcheck="false" autocapitalize="off" />
+        <input class="server" type="text" bind:value={server} placeholder="wss://chat.tonho.wtf" spellcheck="false" autocapitalize="off" />
         <span class="hint">{$t("world.house.server_hint")}</span>
       </div>
     {/if}

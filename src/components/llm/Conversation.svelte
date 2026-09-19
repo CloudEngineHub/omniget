@@ -212,8 +212,13 @@
   .conv-title {
     display: flex;
     align-items: baseline;
+    /* The workspace chip carries Undo: on a narrow window it drops to a line
+       of its own instead of sliding under the actions on the right. */
+    flex-wrap: wrap;
+    row-gap: var(--space-1);
     gap: var(--space-3);
     min-width: 0;
+    flex: 1 1 0;
   }
 
   .conv-title h2 {

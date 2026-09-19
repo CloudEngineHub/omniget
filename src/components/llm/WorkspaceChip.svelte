@@ -119,7 +119,10 @@
     background: var(--fill-quaternary, rgba(127, 127, 127, 0.12));
     font-size: var(--text-sm);
     color: var(--text-dim);
-    max-width: 320px;
+    /* Never wider than the header column it sits in: the folder name gives
+       way (ellipsis), Undo and the detach button do not. */
+    max-width: min(320px, 100%);
+    min-width: 0;
   }
   .ws-chip.attached {
     color: var(--text);

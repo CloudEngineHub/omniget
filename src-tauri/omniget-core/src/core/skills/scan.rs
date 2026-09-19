@@ -481,7 +481,7 @@ pub fn scan_dir_with(program: &Path, dir: &Path, timeout: Duration) -> ScanStatu
         cmd.process_group(0);
     }
 
-    let mut child = match cmd.spawn() {
+    let mut child = match crate::core::process::spawn_retrying_busy(|| cmd.spawn()) {
         Ok(child) => child,
         Err(e) => {
             return ScanStatus::Failed {

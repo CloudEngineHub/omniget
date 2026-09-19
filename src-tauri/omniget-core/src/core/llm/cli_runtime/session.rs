@@ -96,7 +96,7 @@ pub fn spawn_turn(
         .stderr(Stdio::piped())
         .kill_on_drop(true);
 
-    let mut child = cmd.spawn().map_err(|e| {
+    let mut child = crate::core::process::spawn_retrying_busy(|| cmd.spawn()).map_err(|e| {
         LlmError::new(
             ERR_CLI_SPAWN,
             format!("cannot start {}: {e}", spec.program.display()),

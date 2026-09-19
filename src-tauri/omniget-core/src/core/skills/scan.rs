@@ -431,13 +431,17 @@ fn kill_group(child: &mut std::process::Child) {
     #[cfg(unix)]
     {
         // The child leads its own group (see `process_group(0)`), so its pid is
-        // the group id. `kill` the command, not the syscall: no libc in core.
-        let _ = Command::new("kill")
-            .args(["-KILL", &format!("-{}", child.id())])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status();
+        // the group id. The syscall, never the `kill` command: procps on Linux
+        // and the BSD one on macOS do not read a negative argument the same
+        // way, and a misread `-1` takes every process of the user with it (on
+        // CI that is the runner itself).
+        let pgid = child.id() as i32;
+        if pgid > 1 {
+            // SAFETY: plain syscall; a group that is already gone is ESRCH.
+            unsafe {
+                libc::kill(-pgid, libc::SIGKILL);
+            }
+        }
     }
     let _ = child.kill();
     let _ = child.wait();

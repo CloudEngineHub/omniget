@@ -69,6 +69,8 @@
   let isStreamPopout = false;
   // The pet window is a bare 200x200 transparent canvas: no shell around it.
   let isPetWindow = $derived(page.url.pathname === "/pet");
+  // Same for the limits strip: the window is exactly as big as what it draws.
+  let isLimitsStrip = $derived(page.url.pathname === "/limits-strip");
   let hideAppSidebar = false;
   let isCoreRoute = $derived(
     page.url.pathname === "/" ||
@@ -346,7 +348,7 @@
   });
 </script>
 
-{#if isPetWindow}
+{#if isPetWindow || isLimitsStrip}
   {@render children()}
 {:else if isStreamPopout}
   <div class="stream-popout">

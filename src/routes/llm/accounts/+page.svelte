@@ -22,6 +22,7 @@
   import AccountList from "$components/llm/accounts/AccountList.svelte";
   import UsageDashboard from "$components/llm/accounts/UsageDashboard.svelte";
   import AcpAgents from "$components/llm/accounts/AcpAgents.svelte";
+  import LimitsStrip from "$components/llm/accounts/LimitsStrip.svelte";
   import {
     activateAccount,
     createAccount,
@@ -154,6 +155,7 @@
   {/if}
 
   <AcpAgents />
+  <LimitsStrip />
 
   <section class="surface-card rotation">
     <label class="rot-toggle">

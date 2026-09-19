@@ -8975,6 +8975,68 @@
         "failed": "Failed",
         "cancelled": "Cancelled"
       }
+    },
+    "limits": {
+      "title": "Limits strip",
+      "hint": "A small always-on-top strip on a screen edge, one ring per coding assistant: how much of each usage limit is used, when it resets, and whether the assistant is working, waiting or done. Off by default. Nothing is read and no window exists until you switch it on, and each assistant has its own switch.",
+      "enable": "Show the limits strip",
+      "edge": "Screen edge",
+      "edge_top": "Top",
+      "edge_right": "Right",
+      "edge_bottom": "Bottom",
+      "edge_left": "Left",
+      "drag_hint": "You can also drag the strip: it snaps to the nearest edge.",
+      "providers": "What it may read",
+      "privacy": "Each reader only opens the login that tool already keeps on this computer, read-only, and asks that provider's own server. Tokens are never logged, stored or shown. Each provider is asked at most every 5 minutes, and never while the strip is closed.",
+      "beta": "beta",
+      "beta_hint": "Written from documentation, not yet checked against the real tool.",
+      "local": "local",
+      "not_found": "not found on this computer",
+      "unavailable": "The limits strip is not available in this build.",
+      "reads": {
+        "omniget": "OmniGet's own agents: reads the usage the app already keeps in memory. No file, no network.",
+        "claude": "Reads ~/.claude/.credentials.json (on macOS, the Claude Code keychain item), asks api.anthropic.com for your usage.",
+        "codex": "Reads ~/.codex/auth.json, asks chatgpt.com for your usage; falls back to the limits Codex wrote in its own session log.",
+        "cursor": "Reads the editor's own state file (state.vscdb), asks cursor.com for your usage.",
+        "copilot": "Reads the GitHub CLI login (GH_TOKEN, hosts.yml or gh auth token), asks api.github.com for your Copilot quota.",
+        "grok": "Reads ~/.grok/auth.json, asks cli-chat-proxy.grok.com for your credits.",
+        "kimi": "Reads ~/.kimi-code/credentials/kimi-code.json, asks api.kimi.com for your usage.",
+        "opencode": "Reads ~/.local/share/opencode/auth.json, asks opencode.ai for your Go plan usage.",
+        "ollama": "No login. Asks 127.0.0.1:11434 which models are loaded. Nothing leaves this computer.",
+        "lmstudio": "No login. Asks 127.0.0.1:1234 which models the local server offers. Nothing leaves this computer."
+      },
+      "strip": {
+        "aria": "Limits strip",
+        "empty": "Nothing switched on",
+        "used": "{{percent}}% used",
+        "of": "{{used}} of {{limit}} {{unit}}",
+        "count": "{{used}} {{unit}}",
+        "resets_in": "resets in {{time}}",
+        "resets_now": "resets any moment",
+        "d": "d",
+        "h": "h",
+        "min": "min",
+        "plan": "Plan",
+        "models": "Loaded models",
+        "unloads_in": "unloads in {{time}}",
+        "refresh": "Refresh",
+        "hide": "Hide the strip",
+        "read_ago": "read {{time}} ago",
+        "just_now": "read just now",
+        "state": {
+          "working": "working",
+          "waiting": "waiting for you",
+          "done": "done",
+          "idle": "idle"
+        },
+        "status": {
+          "pending": "Reading…",
+          "absent": "Not found on this computer.",
+          "needs_auth": "Sign in again in the tool itself.",
+          "rate_limited": "The provider asked us to wait.",
+          "error": "Could not read."
+        }
+      }
     }
   },
   "omni": {

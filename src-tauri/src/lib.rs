@@ -18,6 +18,7 @@ pub mod extension_storage;
 pub mod external_url;
 pub mod hotkey;
 pub mod jobs;
+pub mod limits_strip;
 pub mod llm_manager;
 pub mod local_bridge;
 pub mod local_bridge_debug;
@@ -450,6 +451,9 @@ pub fn run() {
                     }
                 });
             }
+
+            // So does the limits strip; off by default, and then this is a no-op.
+            limits_strip::commands::restore(app.handle());
 
             commands::host_queue::register_event_listeners(app.handle());
             {
@@ -1530,6 +1534,13 @@ pub fn run() {
             commands::pet::pet_capabilities,
             commands::pet::pet_emit_intent,
             commands::pet::pet_set_ask_pending,
+            limits_strip::commands::limits_strip_get_prefs,
+            limits_strip::commands::limits_strip_set_prefs,
+            limits_strip::commands::limits_strip_open,
+            limits_strip::commands::limits_strip_close,
+            limits_strip::commands::limits_strip_state,
+            limits_strip::commands::limits_strip_refresh,
+            limits_strip::commands::limits_strip_set_expanded,
             commands::tools::ai::tool_ai_keys_openrouter_pkce,
             commands::tools::ai::tool_ai_keys_openrouter_pkce_finish,
             commands::llm::roster::llm_roster_templates,

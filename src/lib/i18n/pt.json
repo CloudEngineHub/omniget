@@ -8975,6 +8975,68 @@
         "failed": "Falhou",
         "cancelled": "Cancelado"
       }
+    },
+    "limits": {
+      "title": "Barra de limites",
+      "hint": "Uma barrinha sempre visível numa borda da tela, com um anel por assistente de código: quanto de cada limite de uso já foi, quando ele renova, e se o assistente está trabalhando, esperando ou terminou. Desligada por padrão. Nada é lido e nenhuma janela existe até você ligar, e cada assistente tem a própria chave.",
+      "enable": "Mostrar a barra de limites",
+      "edge": "Borda da tela",
+      "edge_top": "Topo",
+      "edge_right": "Direita",
+      "edge_bottom": "Base",
+      "edge_left": "Esquerda",
+      "drag_hint": "Você também pode arrastar a barra: ela gruda na borda mais próxima.",
+      "providers": "O que ela pode ler",
+      "privacy": "Cada leitor só abre o login que a própria ferramenta já guarda neste computador, sem alterar nada, e pergunta ao servidor daquele provedor. Tokens nunca são registrados, guardados ou mostrados. Cada provedor é consultado no máximo a cada 5 minutos, e nunca com a barra fechada.",
+      "beta": "beta",
+      "beta_hint": "Escrito a partir da documentação, ainda não conferido com a ferramenta real.",
+      "local": "local",
+      "not_found": "não encontrado neste computador",
+      "unavailable": "A barra de limites não está disponível nesta versão.",
+      "reads": {
+        "omniget": "Os agentes do próprio OmniGet: lê o uso que o app já guarda na memória. Sem arquivo, sem rede.",
+        "claude": "Lê ~/.claude/.credentials.json (no macOS, o item do Claude Code no chaveiro) e pergunta seu uso a api.anthropic.com.",
+        "codex": "Lê ~/.codex/auth.json e pergunta seu uso a chatgpt.com; se não der, usa os limites que o Codex gravou no próprio log de sessão.",
+        "cursor": "Lê o arquivo de estado do próprio editor (state.vscdb) e pergunta seu uso a cursor.com.",
+        "copilot": "Lê o login do GitHub CLI (GH_TOKEN, hosts.yml ou gh auth token) e pergunta sua cota do Copilot a api.github.com.",
+        "grok": "Lê ~/.grok/auth.json e pergunta seus créditos a cli-chat-proxy.grok.com.",
+        "kimi": "Lê ~/.kimi-code/credentials/kimi-code.json e pergunta seu uso a api.kimi.com.",
+        "opencode": "Lê ~/.local/share/opencode/auth.json e pergunta o uso do plano Go a opencode.ai.",
+        "ollama": "Sem login. Pergunta a 127.0.0.1:11434 quais modelos estão carregados. Nada sai deste computador.",
+        "lmstudio": "Sem login. Pergunta a 127.0.0.1:1234 quais modelos o servidor local oferece. Nada sai deste computador."
+      },
+      "strip": {
+        "aria": "Barra de limites",
+        "empty": "Nada ligado",
+        "used": "{{percent}}% usado",
+        "of": "{{used}} de {{limit}} {{unit}}",
+        "count": "{{used}} {{unit}}",
+        "resets_in": "renova em {{time}}",
+        "resets_now": "renova a qualquer momento",
+        "d": "d",
+        "h": "h",
+        "min": "min",
+        "plan": "Plano",
+        "models": "Modelos carregados",
+        "unloads_in": "descarrega em {{time}}",
+        "refresh": "Atualizar",
+        "hide": "Esconder a barra",
+        "read_ago": "lido há {{time}}",
+        "just_now": "lido agora",
+        "state": {
+          "working": "trabalhando",
+          "waiting": "esperando você",
+          "done": "terminou",
+          "idle": "parado"
+        },
+        "status": {
+          "pending": "Lendo…",
+          "absent": "Não encontrado neste computador.",
+          "needs_auth": "Entre de novo na própria ferramenta.",
+          "rate_limited": "O provedor pediu para esperar.",
+          "error": "Não foi possível ler."
+        }
+      }
     }
   },
   "omni": {

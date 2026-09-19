@@ -32,7 +32,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <b>Download Udemy and Hotmart courses, YouTube, Instagram, X, Pinterest, TikTok and 1,800+ other sites.<br/>Then transcribe, convert, read and study what you saved. One free desktop app, no terminal.</b>
+  <b>Download Udemy and Hotmart courses, YouTube, Instagram, X, Pinterest, TikTok and 1,800+ other sites.<br/>Then transcribe, convert, read and study what you saved. One free desktop app, no terminal.<br/>New in 0.10: AI agents that code in your folders, keep working with the window closed, and live in a house you can visit.</b>
 </p>
 
 <p align="center">
@@ -47,7 +47,9 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 <p align="center">
   <a href="#download-and-install"><img src="https://img.shields.io/badge/Download_for_Windows,_macOS_or_Linux-→-F28500?style=for-the-badge" alt="Download OmniGet" height="40" /></a>
   &nbsp;
-  <a href="#the-tools-section-158-tools-in-25-categories"><img src="https://img.shields.io/badge/See_the_158_tools-→-3D5BF0?style=for-the-badge" alt="See the Tools section" height="40" /></a>
+  <a href="#agents-and-the-world"><img src="https://img.shields.io/badge/Meet_your_agents-→-2AA845?style=for-the-badge" alt="Agents and the World" height="40" /></a>
+  &nbsp;
+  <a href="#the-tools-section-156-tools-in-24-categories"><img src="https://img.shields.io/badge/See_the_156_tools-→-3D5BF0?style=for-the-badge" alt="See the Tools section" height="40" /></a>
 </p>
 
 <p align="center">
@@ -63,15 +65,15 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 ## Contents
 
+- [**Agents and the World**: LLM, jobs, loops, your own agents, the house and visits](#agents-and-the-world)
 - [Why OmniGet](#why-omniget)
 - [Download and install](#download-and-install)
 - [Your first download in one minute](#your-first-download-in-one-minute)
 - [What OmniGet downloads](#what-omniget-downloads)
 - [The browser extension, step by step](#the-browser-extension-step-by-step)
-- [The Tools section: 158 tools in 25 categories](#the-tools-section-158-tools-in-25-categories)
+- [The Tools section: 156 tools in 24 categories](#the-tools-section-156-tools-in-24-categories)
 - [OmniGet for AI agents: MCP server and Claude Code plugin](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin)
 - [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
-- [Agents and the World](#agents-and-the-world)
 - [For League of Legends players](#for-league-of-legends-players)
 - [Everything else in the box](#everything-else-in-the-box)
 - [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do)
@@ -79,6 +81,132 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [Command line](#command-line)
 - [Build from source](#build-from-source)
 - [Contributing and translations](#contributing-and-translations)
+
+---
+
+## Agents and the World
+
+<p align="center">
+  <img src="assets/readme/agents-hero.gif" alt="Loop, the OmniGet mascot, gives two thumbs up in the middle of a cozy isometric house while three small robot agents work at three separate workbenches: one types code on a laptop, one studies a book with a magnifying glass, one repairs a folder with a wrench. Each has a balloon showing the tool it is using" width="900" />
+</p>
+
+New in 0.10, and now the centre of the app. OmniGet carries the whole system that goes around an AI agent: a coding harness with permissions and undo, a durable job queue with loops and triggers, a roster that takes your local models, your API keys and the agent CLIs you already pay for, a project memory, and a small world where those agents live and where you can watch them work. It runs on your machine. Nothing talks to the network until you add a key, start a local model or open your house.
+
+| You want to | Open | What happens |
+| --- | --- | --- |
+| Have an agent change code in a folder | **LLM → Chat** | It reads, edits and runs commands inside that folder only, asks before it writes, and one click undoes the turn |
+| Leave work running | **LLM → Jobs**, **Loops** | The turn survives closing the window and a crash; a Loop repeats until your check command passes |
+| Start work on a schedule or from another program | **LLM → Jobs → Triggers** | A cron line or a webhook on the local bridge starts a job |
+| Use Claude Code, Codex, Gemini CLI… | **LLM → Accounts** | They join the roster as agents, keep their login, ask permission through OmniGet |
+| See who is doing what | **World** | Each agent walks to its own workbench, shows the tool in a balloon and waves when it needs you |
+| Show a friend | **World → Open the house** | A code, a visit, a chat. Your app stays the authority |
+
+### Talk and code: `LLM` in the sidebar
+
+<p align="center">
+  <img src="assets/readme/illustration-llm.png" alt="Loop slides a folder across a desk to a robot agent. Between them a permission card shows a removed line in red and an added line in green, with three buttons: allow, always and deny. The agent raises a hand to ask" width="820" />
+</p>
+
+Pick an agent, attach a folder, ask for a change.
+
+- **Eleven tools, one folder.** `fs_read`, `fs_list`, `fs_glob`, `fs_grep`, `fs_edit`, `fs_write`, `fs_apply_patch`, `shell_exec`, `todo_write`, plus `kb_search` and `kb_write`. Every path is resolved inside the folder you attached; a path outside it becomes its own question (`external_directory`) and the answer covers that one call. Each conversation has its own folder.
+- **Edits that survive a sloppy model.** `fs_edit` falls back from an exact match to a block match anchored on the first and last line, and refuses when the block it found is out of proportion to what was asked. `fs_apply_patch` takes the V4A envelope with a context fuzz ladder and keeps the file's own context lines. A small model that invents a container path such as `/workspace` is put back at the folder root instead of failing.
+- **The shell is sandboxed on macOS.** `shell_exec` runs under seatbelt: no network, writes only inside the folder. On Windows and Linux there is no sandbox yet, and the chip next to the folder says so.
+- **Permission with the evidence on screen.** Anything that writes asks first and shows the command or the diff. **Allow** is once, **Deny** is once, **Always** stores a rule for that agent by command prefix: `git status *`, `npm run test *`, `node *`. A chained line (`git status && rm -rf x`) needs a rule for every segment, and `$(…)`, backticks and `>` never ride on a rule. The rules are listed in the inspector on the right, where you edit the pattern, switch a rule to ask or deny, or delete it; the next call asks again.
+- **Undo takes the whole turn back.** Before the first write of a turn OmniGet snapshots the folder into a shadow git that never touches your repository. **Undo** restores the files and removes that turn's messages from the conversation, without running anything again. It also covers edits made by Claude Code or an ACP agent. If `git` is not on the PATH the chip says undo is unavailable, and when a turn ran shell commands the toast names them, because whatever they changed outside the folder is not undone.
+- **Stop means stop.** Cancelling a turn also drops its pending permission request, in the chat and in the job list.
+- **Models.** A local server (Ollama, LM Studio, llama-server) or your own keys, with a router that walks down a chain when a quota runs out or a provider rate-limits. A fresh install is local first.
+
+Measured on the demo project (one failing test, a one-character bug), release build, Apple Silicon: Claude Code through OmniGet fixes it in about 15 seconds from one command; an 8B local model (`qwen3:8b` on Ollama) does the same in about 3 minutes, asking permission with the diff.
+
+### Leave it working: Jobs, Loops and triggers
+
+<p align="center">
+  <img src="assets/readme/illustration-loops.png" alt="A robot agent runs around a circular arrow track and passes under an arch with a green check mark while Loop naps in an armchair beside a closed laptop. On the desk a screen shows two red crosses turning into a green check; a clock and a calendar hang on the wall" width="820" />
+</p>
+
+- **A job is an agent turn that outlives the window.** It lives in a SQLite queue with its state (`queued`, `running`, `waiting_approval`, `done`, `failed`, `cancelled`), its log, and what it cost: model, tokens in and out, cache reads, and the cost when the provider reports one. Two jobs run at a time. A job that needs a permission shows **Allow / Always allow / Deny** right on its row.
+- **A Loop repeats rounds until a check passes.** Give it a prompt and a check command (`npm test`, `cargo test`, `node test/cart.test.js`); the check runs under the same sandbox, and the Loop ends with `check_passed`, or when the rounds or minutes you set run out.
+- **It keeps going without you.** Close the window and the app stays in the tray with the Loop running. Kill the process mid-round and the next launch marks that round failed and opens a new one by itself. Both were tested exactly that way. An unattended Loop needs the rules it will use (an unanswered request is denied after two minutes).
+- **Triggers.** A five-field cron line (lists, ranges, steps, `@hourly`, `@daily`, local time), checked once a minute with no duplicate fire, or a webhook: `POST /v1/hooks/<id>` on the local bridge with your token, where the body becomes `{{body}}` in the prompt.
+- **From a terminal**, against the running app:
+
+```bash
+omniget agent run "Fix the failing test in src/cart.js" --agent claude-code --workspace .
+omniget agent loop "Make the tests pass" --agent omni --workspace . --check "npm test" --rounds 5
+omniget agent jobs          # list, show one, --cancel
+omniget agent loops
+omniget agent agents
+```
+
+<p align="center">
+  <img src="assets/readme/agents-loop.gif" alt="OmniGet LLM Loops page: a Loop run by Claude Code goes from Running to Done with the stop reason check_passed after one of three rounds" width="900" />
+</p>
+
+### Bring your own agents, and let them work as a team
+
+<p align="center">
+  <img src="assets/readme/illustration-team.png" alt="Loop stands as team captain in front of five robot agents of different colours, each with a name badge. One hands a glowing task card to another. Behind them, a large shared notebook with bookmarks and a shelf of skills" width="820" />
+</p>
+
+- **Claude Code and Codex accounts** plug in with their quota on screen, including the login your terminal already has. Several accounts of the same CLI can coexist, read-only or allowed to write.
+- **Any CLI that speaks the [Agent Client Protocol](https://agentclientprotocol.com)** joins the roster from **LLM → Accounts**: Gemini CLI, claude-code-acp, codex-acp, goose, opencode, or a command you type. OmniGet has its own JSON-RPC client over stdio, so there is no SDK to install; the agent keeps its login and model, and its permission requests show up in OmniGet's prompt. Checked field by field against claude-code-acp 0.16.
+- **`agent_delegate`.** One agent hands a task to another and gets the answer back as a tool result, in a child conversation you can open. A local coordinator that delegates the hard part to Claude Code costs exactly one run of the CLI.
+- **A memory the whole team shares.** `AGENTS.md` (or `CLAUDE.md`) plus markdown notes in `.omniget/kb/`, inside your project, in git if you want. The index goes into every prompt, and the agents search and write notes with `kb_search` and `kb_write`.
+- **Skills** install from a folder, a zip, or `owner/repo` and `owner/repo@skill` as in `npx skills add`, and pass through a scanner first.
+- **MCP both ways.** External MCP servers become tools, granted per agent as *auto*, *ask* or *deny*. And OmniGet serves its own 49 tools, the coding ones included, to Claude Code, Cursor, VS Code and the rest: see [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin).
+- **Context pruning, off by default.** On long conversations a judge decides which old tool outputs no longer bear on the task and replaces them with a marker; the call and its id stay, so the agent can run the tool again. It works inside a long turn as well as between turns, and on Claude Code conversations too. The local judge (MiniLM, on your machine) only ever omits an output; the optional remote judge needs a key and says plainly that previews leave your computer. Every request leaves a receipt with measured numbers: outputs omitted, estimated tokens before and after, input tokens the provider billed. No invented percentages.
+- **Budgets.** Per agent: dollars per day, tokens per turn, tool calls per turn. A spent agent goes to sit down, literally.
+
+### The World: watch them work
+
+<p align="center">
+  <img src="assets/readme/illustration-world.gif" alt="Inside an isometric house with terracotta floors, three robot agents tinker at their own workbenches with tool balloons bobbing above them, one waves at the viewer with an exclamation balloon, a side panel fills its progress bars and Loop sways on the sofa" width="820" />
+</p>
+
+A house is made on your first visit and the agents of your roster move in, CLI and ACP agents included. A fresh install starts with three: **Omni** (coordinator), **Builder** (code) and **Scout** (reading and research), all editable. Add or remove an agent and the house follows.
+
+- **One post per agent.** Each has its own desk and workbench, so two agents working at once never stand on the same tile. It walks to the desk when a turn starts and to the workbench when a tool runs, with a balloon naming the tool (`fs_edit cart.js`, `shell_exec`). When it needs your permission it stops and waves at you. When its budget is spent it sits down, tired. Jobs and Loops move the agents exactly like chat does.
+- **The Activity panel** next to the house has a row per agent: state, current tool, running job, energy. Click a row and the camera goes to that agent.
+- **Energy is quota.** What is left of an account's window is that agent's energy; an exhausted account goes to bed.
+- **Demo mode.** `/world?demo=1`, or the **Demo** button, plays a scripted run with three agents and a permission request without spending a token. It is what the clip below shows.
+- **Built here.** The simulation is a Rust crate, the renderer is WebGL2, and the app measures your machine once and picks a quality tier. With eight agents working at once it held a median of 64 frames per second on the test machine (debug build). Furniture goes in slots. A yard with four outdoor workbenches ships as a preview (**World → Quintal artesanal**). Agents only think through a model if you switch that on.
+
+<p align="center">
+  <img src="assets/readme/agents-world.gif" alt="The OmniGet World in the real app: three agents, Omni, Builder and Scout, walk to different workbenches in an isometric house, each with a balloon naming the tool it is running, next to an Activity panel listing who is doing what" width="900" />
+</p>
+
+### Visits
+
+<p align="center">
+  <img src="assets/readme/illustration-visits.gif" alt="Two small houses on floating islands joined by a glowing dotted path. A visitor in a blue cloak walks over carrying a gift while Loop waves from the door, a ticket with an eight-character code floats above, and a small padlocked relay tower passes light along the path" width="820" />
+</p>
+
+**Open the house** gives you a code such as `ZZCJ-YA09`. A friend types it and walks into your house: they see your map, your agents at work and the other guests, walk around, and what they say shows up as a balloon.
+
+- **Your app is the authority.** The room server only relays frames. Your keys, your quota and your agents' brains never leave your machine, and a visitor can do one thing: walk.
+- **No accounts.** The hello is signed with the ed25519 key of your local profile.
+- **It keeps serving while you work.** With the house open the world stays awake when the window is covered or you are on another tab, and a guest that misses a frame asks for a fresh picture instead of freezing.
+- **Closing the house closes the only socket there is.**
+- **The public relay** is `wss://chat.tonho.wtf/v1/room`. To host your own, `omniworld-server` is a single binary with a `Dockerfile` and a `docker-compose.yml` in `scripts/omniworld-server/`; put it behind a proxy that terminates TLS and set the address in **Settings → World → Room server**.
+
+**The pet.** A floating Omni reacts to what the agents do, including Claude Code or Codex running in a terminal outside the app, and answers permission prompts with Allow, Always or Deny.
+
+### Where the ideas come from
+
+| Piece | Read from | In OmniGet |
+| --- | --- | --- |
+| Coding tools, edit cascade, output caps | opencode, Codex, aider | tools bound to one folder, V4A patches, fuzzy block match, seatbelt shell |
+| Undo | opencode snapshots, cline checkpoints | shadow git per folder, one snapshot per writing turn, the turn's messages go back too |
+| Permission rules | opencode | per agent, by command prefix, last match wins, editable in the inspector |
+| Durable jobs, loops, triggers | compozy, codex-loop, cc-loop | SQLite queue, loop until a check passes, own cron parser, webhook |
+| Any CLI as an agent | Agent Client Protocol | own JSON-RPC client over stdio, no SDK |
+| Project memory | compozy/kb, mem0, letta | markdown in the repo, index in the prompt, search and write tools |
+| Tool output compression | headroom | deterministic, no model: repeated lines, compact JSON, log tail |
+| Context pruning with a judge | yoshi, fast-jev-compaction | local MiniLM judge or a remote one, sticky decisions, a measured receipt per request |
+| Agents that live somewhere | ai-town, smallville, generative agents | own simulation and WebGL2 renderer, routine, memory, energy = quota |
+
+What is still young: the agent's shell is sandboxed on macOS only, languages other than English and Portuguese show these screens in English, and the scanner that quarantines skills is a separate install. Voice by proximity, a shared TV and the yard as part of the live house come next.
 
 ---
 
@@ -100,7 +228,7 @@ OmniGet puts all of that behind one text box. Paste a link, see a preview with q
 | Setup | Download one file, open it | Python, PATH, FFmpeg, flags | None | Installer, license key |
 | Logged-in content | Cookies from your browser through the extension | Manual `--cookies` export | Rarely | Sometimes |
 | Queue | Resume, retry with backoff, rules, followed channels | One command at a time | No | Varies |
-| After the download | Player, reader, flashcards, notes, 158 tools | Files | Files, often re-encoded | Files |
+| After the download | Player, reader, flashcards, notes, 156 tools | Files | Files, often re-encoded | Files |
 | Price and license | Free, GPL-3.0 | Free, Unlicense | Free with ads | Subscription |
 
 yt-dlp is the engine OmniGet runs on, and OmniGet would not exist without it. If you live in a terminal and only want files, yt-dlp alone is the right tool.
@@ -197,7 +325,7 @@ OmniGet has native extractors for the platforms people use most, and hands every
 | Video and audio | YouTube (videos, playlists, channels, live from start, chapters, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VODs, clips, live), Vimeo, Bluesky, Threads, Pinterest, Douyin |
 | Bilibili, signed in | 4K, HDR, Dolby Vision, Hi-Res lossless and Dolby Atmos according to your subscription. Danmaku comments as XML, ASS or JSON, NFO files for Kodi and Jellyfin, custom naming templates, 11 URL types including bangumi, courses, favorites, watch later and history |
 | Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
-| Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
+| Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles |
 | Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two OmniGet installs with a short word code |
 | Telegram | Photos, videos, files and audio from any channel or group you belong to, through the Telegram plugin |
 
@@ -247,7 +375,7 @@ If the extension is installed but OmniGet is closed, clicks fall back to the `om
 
 ---
 
-## The Tools section: 158 tools in 25 categories
+## The Tools section: 156 tools in 24 categories
 
 Tools is the part of OmniGet that grew beyond downloading. Each tile is one job: an isolated Rust command with JSON in and JSON out, which is also what lets AI agents drive them through the built-in MCP server. The hub has a search box that understands English and Portuguese ("legenda" finds subtitle tools) and a platform filter, and tools that only run on Windows say so on the tile and stay hidden elsewhere. Everything below runs on your machine; the only tools that touch the network are the ones that fetch from the site they are named after.
 
@@ -256,7 +384,7 @@ Tools is the part of OmniGet that grew beyond downloading. Each tile is one job:
 </p>
 
 <p align="center">
-  <img src="assets/readme/tools.png" alt="OmniGet Tools hub with 25 categories: YouTube, Speech and subtitles, Video editing, Audio, Instagram, X, Facebook, Reddit, Pinterest, Twitch, Bilibili, Spotify, Music, LinkedIn, Games, PDF, Documents, Images, System, Files, Downloads, Automation, Phone, AI and CTF and analysis" width="900" />
+  <img src="assets/readme/tools.png" alt="OmniGet Tools hub with 24 categories: YouTube, Speech and subtitles, Video editing, Audio, Instagram, X, Reddit, Pinterest, Twitch, Bilibili, Spotify, Music, LinkedIn, Games, PDF, Documents, Images, System, Files, Downloads, Automation, Phone, AI and CTF and analysis" width="900" />
 </p>
 
 Status legend: no mark means ready, **beta** means it works but has not been tested against every account type, **planned** means the tile exists so you can see where things are going and does nothing yet.
@@ -363,11 +491,6 @@ Public data comes through the FxTwitter API without login. Anything private (boo
 - **Who doesn't follow back.** Audit following vs. followers and unfollow safely with a whitelist. *beta*
 - **Your X archive.** Open the data zip offline: stats, top posts, likes and follow lists.
 - **Grok.** Ask Grok with live X search or summarize a thread, through the xAI API or your X session. *beta*
-
-### Facebook (2)
-
-- **Album download.** Paste an album link and every photo and video inside it lands in one folder.
-- **Download video.** A single video or reel, straight from the link box.
 
 ### Reddit (3)
 
@@ -505,7 +628,7 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Local models (Ollama).** See, download and remove local models and use them as a free provider.
 - **Humanize text.** Rewrite AI-sounding text so it reads like a person wrote it, without changing what it says. Runs on the AI provider you configured. *beta*
 - **API keys.** A local vault for keys and accounts, with a connection test, balance for OpenRouter, DeepSeek, SiliconFlow and New API, and export to Claude Code, Codex, Cherry Studio, opencode or a `.env` file.
-- **MCP server.** OmniGet's tools exposed over the Model Context Protocol on the local bridge, 37 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin). *beta*
+- **MCP server.** OmniGet's tools exposed over the Model Context Protocol on the local bridge, 49 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin). *beta*
 
 ### CTF and analysis (6)
 
@@ -588,40 +711,6 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 
 ---
 
-## Agents and the World
-
-New in 0.10. OmniGet now carries the system that goes around an AI agent, and a small world where your agents live. Everything runs on your machine; nothing talks to the network until you add a key, start a local model or open your house.
-
-**Talk and code (`LLM` in the sidebar).** Pick an agent, attach a folder and ask for a change. The agent reads, searches, edits, applies patches and runs commands inside that folder only, under a macOS sandbox for the shell. Anything that writes asks first and shows the command or the diff; **Always** remembers the kind of call (`git status`, `npm run test`), never the whole line. **Undo** puts the folder back to how it was before the last turn, from a shadow git that never touches your repository. Each conversation has its own folder. Models come from a local server (Ollama, LM Studio, llama-server) or your own keys, with a router that falls back when a quota runs out.
-
-**Leave it working (`LLM → Jobs` and `Loops`).** A job is one agent turn that outlives the window. A Loop repeats rounds until a check command exits 0, or until the rounds or minutes you gave it run out. Triggers start a job from a five-field cron line or from a webhook on the local bridge. `omniget agent run`, `omniget agent loop --check "npm test"` and `omniget agent jobs` drive the same queue from a terminal.
-
-**Use what you already have.** Claude Code and Codex accounts plug in as agents with their quota on screen. Any CLI that speaks the [Agent Client Protocol](https://agentclientprotocol.com) (Gemini CLI, claude-code-acp, codex-acp, goose, opencode) joins the roster from **LLM → Accounts**, keeps its own login and model, and asks permission through OmniGet. Agents share a project knowledge base: `AGENTS.md` plus markdown notes in `.omniget/kb/` that they search and write. Skills install from a folder, a zip, or `owner/repo` as in `npx skills add`, and go through a scanner first. MCP servers plug in as tools, and OmniGet's own tools, the coding ones included, are served over MCP to other clients.
-
-**The World (`World` in the sidebar).** A house is made on your first visit and the agents of your roster move in. They follow a routine, walk to the desk when a turn starts and to the workbench when a tool runs, and their energy is their quota. Furniture goes in slots. Agents only think through a model if you switch that on.
-
-**Visits.** **Open the house** gives you a code; a friend types it and walks into your house, sees your agents and the other guests, and chats. Your app stays the authority and the room server only relays, so your keys and quota never leave your machine. There are no accounts: the hello is signed with the key of your local profile. `omniworld-server` is a single binary with a `docker-compose.yml` in `scripts/omniworld-server/` if you want to host your own; set its address in **Settings → World → Room server**. Closing the house closes the only socket there is.
-
-**The pet.** A floating Omni reacts to what the agents do, including Claude Code or Codex running in a terminal outside the app, and answers permission prompts.
-
-Where the ideas come from, and what OmniGet does with each:
-
-| Piece | Read from | In OmniGet |
-| --- | --- | --- |
-| Coding tools, edit cascade, output caps | opencode, Codex, aider | 9 tools bound to one folder, V4A patches, fuzzy block match, seatbelt shell |
-| Undo | opencode snapshots, cline checkpoints | shadow git per folder, one snapshot per writing turn |
-| Permission rules | opencode | per agent, by command prefix, last match wins |
-| Durable jobs, loops, triggers | compozy, codex-loop, cc-loop | SQLite queue, loop until a check passes, own cron parser, webhook |
-| Any CLI as an agent | Agent Client Protocol | own JSON-RPC client over stdio, no SDK |
-| Project memory | compozy/kb, mem0, letta | markdown in the repo, index in the prompt, search and write tools |
-| Tool output compression | headroom | deterministic, no model: repeated lines, compact JSON, log tail |
-| Context pruning with a judge | yoshi, fast-jev-compaction | local MiniLM judge or a remote one, decisions kept between turns |
-| Agents that live somewhere | ai-town, smallville, generative agents | own simulation and WebGL2 renderer, routine, memory, energy = quota |
-
-This part of the app is young: it shipped before its benchmark pass, and sandboxing of the agent's shell exists on macOS only. Voice by proximity and a shared TV in the house come next.
-
----
-
 ## For League of Legends players
 
 A League menu sits in the sidebar. It reads your running League client locally, with no account and no third-party build site, and does nothing until the client is open. If you never play, switch it off in **Settings → Advanced → League of Legends** and the menu disappears.
@@ -700,7 +789,7 @@ Run the two commands in [the first launch section](#the-first-launch-warning-and
 Yes. Request the export from the platform, then open the zip in the matching tool. It is parsed on your machine and nothing is uploaded.
 
 **Can an AI agent use OmniGet?**
-Yes, two ways. The MCP server in Tools → AI exposes 37 tools to Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, and the `claude-plugin/` folder ships a Claude Code plugin that fetches and transcribes media without the desktop app. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin).
+Yes, two ways. The MCP server in Tools → AI exposes 49 tools to Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, and the `claude-plugin/` folder ships a Claude Code plugin that fetches and transcribes media without the desktop app. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin).
 
 **Can I transcribe a video to subtitles offline?**
 Yes. Tools → Speech and subtitles → Transcribe uses whisper.cpp locally. Models download on demand.

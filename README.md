@@ -217,6 +217,8 @@ A house is made on your first visit and the agents of your roster move in, CLI a
 
 **The pet.** A floating Omni reacts to what the agents do, including Claude Code or Codex running in a terminal outside the app, and answers permission prompts with Allow, Always or Deny.
 
+**The limits strip.** A thin strip on a screen edge with one ring per coding assistant: how much of each usage limit is gone, when it resets, and whether the assistant is working, waiting or done. Off until you switch it on in **LLM → Accounts**, and every assistant is its own checkbox that says what it reads. A reader opens only the login that tool already keeps on your machine, read-only, asks that tool's own service for your usage at most once every five minutes, and never writes, refreshes or logs a token. Local runtimes (Ollama, LM Studio) show the models they have loaded. Claude Code is verified; the other remote readers are marked *beta*.
+
 ---
 
 <a id="why-omniget"></a>

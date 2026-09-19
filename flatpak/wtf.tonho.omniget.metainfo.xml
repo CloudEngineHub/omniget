@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>wtf.tonho.omniget</id>
   <name>Omniget</name>
-  <summary>Download media from multiple platforms</summary>
+  <summary>Course and video downloader, yt-dlp GUI and AI agents desktop app</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <developer id="wtf.tonho">
@@ -10,19 +10,51 @@
   </developer>
   <description>
     <p>
-      Omniget is a desktop application to download videos, courses, and media
-      from platforms like YouTube, Udemy, Hotmart, Telegram, Instagram, TikTok,
-      Twitter, Reddit, Twitch, Pinterest, Bluesky, and Vimeo.
+      OmniGet downloads the Udemy and Hotmart courses you bought, YouTube, Instagram,
+      TikTok, X, Reddit, Twitch, Pinterest, Telegram, torrents and about 1,800 other
+      sites through a graphical interface for yt-dlp, then plays, reads, transcribes
+      and converts what you saved.
+    </p>
+    <p>
+      It also runs AI coding agents on your machine: Claude Code, Codex, Gemini CLI
+      and local Ollama models, with permissions, undo, background jobs, loops that
+      repeat until your tests pass, and a built-in MCP server.
     </p>
     <p>Features include:</p>
     <ul>
-      <li>Multi-platform media downloading</li>
-      <li>Course downloading from Udemy and Hotmart</li>
-      <li>Telegram media browser and batch downloader</li>
-      <li>Media format conversion</li>
-      <li>Queue management with concurrent downloads</li>
+      <li>Udemy, Hotmart, Kiwify and Rocketseat course downloader with a course player</li>
+      <li>YouTube downloader and yt-dlp GUI with queue, resume and subtitles</li>
+      <li>Instagram, TikTok, X, Reddit, Pinterest, Twitch, Bilibili and Telegram downloads</li>
+      <li>156 tools in 24 categories: transcription, PDF, video, images and more</li>
+      <li>AI agents with per-folder permissions, undo, jobs, loops and triggers</li>
+      <li>MCP server with 49 tools for Claude Code, Cursor and VS Code</li>
+      <li>The World: an isometric house where your agents are seen working</li>
     </ul>
   </description>
+  <categories>
+    <category>Network</category>
+    <category>AudioVideo</category>
+    <category>Development</category>
+    <category>Utility</category>
+  </categories>
+  <keywords>
+    <keyword>downloader</keyword>
+    <keyword>yt-dlp</keyword>
+    <keyword>youtube</keyword>
+    <keyword>udemy</keyword>
+    <keyword>hotmart</keyword>
+    <keyword>course</keyword>
+    <keyword>video</keyword>
+    <keyword>instagram</keyword>
+    <keyword>tiktok</keyword>
+    <keyword>torrent</keyword>
+    <keyword>ai agents</keyword>
+    <keyword>claude code</keyword>
+    <keyword>codex</keyword>
+    <keyword>ollama</keyword>
+    <keyword>mcp</keyword>
+    <keyword>llm</keyword>
+  </keywords>
   <url type="homepage">https://github.com/tonhowtf/omniget</url>
   <url type="bugtracker">https://github.com/tonhowtf/omniget/issues</url>
   <url type="vcs-browser">https://github.com/tonhowtf/omniget</url>

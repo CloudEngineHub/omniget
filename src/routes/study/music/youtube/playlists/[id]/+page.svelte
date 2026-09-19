@@ -43,7 +43,7 @@
 
   type RowItem = YoutubeUserPlaylistItem & { id: string };
 
-  const rowItems = $derived<RowItem[]>(
+  const rowItems = $derived(
     (detail?.items ?? []).map((it) => ({ ...it, id: it.video_id })),
   );
 
@@ -609,7 +609,7 @@
     height: 28px;
     border-radius: 50%;
     background: var(--accent);
-    color: var(--on-accent, #000);
+    color: var(--on-accent);
     display: grid;
     place-items: center;
     font-size: 16px;

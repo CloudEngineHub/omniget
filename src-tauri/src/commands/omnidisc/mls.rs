@@ -10,8 +10,8 @@
 //! is merged **only after** the server accepted it (409 means someone else won
 //! the epoch, so we clear, catch up and retry).
 
-use super::api::{Api, ERR_BAD_REQUEST, ERR_NOT_FOUND};
 use super::device::{self, DeviceIdentity};
+use super::http::{Api, ERR_BAD_REQUEST, ERR_NOT_FOUND};
 use super::store;
 use base64::Engine;
 use omnidisc_mls::{ClaimedDevice, CommitOutput, DeviceRef, Incoming, MlsClient, CIPHERSUITE_ID};
@@ -497,7 +497,7 @@ pub async fn top_up_key_packages(api: &Api, session: &mut Session) -> Result<(),
 /// only handle the client has on "which key really belongs to that device", so
 /// every key package and every sender is checked against it.
 async fn device_roster(api: &Api, user_id: &str) -> Result<Vec<DeviceRef>, String> {
-    let user_id = super::api::path_id(user_id)?;
+    let user_id = super::http::path_id(user_id)?;
     let devices: Vec<Device> = api
         .send(
             Method::GET,
@@ -529,7 +529,7 @@ async fn claim_devices(api: &Api, user_ids: &[String]) -> Result<Vec<ClaimedDevi
         let packages: ClaimedKeyPackages = match api
             .send(
                 Method::GET,
-                &format!("/api/mls/key-packages/{}", super::api::path_id(user_id)?),
+                &format!("/api/mls/key-packages/{}", super::http::path_id(user_id)?),
                 &[],
                 None,
             )
@@ -871,7 +871,7 @@ async fn welcome_senders(
     let channel: Channel = api
         .send(
             Method::GET,
-            &format!("/api/channels/{}", super::api::path_id(channel_id)?),
+            &format!("/api/channels/{}", super::http::path_id(channel_id)?),
             &[],
             None,
         )

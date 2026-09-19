@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+import { t } from "$lib/i18n";
   import CreatePageDialog from "../CreatePageDialog.svelte";
   import NbNotebookCreateDialog from "./NbNotebookCreateDialog.svelte";
   import NbNotebookCoverDialog from "./NbNotebookCoverDialog.svelte";
@@ -166,12 +167,12 @@
     const nb = notebooksStore.byId(notebookId);
     if (!nb) return;
     if (nb.id === 1) {
-      window.alert("Notebook 'Pessoal' não pode ser excluído.");
+      window.alert($t("study.notes.files.personal_locked"));
       return;
     }
     if (nb.page_count > 0) {
       const ok = window.confirm(
-        `Excluir "${nb.name}" remove ${nb.page_count} página${nb.page_count === 1 ? "" : "s"} para sempre. Continuar?`,
+        $t("study.notes.files.delete_confirm", { name: nb.name, n: nb.page_count }),
       );
       if (!ok) return;
       const r = await notebooksStore.delete(notebookId, true);
@@ -207,7 +208,7 @@
   async function pickIcon(notebookId: number) {
     closeContext();
     const icon = window.prompt(
-      "Ícone (lucide name, ex: book, briefcase). Vazio = sem ícone.",
+      $t("study.notes.files.icon_hint"),
       notebooksStore.byId(notebookId)?.icon_lucide ?? "",
     );
     if (icon == null) return;
@@ -272,7 +273,7 @@
 
   <input
     class="search"
-    placeholder="Filtrar páginas…"
+    placeholder={$t("study.notes.files.filter_pages")}
     bind:value={search}
   />
 
@@ -329,9 +330,9 @@
                 type="button"
                 class="page-row add-page"
                 onclick={() => startCreatePage(nb.id)}
-                title="Nova página neste notebook"
+                title={$t("study.notes.files.new_page_here")}
               >
-                <span class="page-name">+ Nova página</span>
+                <span class="page-name">{$t("study.notes.files.new_page")}</span>
               </button>
             </li>
           </ul>
@@ -414,7 +415,7 @@
         Cor…
       </button>
       <button class="ctx-item" onclick={() => void pickIcon(nb.id)}>
-        Ícone…
+        {$t("study.notes.files.pick_icon")}
       </button>
       <hr />
       {#if nb.closed}
@@ -840,6 +841,6 @@
   }
   .btn.primary {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
   }
 </style>

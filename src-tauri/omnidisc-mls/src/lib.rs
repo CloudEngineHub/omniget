@@ -20,6 +20,11 @@ pub use file::{
 };
 pub use state::{decrypt_state, encrypt_state, new_state_key, FORMAT_VERSION};
 
+/// The signature crate itself, so callers that hold the same 32-byte seed this
+/// crate turns into an MLS signer can sign and verify with it without taking a
+/// second, possibly different, `ed25519-dalek` on their own.
+pub use ed25519_dalek;
+
 use thiserror::Error;
 
 #[derive(Debug, Error)]

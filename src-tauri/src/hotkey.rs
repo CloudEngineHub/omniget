@@ -26,7 +26,7 @@ pub fn register_from_settings(app: &tauri::AppHandle) {
         register_one(app, &settings.download.music_hotkey_binding, "music");
     }
     let ptt = settings.omnidisc.voice.ptt_key.trim();
-    if settings.omnidisc.enabled && !ptt.is_empty() {
+    if !ptt.is_empty() {
         register_one(app, ptt, "omnidisc-ptt");
     }
     crate::commands::tools::desktop::register_tool_hotkeys(app);

@@ -4,10 +4,9 @@
 //! que é o que Claude Code, Cursor, Goose e o `mcp-remote` do Claude Desktop
 //! aceitam. Sem crate de MCP: o protocolo aqui é JSON-RPC com quatro métodos.
 
-use omniget_core::core::tools::{
-    self as tools, ai_keys, disk, dupes, edge_tts, file_search, humanize, image_resize, ocr, pdf,
-    pricing, ryd, sponsorblock, startup, sysclean, uninstall, whisper, x,
-};
+use async_trait::async_trait;
+use omniget_core::core::llm::tool_table::{self, need_id, need_str, num, s, to_json, HostTools};
+use omniget_core::core::tools;
 use serde::Serialize;
 use serde_json::{json, Value};
 use tauri::AppHandle;
@@ -22,95 +21,20 @@ pub struct ToolDef {
     pub input_schema: Value,
 }
 
-fn obj(props: Value, required: &[&str]) -> Value {
-    json!({ "type": "object", "properties": props, "required": required })
-}
-
+/// A lista de tools vem inteira de `core::llm::tool_table`: a mesma tabela que
+/// alimenta o broker do /llm e as concessoes da UI. Aqui so muda o formato do
+/// JSON que o protocolo MCP espera (`inputSchema` em camelCase).
 pub fn tools() -> Vec<ToolDef> {
-    let t = |name, description, input_schema| ToolDef {
-        name,
-        description,
-        input_schema,
-    };
-    vec![
-        t("download_url", "Queue a URL (video, audio, playlist, course, image) in the OmniGet Downloads panel. Same as pasting it in the app.", obj(json!({ "url": { "type": "string" } }), &["url"])),
-        t("youtube_sponsorblock", "SponsorBlock segments (sponsor, intro, outro, selfpromo…) of a YouTube video.", obj(json!({ "url": { "type": "string" }, "categories": { "type": "array", "items": { "type": "string" } } }), &["url"])),
-        t("youtube_dislikes", "Return YouTube Dislike estimates for a video.", obj(json!({ "url": { "type": "string" } }), &["url"])),
-        t("pdf_info", "Pages, size, title, author and whether the PDF has a text layer.", obj(json!({ "path": { "type": "string" } }), &["path"])),
-        t("pdf_merge", "Merge PDFs into one file, in the given order.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "output": { "type": "string" } }), &["inputs", "output"])),
-        t("pdf_split", "Split a PDF: mode each | every | ranges (\"1-3; 4-10\") | extract (\"1,3,5-7\").", obj(json!({ "input": { "type": "string" }, "mode": { "type": "string" }, "every": { "type": "integer" }, "ranges": { "type": "string" }, "output_dir": { "type": "string" } }), &["input", "mode"])),
-        t("pdf_text", "Extract the text of a PDF (optionally a page range like \"1-3, 5\").", obj(json!({ "path": { "type": "string" }, "pages": { "type": "string" } }), &["path"])),
-        t("pdf_render", "Render PDF pages to PNG or JPG files.", obj(json!({ "input": { "type": "string" }, "pages": { "type": "string" }, "dpi": { "type": "integer" }, "format": { "type": "string", "enum": ["png", "jpg"] }, "output_dir": { "type": "string" } }), &["input"])),
-        t("pdf_sanitize", "Rebuild a PDF from pixels (Dangerzone-style) so scripts, forms and attachments are dropped.", obj(json!({ "input": { "type": "string" }, "output_dir": { "type": "string" } }), &["input"])),
-        t("tts_speak", "Text to speech with Microsoft Edge neural voices; writes an MP3.", obj(json!({ "text": { "type": "string" }, "voice": { "type": "string", "description": "e.g. pt-BR-AntonioNeural, en-US-AriaNeural" }, "output": { "type": "string" } }), &["text", "output"])),
-        t("transcribe", "Transcribe audio or video locally with whisper.cpp; returns text and SRT path.", obj(json!({ "input": { "type": "string" }, "model": { "type": "string", "description": "GGML model id, default base" }, "language": { "type": "string", "description": "auto | pt | en …" } }), &["input"])),
-        t("image_resize", "Resize images in batch. mode width | height | fit | percent.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "mode": { "type": "string" }, "value": { "type": "integer" }, "value2": { "type": "integer" }, "format": { "type": "string" }, "output_dir": { "type": "string" } }), &["inputs", "mode", "value"])),
-        t("ocr", "Extract text from images with Tesseract.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "langs": { "type": "string", "description": "por+eng" } }), &["inputs"])),
-        t("find_duplicates", "Find duplicate files (same content) under folders.", obj(json!({ "dirs": { "type": "array", "items": { "type": "string" } }, "min_size": { "type": "integer" } }), &["dirs"])),
-        t("file_search", "Search files by name (Everything, Spotlight or locate/find).", obj(json!({ "query": { "type": "string" }, "folder": { "type": "string" }, "limit": { "type": "integer" } }), &["query"])),
-        t("ai_prices", "Search LLM prices per million tokens (LiteLLM + models.dev).", obj(json!({ "query": { "type": "string" }, "limit": { "type": "integer" } }), &["query"])),
-        t("humanize", "Rewrite AI-sounding text so it reads like a person wrote it, using the app's configured AI.", obj(json!({ "text": { "type": "string" } }), &["text"])),
-        t("x_post", "Fetch an X/Twitter post (text, author, media) by URL or id.", obj(json!({ "url": { "type": "string" } }), &["url"])),
-        t("x_thread", "Unroll an X/Twitter thread from any post in it.", obj(json!({ "url": { "type": "string" } }), &["url"])),
-        t("x_profile", "Profile analytics for an X/Twitter user (engagement, best hours, top posts).", obj(json!({ "handle": { "type": "string" }, "limit": { "type": "integer" } }), &["handle"])),
-        t("x_search", "Search X/Twitter posts (advanced operators supported).", obj(json!({ "query": { "type": "string" }, "feed": { "type": "string", "enum": ["latest", "top"] } }), &["query"])),
-        t("x_trends", "Current X/Twitter trends.", obj(json!({}), &[])),
-        t("instagram_profile", "Public info of an Instagram profile, using the cookies captured by the OmniGet extension.", obj(json!({ "username": { "type": "string" }, "account": { "type": "string", "description": "cookie slot, default _default" } }), &["username"])),
-        t("gallery_download", "Download a gallery/profile with gallery-dl (Pinterest, ArtStation, DeviantArt, Reddit…).", obj(json!({ "url": { "type": "string" }, "dest": { "type": "string" } }), &["url", "dest"])),
-        t("aria2_download", "Download a large file with aria2 (multi-connection).", obj(json!({ "url": { "type": "string" }, "dest_dir": { "type": "string" }, "connections": { "type": "integer" } }), &["url", "dest_dir"])),
-        t("disk_volumes", "Mounted volumes with total and free space.", obj(json!({}), &[])),
-        t("disk_scan", "Folder sizes tree and largest files under a path.", obj(json!({ "path": { "type": "string" }, "depth": { "type": "integer" } }), &["path"])),
-        t("clean_scan", "What the cache cleaner would remove (rule, size, files). Does not delete anything.", obj(json!({}), &[])),
-        t("startup_items", "Programs that start with the system.", obj(json!({}), &[])),
-        t("installed_apps", "Installed applications with version and size.", obj(json!({}), &[])),
-        t("ai_keys", "Saved AI API accounts (names, providers, balances). Keys are never returned.", obj(json!({}), &[])),
-        t("download_enqueue", "Queue a URL in the Downloads panel using the app defaults, and return the queue item. mode audio downloads audio only.", obj(json!({ "url": { "type": "string" }, "mode": { "type": "string", "enum": ["video", "audio"] } }), &["url"])),
-        t("downloads_queue", "List the Downloads queue with per-item status, progress, speed, ETA and output path.", obj(json!({ "status": { "type": "string", "enum": ["queued", "active", "paused", "seeding", "complete", "error"] }, "limit": { "type": "integer" } }), &[])),
-        t("download_status", "One download by id: status, percent, speed, ETA, file path and the last yt-dlp command.", obj(json!({ "download_id": { "type": "integer" } }), &["download_id"])),
-        t("download_cancel", "Cancel a download by id (queued, active, paused or seeding).", obj(json!({ "download_id": { "type": "integer" } }), &["download_id"])),
-        t("download_pause", "Pause an active download by id.", obj(json!({ "download_id": { "type": "integer" } }), &["download_id"])),
-        t("download_resume", "Resume a paused download by id.", obj(json!({ "download_id": { "type": "integer" } }), &["download_id"])),
-    ]
-}
-
-fn s(v: &Value, k: &str) -> String {
-    v.get(k).and_then(|x| x.as_str()).unwrap_or("").to_string()
-}
-fn list(v: &Value, k: &str) -> Vec<String> {
-    v.get(k)
-        .and_then(|x| x.as_array())
-        .map(|a| {
-            a.iter()
-                .filter_map(|x| x.as_str().map(String::from))
-                .collect()
+    tool_table::table()
+        .iter()
+        .map(|e| ToolDef {
+            name: e.name,
+            description: e.description,
+            input_schema: e.input_schema.clone(),
         })
-        .unwrap_or_default()
-}
-fn num(v: &Value, k: &str) -> Option<u64> {
-    v.get(k).and_then(|x| x.as_u64())
+        .collect()
 }
 
-/// Argumento de texto obrigatorio, com erro legivel quando falta.
-fn need_str(v: &Value, k: &str) -> Result<String, String> {
-    let value = s(v, k);
-    if value.trim().is_empty() {
-        return Err(format!("argument \"{}\" is required (string)", k));
-    }
-    Ok(value)
-}
-
-/// Id de download: aceita numero ou string numerica.
-fn need_id(v: &Value, k: &str) -> Result<u64, String> {
-    v.get(k)
-        .and_then(|x| {
-            x.as_u64()
-                .or_else(|| x.as_str().and_then(|t| t.trim().parse().ok()))
-        })
-        .ok_or_else(|| format!("argument \"{}\" is required (download id, integer)", k))
-}
-fn to_json<T: Serialize>(v: T) -> Result<Value, String> {
-    serde_json::to_value(v).map_err(|e| e.to_string())
-}
 fn err<E: std::fmt::Display>(e: E) -> String {
     e.to_string()
 }
@@ -132,8 +56,9 @@ fn status_key(status: &crate::core::queue::QueueStatus) -> &'static str {
     }
 }
 
-pub(crate) const QUEUE_STATUS_KEYS: &[&str] =
-    &["queued", "active", "paused", "seeding", "complete", "error"];
+/// As chaves da fila vivem na tabela (o schema de `downloads_queue` sai de la);
+/// aqui so reexportamos para o filtro e para os testes nao poderem divergir.
+pub(crate) use omniget_core::core::llm::tool_table::QUEUE_STATUS_KEYS;
 
 async fn queue_snapshot(app: &AppHandle) -> Vec<crate::core::queue::QueueItemInfo> {
     use tauri::Manager;
@@ -210,305 +135,174 @@ async fn queue_control(app: &AppHandle, id: u64, action: &str) -> Result<Value, 
     Ok(json!({ "download_id": id, "action": action, "item": item }))
 }
 
-pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String> {
-    let p = tools::noop_progress();
-    match name {
-        "download_url" => {
-            let url = s(&a, "url");
-            let action = crate::external_url::handle_external_url(app, url.clone(), "mcp").await?;
-            Ok(json!({ "url": url, "action": format!("{:?}", action).to_lowercase() }))
-        }
-        "youtube_sponsorblock" => to_json(
-            sponsorblock::segments(&s(&a, "url"), &list(&a, "categories"))
-                .await
-                .map_err(err)?,
-        ),
-        "youtube_dislikes" => to_json(ryd::votes(&s(&a, "url")).await.map_err(err)?),
-        "pdf_info" => {
-            let path = s(&a, "path");
-            to_json(
-                tokio::task::spawn_blocking(move || pdf::info(&path, None))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "pdf_merge" => {
-            let opts = pdf::MergeOptions {
-                inputs: list(&a, "inputs"),
-                output: s(&a, "output"),
-            };
-            to_json(
-                tokio::task::spawn_blocking(move || pdf::merge(&opts, &p))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "pdf_split" => {
-            let opts = pdf::SplitOptions {
-                input: s(&a, "input"),
-                mode: s(&a, "mode"),
-                every: num(&a, "every").unwrap_or(0) as usize,
-                ranges: s(&a, "ranges"),
-                output_dir: s(&a, "output_dir"),
-            };
-            to_json(
-                tokio::task::spawn_blocking(move || pdf::split(&opts, &p))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "pdf_text" => {
-            let (path, pages) = (s(&a, "path"), s(&a, "pages"));
-            to_json(
-                tokio::task::spawn_blocking(move || pdf::to_text(&path, &pages, false, ""))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "pdf_render" => {
-            let opts = pdf::RenderOptions {
-                input: s(&a, "input"),
-                pages: s(&a, "pages"),
-                dpi: num(&a, "dpi").unwrap_or(0) as u32,
-                format: s(&a, "format"),
-                quality: 0,
-                output_dir: s(&a, "output_dir"),
-            };
-            to_json(
-                tokio::task::spawn_blocking(move || pdf::render(&opts, &p))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "pdf_sanitize" => {
-            let (input, dir) = (s(&a, "input"), s(&a, "output_dir"));
-            to_json(
-                tokio::task::spawn_blocking(move || pdf::sanitize(&input, &dir, 0, 0, &p))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "tts_speak" => {
-            let voice = {
-                let v = s(&a, "voice");
-                if v.is_empty() {
-                    "pt-BR-AntonioNeural".to_string()
-                } else {
-                    v
-                }
-            };
-            let opts: edge_tts::TtsOptions =
-                serde_json::from_value(json!({ "text": s(&a, "text"), "voice": voice }))
-                    .map_err(err)?;
-            to_json(
-                edge_tts::synthesize(opts, std::path::Path::new(&s(&a, "output")), p)
-                    .await
-                    .map_err(err)?,
-            )
-        }
-        "transcribe" => {
-            let model = {
-                let m = s(&a, "model");
-                if m.is_empty() {
-                    "base".to_string()
-                } else {
-                    m
-                }
-            };
-            let language = {
-                let l = s(&a, "language");
-                if l.is_empty() {
-                    "auto".to_string()
-                } else {
-                    l
-                }
-            };
-            let opts: whisper::TranscribeOptions = serde_json::from_value(
-                json!({ "input": s(&a, "input"), "model": model, "language": language }),
-            )
-            .map_err(err)?;
-            let r = whisper::transcribe(opts, p).await.map_err(err)?;
-            Ok(
-                json!({ "language": r.language, "text": r.text, "srt": r.srt_path, "vtt": r.vtt_path, "txt": r.txt_path, "seconds": r.seconds }),
-            )
-        }
-        "image_resize" => {
-            let opts: image_resize::ResizeOptions = serde_json::from_value(json!({ "inputs": list(&a, "inputs"), "mode": s(&a, "mode"), "value": num(&a, "value").unwrap_or(1024), "value2": num(&a, "value2").unwrap_or(0), "format": s(&a, "format"), "output_dir": s(&a, "output_dir") })).map_err(err)?;
-            to_json(image_resize::run(opts, p).await.map_err(err)?)
-        }
-        "ocr" => to_json(
-            ocr::run(&list(&a, "inputs"), &s(&a, "langs"), p)
-                .await
-                .map_err(err)?,
-        ),
-        "find_duplicates" => {
-            let opts: dupes::DupesOptions = serde_json::from_value(json!({ "dirs": list(&a, "dirs"), "min_size": num(&a, "min_size").unwrap_or(1024) })).map_err(err)?;
-            to_json(
-                tokio::task::spawn_blocking(move || dupes::scan(&opts, &p))
-                    .await
-                    .map_err(err)?,
-            )
-        }
-        "file_search" => to_json(
-            file_search::search(
-                &s(&a, "query"),
-                &s(&a, "folder"),
-                num(&a, "limit").unwrap_or(100) as usize,
-            )
-            .await
-            .map_err(err)?,
-        ),
-        "ai_prices" => to_json(
-            pricing::search(&s(&a, "query"), "", num(&a, "limit").unwrap_or(30) as usize)
-                .await
-                .map_err(err)?,
-        ),
-        "humanize" => Ok(json!({ "text": humanize::humanize(&s(&a, "text"), None).await? })),
-        "x_post" => {
-            let input = s(&a, "url");
-            let id = x::post_id_from(&input).ok_or_else(|| format!("not an X post: {}", input))?;
-            to_json(x::fx::status(&id).await.map_err(err)?)
-        }
-        "x_thread" => to_json(x::thread::unroll(&s(&a, "url")).await.map_err(err)?),
-        "x_profile" => to_json(
-            x::profile::analyze(
-                &s(&a, "handle"),
-                num(&a, "limit").unwrap_or(100) as usize,
-                false,
-            )
-            .await
-            .map_err(err)?,
-        ),
-        "x_search" => {
-            let feed = {
-                let f = s(&a, "feed");
-                if f.is_empty() {
-                    "latest".to_string()
-                } else {
-                    f
-                }
-            };
-            to_json(
-                x::search::search(&s(&a, "query"), &feed, None)
-                    .await
-                    .map_err(err)?,
-            )
-        }
-        "x_trends" => to_json(x::search::trends().await.map_err(err)?),
-        "instagram_profile" => {
-            let account = {
-                let v = s(&a, "account");
-                if v.is_empty() {
-                    None
-                } else {
-                    Some(v)
-                }
-            };
-            let client = crate::commands::tools::instagram::load_client(account.as_deref())?;
-            to_json(
-                tools::instagram::profile::resolve_user(&client, &s(&a, "username"))
-                    .await
-                    .map_err(err)?,
-            )
-        }
-        "gallery_download" => to_json(
-            tools::gallery::download(&s(&a, "url"), &s(&a, "dest"), None, p)
-                .await
-                .map_err(err)?,
-        ),
-        "aria2_download" => {
-            let opts: tools::aria2::Aria2Options = serde_json::from_value(json!({ "url": s(&a, "url"), "dest_dir": s(&a, "dest_dir"), "connections": num(&a, "connections").unwrap_or(16) })).map_err(err)?;
-            to_json(tools::aria2::download(opts, p).await.map_err(err)?)
-        }
-        "disk_volumes" => to_json(disk::volumes()),
-        "disk_scan" => {
-            let (path, depth) = (s(&a, "path"), num(&a, "depth").unwrap_or(2) as usize);
-            to_json(
-                tokio::task::spawn_blocking(move || disk::scan(&path, depth, 25, &p))
-                    .await
-                    .map_err(err)?
-                    .map_err(err)?,
-            )
-        }
-        "clean_scan" => to_json(
-            tokio::task::spawn_blocking(move || sysclean::scan(&p))
-                .await
-                .map_err(err)?,
-        ),
-        "startup_items" => to_json(startup::list().await),
-        "installed_apps" => to_json(uninstall::list(p).await),
-        "ai_keys" => to_json(ai_keys::list()),
-        "download_enqueue" => {
-            let url = need_str(&a, "url")?;
-            let mode = match s(&a, "mode").as_str() {
-                "" | "video" => None,
-                "audio" => Some("audio".to_string()),
-                other => {
+/// A metade "desktop" da tabela: as tools que precisam do `AppHandle` (fila de
+/// downloads, sessao de torrent, cookies da extensao). O resto do corpo das
+/// tools mora em `core::llm::tool_table` e roda sem o app.
+struct AppHost {
+    app: AppHandle,
+}
+
+#[async_trait]
+impl HostTools for AppHost {
+    async fn call(&self, name: &str, a: Value) -> Result<Value, String> {
+        let app = &self.app;
+        match name {
+            "download_url" => {
+                let url = s(&a, "url");
+                let action =
+                    crate::external_url::handle_external_url(app, url.clone(), "mcp").await?;
+                Ok(json!({ "url": url, "action": format!("{:?}", action).to_lowercase() }))
+            }
+            "instagram_profile" => {
+                let account = {
+                    let v = s(&a, "account");
+                    if v.is_empty() {
+                        None
+                    } else {
+                        Some(v)
+                    }
+                };
+                let client = crate::commands::tools::instagram::load_client(account.as_deref())?;
+                to_json(
+                    tools::instagram::profile::resolve_user(&client, &s(&a, "username"))
+                        .await
+                        .map_err(err)?,
+                )
+            }
+            "download_enqueue" => {
+                let url = need_str(&a, "url")?;
+                let mode = match s(&a, "mode").as_str() {
+                    "" | "video" => None,
+                    "audio" => Some("audio".to_string()),
+                    other => {
+                        return Err(format!(
+                            "argument \"mode\" must be \"video\" or \"audio\", got \"{}\"",
+                            other
+                        ))
+                    }
+                };
+                let before: std::collections::HashSet<u64> =
+                    queue_snapshot(app).await.iter().map(|i| i.id).collect();
+                let outcome =
+                    crate::external_url::queue_url_with_defaults(app, url.clone(), false, mode)
+                        .await?;
+                let after = queue_snapshot(app).await;
+                let item = after
+                    .iter()
+                    .find(|i| !before.contains(&i.id) && i.url == url)
+                    .or_else(|| after.iter().find(|i| i.url == url));
+                let outcome = match outcome {
+                    crate::external_url::QueueUrlOutcome::Queued => "queued",
+                    crate::external_url::QueueUrlOutcome::AlreadyQueued => "already-queued",
+                };
+                Ok(json!({ "url": url, "outcome": outcome, "item": item }))
+            }
+            "downloads_queue" => {
+                let want = s(&a, "status").trim().to_lowercase();
+                if !want.is_empty() && !QUEUE_STATUS_KEYS.contains(&want.as_str()) {
                     return Err(format!(
-                        "argument \"mode\" must be \"video\" or \"audio\", got \"{}\"",
-                        other
-                    ))
+                        "argument \"status\" must be one of {}, got \"{}\"",
+                        QUEUE_STATUS_KEYS.join(", "),
+                        want
+                    ));
                 }
-            };
-            let before: std::collections::HashSet<u64> =
-                queue_snapshot(app).await.iter().map(|i| i.id).collect();
-            let outcome =
-                crate::external_url::queue_url_with_defaults(app, url.clone(), false, mode).await?;
-            let after = queue_snapshot(app).await;
-            let item = after
-                .iter()
-                .find(|i| !before.contains(&i.id) && i.url == url)
-                .or_else(|| after.iter().find(|i| i.url == url));
-            let outcome = match outcome {
-                crate::external_url::QueueUrlOutcome::Queued => "queued",
-                crate::external_url::QueueUrlOutcome::AlreadyQueued => "already-queued",
-            };
-            Ok(json!({ "url": url, "outcome": outcome, "item": item }))
-        }
-        "downloads_queue" => {
-            let want = s(&a, "status").trim().to_lowercase();
-            if !want.is_empty() && !QUEUE_STATUS_KEYS.contains(&want.as_str()) {
-                return Err(format!(
-                    "argument \"status\" must be one of {}, got \"{}\"",
-                    QUEUE_STATUS_KEYS.join(", "),
-                    want
-                ));
+                let limit = num(&a, "limit").unwrap_or(50).max(1) as usize;
+                let items = queue_snapshot(app).await;
+                let mut by_status: std::collections::BTreeMap<&str, u64> = Default::default();
+                for i in &items {
+                    *by_status.entry(status_key(&i.status)).or_insert(0) += 1;
+                }
+                let total = items.len();
+                let matched: Vec<_> = items
+                    .into_iter()
+                    .filter(|i| want.is_empty() || status_key(&i.status) == want)
+                    .collect();
+                let shown = matched.len().min(limit);
+                Ok(
+                    json!({ "total": total, "matched": matched.len(), "shown": shown, "by_status": by_status, "items": matched.into_iter().take(limit).collect::<Vec<_>>() }),
+                )
             }
-            let limit = num(&a, "limit").unwrap_or(50).max(1) as usize;
-            let items = queue_snapshot(app).await;
-            let mut by_status: std::collections::BTreeMap<&str, u64> = Default::default();
-            for i in &items {
-                *by_status.entry(status_key(&i.status)).or_insert(0) += 1;
+            "download_status" => {
+                let id = need_id(&a, "download_id")?;
+                let item = queue_item(app, id).await?;
+                let command = omniget_core::core::ytdlp::get_command(id);
+                let log = crate::core::download_log::get(id);
+                let log: Vec<String> = log.into_iter().rev().take(20).rev().collect();
+                to_json(json!({ "item": item, "command": command, "log": log }))
             }
-            let total = items.len();
-            let matched: Vec<_> = items
-                .into_iter()
-                .filter(|i| want.is_empty() || status_key(&i.status) == want)
-                .collect();
-            let shown = matched.len().min(limit);
-            Ok(
-                json!({ "total": total, "matched": matched.len(), "shown": shown, "by_status": by_status, "items": matched.into_iter().take(limit).collect::<Vec<_>>() }),
-            )
+            "download_cancel" => queue_control(app, need_id(&a, "download_id")?, "cancel").await,
+            "download_pause" => queue_control(app, need_id(&a, "download_id")?, "pause").await,
+            "download_resume" => queue_control(app, need_id(&a, "download_id")?, "resume").await,
+            "agent_delegate" => agent_delegate(app, &a).await,
+            _ => Err(format!("unknown tool: {}", name)),
         }
-        "download_status" => {
-            let id = need_id(&a, "download_id")?;
-            let item = queue_item(app, id).await?;
-            let command = omniget_core::core::ytdlp::get_command(id);
-            let log = crate::core::download_log::get(id);
-            let log: Vec<String> = log.into_iter().rev().take(20).rev().collect();
-            to_json(json!({ "item": item, "command": command, "log": log }))
-        }
-        "download_cancel" => queue_control(app, need_id(&a, "download_id")?, "cancel").await,
-        "download_pause" => queue_control(app, need_id(&a, "download_id")?, "pause").await,
-        "download_resume" => queue_control(app, need_id(&a, "download_id")?, "resume").await,
-        _ => Err(format!("unknown tool: {}", name)),
     }
+}
+
+/// Sub-agente: um turno inteiro de outro agente do roster numa conversa filha,
+/// no mesmo workspace. A resposta final volta como resultado da tool.
+async fn agent_delegate(app: &AppHandle, a: &Value) -> Result<Value, String> {
+    use futures::StreamExt;
+    use omniget_core::core::llm::code_tools;
+    use omniget_core::core::llm::types::TurnEvent;
+    use tauri::Manager;
+
+    let agent_id = need_str(a, "agent_id")?;
+    let task = need_str(a, "task")?;
+    let state = app.state::<crate::AppState>();
+    let manager = state.llm.clone();
+    let to = manager.agent(&agent_id).ok_or_else(|| {
+        let ids: Vec<String> = manager.roster().into_iter().map(|r| r.id).collect();
+        format!("no agent `{agent_id}`; roster: {}", ids.join(", "))
+    })?;
+    let parent = code_tools::current_turn();
+    let parent_conv = parent
+        .as_ref()
+        .map(|c| c.conversation.clone())
+        .unwrap_or_else(|| "mcp".into());
+    if parent_conv.matches("-sub-").count() >= 2 {
+        return Err("delegation is limited to two levels".into());
+    }
+    if parent
+        .as_ref()
+        .map(|c| c.agent == agent_id)
+        .unwrap_or(false)
+    {
+        return Err("an agent cannot delegate to itself".into());
+    }
+    let child = format!(
+        "{parent_conv}-sub-{}",
+        &uuid::Uuid::new_v4().simple().to_string()[..8]
+    );
+    if let Some(ws) = code_tools::workspace() {
+        let _ = code_tools::set_conversation_workspace(&child, Some(ws));
+    }
+    if let Some(from) = parent.as_ref().and_then(|c| manager.agent(&c.agent)) {
+        let _ = manager.coordinator().handoff(&child, &from, &to, &task);
+    }
+    let (request_id, _cancel, mut stream) = manager.turn_stream(&child, &agent_id, &task).await?;
+    let mut text = String::new();
+    let mut error = None;
+    while let Some(event) = stream.next().await {
+        manager.note_event(&agent_id, &event);
+        match event {
+            TurnEvent::TextDelta { text: t } => text.push_str(&t),
+            TurnEvent::Error { error: e } => error = Some(format!("{}: {}", e.code, e.message)),
+            _ => {}
+        }
+    }
+    manager.finish_turn(&request_id, &agent_id);
+    match (text.trim().is_empty(), error) {
+        (true, Some(e)) => Err(e),
+        _ => Ok(json!({ "agent": agent_id, "conversation_id": child, "answer": text })),
+    }
+}
+
+/// Uma chamada de tool. A tabela decide quem roda: o core, ou o `AppHost`
+/// acima quando a tool precisa do app.
+pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String> {
+    let host = AppHost { app: app.clone() };
+    tool_table::dispatch(name, a, Some(&host)).await
 }
 
 // ── Estado (ligado/desligado) ──────────────────────────────────────────
@@ -772,6 +566,33 @@ mod tests {
             }),
             "error"
         );
+    }
+
+    /// O servidor MCP nao tem mais lista propria: `tools()` e a tabela do core,
+    /// nome por nome, na mesma ordem, com o mesmo schema. Se alguem acrescentar
+    /// uma tool so aqui (ou so la), este teste cai.
+    #[test]
+    fn a_lista_do_servidor_e_a_tabela_do_core() {
+        let table = omniget_core::core::llm::tool_table::table();
+        let list = tools();
+        assert_eq!(list.len(), 49, "a tabela mudou de tamanho");
+        assert_eq!(list.len(), table.len());
+        for (def, entry) in list.iter().zip(table) {
+            assert_eq!(def.name, entry.name);
+            assert_eq!(def.description, entry.description);
+            assert_eq!(def.input_schema, entry.input_schema);
+        }
+        // O JSON do protocolo usa `inputSchema`, nao `input_schema`.
+        let wire = serde_json::to_value(&list[0]).unwrap();
+        assert!(wire.get("inputSchema").is_some(), "{}", wire);
+
+        // Toda tool que precisa do app tem arm no `AppHost`; nenhuma outra tem.
+        let host: Vec<&str> = table
+            .iter()
+            .filter(|e| e.needs_host())
+            .map(|e| e.name)
+            .collect();
+        assert_eq!(host.len(), 9, "{:?}", host);
     }
 
     #[test]

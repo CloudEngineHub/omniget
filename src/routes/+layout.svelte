@@ -9,12 +9,6 @@
   import { listen } from "@tauri-apps/api/event";
   import { initDownloadListener } from "$lib/stores/download-listener";
   import { getCounts } from "$lib/stores/download-store.svelte";
-  import {
-    getUnreadCount as getChatUnreadCount,
-    getMentionTotal as getChatMentionCount,
-    isImmersive,
-    initOmnidisc,
-  } from "$lib/stores/omnidisc-store.svelte";
   import { getSettings, loadSettings } from "$lib/stores/settings-store.svelte";
   import { queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
@@ -22,6 +16,7 @@
   import AppToolbar from "$components/shell/AppToolbar.svelte";
   import CommandPalette from "$components/shell/CommandPalette.svelte";
   import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
+  import { accountPaletteItems, activateAccount, getAccounts } from "$lib/stores/llm-accounts-store.svelte";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
   import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { readText } from "@tauri-apps/plugin-clipboard-manager";
@@ -51,7 +46,10 @@
   );
 
   let coreNavItems = $derived(
-    CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? true))
+    CORE_NAV_ITEMS.filter(
+      (item) =>
+        item.href !== "/world" || (getSettings()?.world?.enabled ?? true),
+    )
   );
 
   let allNav = $derived([...coreNavItems, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
@@ -65,12 +63,13 @@
 
   let counts = $derived(getCounts());
   let badgeLabel = $derived(counts.badge > 99 ? "99+" : String(counts.badge));
-  let chatBadgeCount = $derived(getChatMentionCount() || getChatUnreadCount());
   let settings = $derived(getSettings());
 
   let isStudyRoute = $derived(page.url.pathname.startsWith("/study"));
-  let isStreamPopout = $derived(page.url.pathname === "/omnidisc/stream");
-  let hideAppSidebar = $derived(page.url.pathname.startsWith("/omnidisc") && isImmersive());
+  let isStreamPopout = false;
+  // The pet window is a bare 200x200 transparent canvas: no shell around it.
+  let isPetWindow = $derived(page.url.pathname === "/pet");
+  let hideAppSidebar = false;
   let isCoreRoute = $derived(
     page.url.pathname === "/" ||
     page.url.pathname.startsWith("/downloads") ||
@@ -137,13 +136,6 @@
       })
       .catch(() => {});
   }
-
-  let omnidiscStarted = false;
-  $effect(() => {
-    if (omnidiscStarted || !(getSettings()?.omnidisc?.enabled ?? true)) return;
-    omnidiscStarted = true;
-    void initOmnidisc();
-  });
 
   onMount(() => {
     initDownloadListener();
@@ -252,6 +244,17 @@
         keywords: [...tool.keywords, get(t)(`tools.categories.${tool.category}.name`)].join(" "),
         action: () => goto(toolHref(tool)),
       })),
+      // Contas & cota: ⌘K troca a assinatura do CLI sem abrir a aba. Lê só o
+      // estado já carregado, então não há IPC no boot.
+      ...accountPaletteItems(
+        getAccounts().accounts,
+        {
+          group: get(t)("command_palette.group_nav"),
+          switchTo: (label) => `${get(t)("llm.accounts.palette_switch")} ${label}`,
+          openTab: get(t)("llm.accounts.title"),
+        },
+        { activate: (id) => void activateAccount(id), open: () => goto("/llm/accounts") },
+      ),
       {
         id: "nav-marketplace",
         label: get(t)("nav.marketplace"),
@@ -343,14 +346,16 @@
   });
 </script>
 
-{#if isStreamPopout}
+{#if isPetWindow}
+  {@render children()}
+{:else if isStreamPopout}
   <div class="stream-popout">
     {@render children()}
   </div>
 {:else}
 <div class="shell" data-reduce-motion={settings?.accessibility?.reduce_motion} data-reduce-transparency={settings?.accessibility?.reduce_transparency}>
   {#if !hideAppSidebar}
-    <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} {chatBadgeCount} />
+    <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} />
   {/if}
 
   <div class="shell-body">

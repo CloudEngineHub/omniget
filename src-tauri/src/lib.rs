@@ -17,14 +17,23 @@ pub mod core;
 pub mod extension_storage;
 pub mod external_url;
 pub mod hotkey;
+pub mod jobs;
+pub mod llm_manager;
 pub mod local_bridge;
+pub mod local_bridge_debug;
+pub mod local_bridge_jobs;
+pub mod local_bridge_llm;
 pub mod mcp;
 pub mod models;
 pub mod platforms;
 pub mod plugin_host;
 pub mod plugin_loader;
+pub mod profile;
+pub mod secrets;
 pub mod storage;
 pub mod tray;
+pub mod world_bench;
+pub mod world_manager;
 
 struct DesktopCookieProvider;
 
@@ -206,6 +215,10 @@ pub struct AppState {
     pub omnidisc_stream: Arc<commands::omnidisc::stream::StreamManager>,
     pub omnidisc_mls: Arc<commands::omnidisc::mls::MlsManager>,
     pub omnidisc_uploads: Arc<commands::omnidisc::upload::UploadManager>,
+    pub profile: Arc<profile::ProfileManager>,
+    pub llm: Arc<llm_manager::LlmManager>,
+    /// Lazy on purpose: a user who never opens `/world` pays nothing.
+    pub world: std::sync::OnceLock<Arc<world_manager::WorldManager>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -269,10 +282,20 @@ pub fn run() {
         omnidisc_stream: Arc::new(commands::omnidisc::stream::StreamManager::default()),
         omnidisc_mls: Arc::new(commands::omnidisc::mls::MlsManager::default()),
         omnidisc_uploads: Arc::new(commands::omnidisc::upload::UploadManager::default()),
+        profile: Arc::new(profile::ProfileManager::new()),
+        llm: Arc::new(llm_manager::LlmManager::new()),
+        world: std::sync::OnceLock::new(),
     };
 
-    tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+    // A second profile (`OMNIGET_DATA_DIR` set by hand, not by portable mode)
+    // is its own app: own settings, own bridge port, no single-instance lock.
+    let second_profile = std::env::var_os("OMNIGET_DATA_DIR").is_some()
+        && std::env::var("OMNIGET_PORTABLE").ok().as_deref() != Some("1");
+    let builder = tauri::Builder::default();
+    let builder = if second_profile {
+        builder
+    } else {
+        builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if let Some(url) =
                 external_url::find_external_url_arg(argv.iter().skip(1).map(|arg| arg.as_str()))
             {
@@ -291,6 +314,8 @@ pub fn run() {
                 tray::show_window(app);
             }
         }))
+    };
+    builder
         .manage(state)
         .manage(Arc::new(tokio::sync::RwLock::new(
             plugin_loader::PluginManager::new(
@@ -326,6 +351,11 @@ pub fn run() {
             None,
         ))
         .setup(|app| {
+            // Provider keys (and anything else the core stores) go through the
+            // app's store — keychain where the policy allows it — instead of
+            // the core's file default. Must run before any secret is read.
+            omniget_core::core::secrets::install(std::sync::Arc::new(secrets::AppSecretStore));
+
             // A janela principal e criada aqui, e nao pelo `tauri.conf.json`
             // (`"create": false`), porque so daqui da para passar
             // `.data_directory(...)` ao WebView2. O Tauri resolve esse caminho
@@ -405,6 +435,20 @@ pub fn run() {
                         handle.exit(0);
                     });
                 }
+            }
+
+            // Modo bench do mundo (`OMNIGET_WORLD_BENCH=<cenario>`): mesmo molde
+            // do smoke; abre `/world?bench=`, recebe o JSON e sai. Ver `world_bench.rs`.
+            world_bench::maybe_run(app);
+
+            // The pet survives restarts when the user left it on.
+            if commands::pet::load_prefs().enabled {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    if let Err(error) = commands::pet::pet_open(handle).await {
+                        tracing::warn!("pet window did not reopen: {error}");
+                    }
+                });
             }
 
             commands::host_queue::register_event_listeners(app.handle());
@@ -641,6 +685,36 @@ pub fn run() {
                     for url in event.urls() {
                         let raw = url.to_string();
                         let handle = app_handle.clone();
+                        // Sign in with OpenRouter (PKCE) comes back on the same
+                        // scheme; it is a key exchange, not a media URL.
+                        if raw.starts_with("omniget://openrouter-auth") {
+                            let code = url
+                                .query_pairs()
+                                .find(|(k, _)| k == "code")
+                                .map(|(_, v)| v.into_owned())
+                                .unwrap_or_default();
+                            let state = url
+                                .query_pairs()
+                                .find(|(k, _)| k == "state")
+                                .map(|(_, v)| v.into_owned());
+                            tauri::async_runtime::spawn(async move {
+                                use tauri::Emitter;
+                                let payload = match omniget_core::core::tools::ai_keys::pkce_finish(
+                                    &code,
+                                    state.as_deref(),
+                                )
+                                .await
+                                {
+                                    Ok(key) => serde_json::json!({ "ok": true, "key": key }),
+                                    Err(error) => {
+                                        tracing::warn!("OpenRouter PKCE exchange failed: {error}");
+                                        serde_json::json!({ "ok": false, "error": error.to_string() })
+                                    }
+                                };
+                                let _ = handle.emit("llm://openrouter-auth", payload);
+                            });
+                            continue;
+                        }
                         tauri::async_runtime::spawn(async move {
                             if let Err(error) =
                                 external_url::handle_external_url(&handle, raw, "deep-link").await
@@ -713,7 +787,8 @@ pub fn run() {
             {
                 let app_handle = app.handle().clone();
                 tauri::async_runtime::spawn(async move {
-                    local_bridge::spawn(app_handle).await;
+                    local_bridge::spawn(app_handle.clone()).await;
+                    jobs::boot(&app_handle);
                 });
             }
             {
@@ -869,58 +944,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,
             commands::omnidisc::omnidisc_connect,
-            commands::omnidisc::auth::omnidisc_register,
-            commands::omnidisc::auth::omnidisc_login,
-            commands::omnidisc::auth::omnidisc_logout,
-            commands::omnidisc::auth::omnidisc_has_session,
-            commands::omnidisc::api::omnidisc_list_messages,
-            commands::omnidisc::api::omnidisc_send_message,
-            commands::omnidisc::api::omnidisc_edit_message,
-            commands::omnidisc::api::omnidisc_delete_message,
-            commands::omnidisc::api::omnidisc_add_reaction,
-            commands::omnidisc::api::omnidisc_remove_reaction,
-            commands::omnidisc::api::omnidisc_ack,
             commands::omnidisc::gateway::omnidisc_typing,
-            commands::omnidisc::api::omnidisc_create_guild,
-            commands::omnidisc::api::omnidisc_create_channel,
-            commands::omnidisc::api::omnidisc_create_invite,
-            commands::omnidisc::api::omnidisc_join_invite,
-            commands::omnidisc::api::omnidisc_create_dm,
-            commands::omnidisc::api::omnidisc_update_me,
-            commands::omnidisc::api::omnidisc_get_user,
-            commands::omnidisc::api::omnidisc_get_guild,
-            commands::omnidisc::api::omnidisc_get_me,
-            commands::omnidisc::api::omnidisc_search,
-            commands::omnidisc::api::omnidisc_list_pins,
-            commands::omnidisc::api::omnidisc_pin_message,
-            commands::omnidisc::api::omnidisc_list_relationships,
-            commands::omnidisc::api::omnidisc_add_relationship,
-            commands::omnidisc::api::omnidisc_accept_relationship,
-            commands::omnidisc::api::omnidisc_remove_relationship,
-            commands::omnidisc::api::omnidisc_block_user,
-            commands::omnidisc::api::omnidisc_list_notes,
-            commands::omnidisc::api::omnidisc_put_note,
-            commands::omnidisc::api::omnidisc_update_guild,
-            commands::omnidisc::api::omnidisc_delete_guild,
-            commands::omnidisc::api::omnidisc_leave_guild,
-            commands::omnidisc::api::omnidisc_transfer_guild,
-            commands::omnidisc::api::omnidisc_create_role,
-            commands::omnidisc::api::omnidisc_update_role,
-            commands::omnidisc::api::omnidisc_delete_role,
-            commands::omnidisc::api::omnidisc_set_member_role,
-            commands::omnidisc::api::omnidisc_update_member,
-            commands::omnidisc::api::omnidisc_kick_member,
-            commands::omnidisc::api::omnidisc_ban_member,
-            commands::omnidisc::api::omnidisc_unban_member,
-            commands::omnidisc::api::omnidisc_list_bans,
-            commands::omnidisc::api::omnidisc_audit_log,
-            commands::omnidisc::api::omnidisc_update_channel,
-            commands::omnidisc::api::omnidisc_delete_channel,
-            commands::omnidisc::api::omnidisc_put_overwrite,
-            commands::omnidisc::api::omnidisc_delete_overwrite,
-            commands::omnidisc::api::omnidisc_list_sessions,
-            commands::omnidisc::api::omnidisc_revoke_session,
-            commands::omnidisc::api::omnidisc_revoke_other_sessions,
             commands::omnidisc::device::omnidisc_device_fingerprint,
             commands::omnidisc::device::omnidisc_list_user_devices,
             commands::omnidisc::device::omnidisc_revoke_device,
@@ -1444,11 +1468,131 @@ pub fn run() {
             commands::tools::linkedin::tool_li_connections,
             commands::tools::linkedin::tool_li_messages,
             commands::tools::linkedin::tool_li_checklist,
+            // Fase 1 (perfil local) — f1-perfil-core
+            commands::profile::profile_get,
+            commands::profile::profile_set_nickname,
+            commands::profile::profile_set_skin,
+            commands::profile::profile_sign,
+            commands::profile::profile_export_public,
+            // Fase 6 (bench do mundo) — f6-bench
+            commands::world_bench::world_bench_report,
+            // Fase 2 (/llm) — f2-llm-commands, f2-wire-probe; Fase 5 (pet) — f5-pet-window
+            commands::llm::roster::llm_roster_list,
+            commands::llm::roster::llm_roster_create,
+            commands::llm::roster::llm_roster_update,
+            commands::llm::roster::llm_roster_delete,
+            commands::llm::roster::llm_roster_apply_template,
+            commands::llm::chat::llm_conversation_list,
+            commands::llm::chat::llm_conversation_get,
+            commands::llm::chat::llm_conversation_delete,
+            commands::llm::chat::llm_turn_start,
+            commands::llm::chat::llm_turn_cancel,
+            commands::llm::chat::llm_tool_answer,
+            commands::llm::chat::llm_tool_asks_pending,
+            commands::llm::chat::llm_workspace_set,
+            commands::llm::chat::llm_workspace_get,
+            commands::llm::chat::llm_turn_undo,
+            local_bridge_debug::debug_report,
+            commands::llm::skills::llm_skills_install_repo,
+            commands::llm::roster::llm_acp_detect,
+            commands::llm::roster::llm_acp_agent_create,
+            commands::llm::jobs::llm_jobs_list,
+            commands::llm::jobs::llm_job_get,
+            commands::llm::jobs::llm_job_submit,
+            commands::llm::jobs::llm_job_cancel,
+            commands::llm::jobs::llm_job_delete,
+            commands::llm::jobs::llm_loops_list,
+            commands::llm::jobs::llm_loop_create,
+            commands::llm::jobs::llm_loop_cancel,
+            commands::llm::jobs::llm_loop_delete,
+            commands::llm::jobs::llm_triggers_list,
+            commands::llm::jobs::llm_trigger_save,
+            commands::llm::jobs::llm_trigger_delete,
+            commands::llm::jobs::llm_trigger_fire,
+            commands::llm::chat::llm_permission_rules_get,
+            commands::llm::chat::llm_permission_rules_set,
+            commands::llm::chat::llm_switch_model,
+            commands::llm::models::llm_models_list,
+            commands::llm::observatory::llm_telemetry_snapshot,
+            commands::llm::prune::llm_prune_status,
+            commands::llm::prune::llm_prune_set_config,
+            commands::llm::prune::llm_prune_set_jev_key,
+            commands::llm::local::llm_local_status,
+            commands::llm::local::llm_local_install_llama,
+            commands::llm::local::llm_local_models,
+            commands::llm::local::llm_bridge_openai_enabled,
+            commands::llm::wire_probe::llm_wire_probe_run,
+            commands::llm::wire_probe::llm_wire_probe_last,
+            commands::pet::pet_open,
+            commands::pet::pet_close,
+            commands::pet::pet_set_corner,
+            commands::pet::pet_set_click_through,
+            commands::pet::pet_capabilities,
+            commands::pet::pet_emit_intent,
+            commands::pet::pet_set_ask_pending,
+            commands::tools::ai::tool_ai_keys_openrouter_pkce,
+            commands::tools::ai::tool_ai_keys_openrouter_pkce_finish,
+            commands::llm::roster::llm_roster_templates,
+            commands::llm::local::llm_local_download_model,
+            commands::llm::local::llm_local_start_llama,
+            commands::llm::local::llm_local_stop_llama,
+            // Rodada 3: Fase 3 (MCP, skills) e Fase 4 (contas)
+            commands::llm::mcp::llm_mcp_list,
+            commands::llm::mcp::llm_mcp_upsert,
+            commands::llm::mcp::llm_mcp_remove,
+            commands::llm::mcp::llm_mcp_test,
+            commands::llm::mcp::llm_mcp_tools,
+            commands::llm::mcp::llm_mcp_grant,
+            commands::llm::skills::llm_skills_list,
+            commands::llm::skills::llm_skills_install_dir,
+            commands::llm::skills::llm_skills_install_zip,
+            commands::llm::skills::llm_skills_install_git,
+            commands::llm::skills::llm_skills_remove,
+            commands::llm::skills::llm_skills_catalog,
+            commands::llm::skills::llm_skills_install_catalog,
+            commands::llm::skills::llm_skills_confirm_install,
+            commands::llm::skills::llm_skills_discard_install,
+            commands::llm::skills::llm_skills_pending,
+            commands::llm::skills::llm_skills_scanner,
+            commands::llm::accounts::llm_accounts_list,
+            commands::llm::accounts::llm_accounts_detect,
+            commands::llm::accounts::llm_accounts_create,
+            commands::llm::accounts::llm_accounts_remove,
+            commands::llm::accounts::llm_accounts_login,
+            commands::llm::accounts::llm_accounts_set_disabled,
+            commands::llm::accounts::llm_cli_usage_report,
+            commands::llm::accounts::llm_accounts_set_sandbox,
+            commands::llm::accounts::llm_accounts_activate,
+            commands::llm::accounts::llm_accounts_set_chain,
+            commands::llm::accounts::llm_accounts_rotation,
+            // Fase 7 (mundo) — f7-world-bridge
+            commands::world::session::world_exists,
+            commands::world::session::world_create,
+            commands::world::session::world_open,
+            commands::world::house::house_status,
+            commands::world::house::house_open,
+            commands::world::house::house_close,
+            commands::world::house::house_join,
+            commands::world::house::house_leave,
+            commands::world::house::house_input,
+            commands::world::house::house_chat,
+            commands::world::session::world_close,
+            commands::world::session::world_set_visible,
+            commands::world::session::world_resync,
+            commands::world::session::world_activity,
+            commands::world::demo::world_demo,
+            commands::world::session::world_delete,
+            commands::world::input::world_input,
+            commands::world::tier::world_tier_get,
+            commands::world::tier::world_tier_set,
+            commands::world::tier::world_calibration_save,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| {
             if let tauri::RunEvent::ExitRequested { .. } = &event {
+                // The managed llama-server dies with the app (phase 2).
+                tauri::async_runtime::block_on(omniget_core::core::llm::local_servers::stop());
                 let state = app_handle.state::<AppState>();
                 let session_mutex = state.torrent_session.clone();
                 tauri::async_runtime::block_on(async move {

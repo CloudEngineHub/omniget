@@ -677,9 +677,11 @@ mod tests {
     fn account_env_carries_only_pointers() {
         let a = account("max-1", Path::new("/tmp/p"));
         let env = account_env(&a);
+        // Built the way the account is, so the separator is the platform's.
+        let expected = Path::new("/tmp/p").join("max-1").display().to_string();
         assert_eq!(
             env.get("CLAUDE_CONFIG_DIR").map(String::as_str),
-            Some("/tmp/p/max-1")
+            Some(expected.as_str())
         );
         assert_eq!(
             env.get("CLAUDE_CODE_SUBPROCESS_ENV_SCRUB")

@@ -326,7 +326,8 @@ mod tests {
     #[test]
     fn os_ids_batem_com_a_linha_do_vocab() {
         let t = tk();
-        let linhas: Vec<&str> = VOCAB.split('\n').collect();
+        // `lines()` e não `split('\n')`: no Windows o checkout pode trazer CRLF.
+        let linhas: Vec<&str> = VOCAB.lines().collect();
         for id in t.encode("the quick brown fox jumps over the lazy dog").ids {
             assert!(!linhas[id as usize].is_empty());
         }

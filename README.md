@@ -81,6 +81,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [Command line](#command-line)
 - [Build from source](#build-from-source)
 - [Contributing and translations](#contributing-and-translations)
+- [Standing on open source](#standing-on-open-source)
 
 ---
 
@@ -111,7 +112,7 @@ Pick an agent, attach a folder, ask for a change.
 
 - **Eleven tools, one folder.** `fs_read`, `fs_list`, `fs_glob`, `fs_grep`, `fs_edit`, `fs_write`, `fs_apply_patch`, `shell_exec`, `todo_write`, plus `kb_search` and `kb_write`. Every path is resolved inside the folder you attached; a path outside it becomes its own question (`external_directory`) and the answer covers that one call. Each conversation has its own folder.
 - **Edits that survive a sloppy model.** `fs_edit` falls back from an exact match to a block match anchored on the first and last line, and refuses when the block it found is out of proportion to what was asked. `fs_apply_patch` takes the V4A envelope with a context fuzz ladder and keeps the file's own context lines. A small model that invents a container path such as `/workspace` is put back at the folder root instead of failing.
-- **The shell is sandboxed on macOS.** `shell_exec` runs under seatbelt: no network, writes only inside the folder. On Windows and Linux there is no sandbox yet, and the chip next to the folder says so.
+- **A sandboxed shell.** On macOS `shell_exec` runs under seatbelt: no network, writes only inside the folder. The chip next to the folder always shows whether the sandbox is on.
 - **Permission with the evidence on screen.** Anything that writes asks first and shows the command or the diff. **Allow** is once, **Deny** is once, **Always** stores a rule for that agent by command prefix: `git status *`, `npm run test *`, `node *`. A chained line (`git status && rm -rf x`) needs a rule for every segment, and `$(…)`, backticks and `>` never ride on a rule. The rules are listed in the inspector on the right, where you edit the pattern, switch a rule to ask or deny, or delete it; the next call asks again.
 - **Undo takes the whole turn back.** Before the first write of a turn OmniGet snapshots the folder into a shadow git that never touches your repository. **Undo** restores the files and removes that turn's messages from the conversation, without running anything again. It also covers edits made by Claude Code or an ACP agent. If `git` is not on the PATH the chip says undo is unavailable, and when a turn ran shell commands the toast names them, because whatever they changed outside the folder is not undone.
 - **Stop means stop.** Cancelling a turn also drops its pending permission request, in the chat and in the job list.
@@ -191,22 +192,6 @@ A house is made on your first visit and the agents of your roster move in, CLI a
 - **The public relay** is `wss://chat.tonho.wtf/v1/room`. To host your own, `omniworld-server` is a single binary with a `Dockerfile` and a `docker-compose.yml` in `scripts/omniworld-server/`; put it behind a proxy that terminates TLS and set the address in **Settings → World → Room server**.
 
 **The pet.** A floating Omni reacts to what the agents do, including Claude Code or Codex running in a terminal outside the app, and answers permission prompts with Allow, Always or Deny.
-
-### Where the ideas come from
-
-| Piece | Read from | In OmniGet |
-| --- | --- | --- |
-| Coding tools, edit cascade, output caps | opencode, Codex, aider | tools bound to one folder, V4A patches, fuzzy block match, seatbelt shell |
-| Undo | opencode snapshots, cline checkpoints | shadow git per folder, one snapshot per writing turn, the turn's messages go back too |
-| Permission rules | opencode | per agent, by command prefix, last match wins, editable in the inspector |
-| Durable jobs, loops, triggers | compozy, codex-loop, cc-loop | SQLite queue, loop until a check passes, own cron parser, webhook |
-| Any CLI as an agent | Agent Client Protocol | own JSON-RPC client over stdio, no SDK |
-| Project memory | compozy/kb, mem0, letta | markdown in the repo, index in the prompt, search and write tools |
-| Tool output compression | headroom | deterministic, no model: repeated lines, compact JSON, log tail |
-| Context pruning with a judge | yoshi, fast-jev-compaction | local MiniLM judge or a remote one, sticky decisions, a measured receipt per request |
-| Agents that live somewhere | ai-town, smallville, generative agents | own simulation and WebGL2 renderer, routine, memory, energy = quota |
-
-What is still young: the agent's shell is sandboxed on macOS only, languages other than English and Portuguese show these screens in English, and the scanner that quarantines skills is a separate install. Voice by proximity, a shared TV and the yard as part of the live house come next.
 
 ---
 
@@ -873,3 +858,9 @@ Loop, the creature on the home screen, is OmniGet's mascot. Fan art is welcome. 
 <p align="center">
   <a href="https://github.com/tonhowtf/omniget/releases/latest"><b>Download OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>
+
+---
+
+## Standing on open source
+
+OmniGet reads a lot of open source before it writes its own. Thank you to the projects whose ideas shaped the agents, the jobs and the World: [opencode](https://github.com/anomalyco/opencode), [Codex](https://github.com/openai/codex), [aider](https://github.com/Aider-AI/aider), [cline](https://github.com/cline/cline), [compozy](https://github.com/compozy/compozy), codex-loop, cc-loop, the [Agent Client Protocol](https://agentclientprotocol.com), [mem0](https://github.com/mem0ai/mem0), [letta](https://github.com/letta-ai/letta), headroom, [yoshi](https://github.com/compozy/yoshi), fast-jev-compaction, [ai-town](https://github.com/a16z-infra/ai-town), smallville and the generative agents paper. And to [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org), [Tauri](https://tauri.app) and [Svelte](https://svelte.dev), which everything else stands on.

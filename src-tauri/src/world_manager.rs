@@ -1623,6 +1623,9 @@ mod tests {
         assert_eq!(m.sleep_state(), SleepState::Active);
         m.close();
         assert_eq!(m.sleep_state(), SleepState::Dozing);
+        // From here the clock is moved by hand; the live tick thread would
+        // settle the state back with the real one.
+        m.stop_thread();
 
         // Time is moved forward, never backward: `Instant - Duration` panics on
         // a machine whose uptime is shorter than the span.
@@ -1676,6 +1679,9 @@ mod tests {
         let (m, root) = manager("resync");
         let sink = Arc::new(Collector::default());
         m.open(sink.clone()).unwrap();
+        // This test steps the world by hand; the live tick thread would drain
+        // the outbox behind its back on a fast (or a slow) machine.
+        m.stop_thread();
         m.submit(BridgeInput::World(Box::new(Input::Spawn {
             ent: EntId(1),
             name: "Omni".into(),

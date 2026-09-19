@@ -71,7 +71,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [The Tools section: 158 tools in 25 categories](#the-tools-section-158-tools-in-25-categories)
 - [OmniGet for AI agents: MCP server and Claude Code plugin](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin)
 - [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
-- [Built-in chat, off by default](#built-in-chat-off-by-default)
+- [Agents and the World](#agents-and-the-world)
 - [For League of Legends players](#for-league-of-legends-players)
 - [Everything else in the box](#everything-else-in-the-box)
 - [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do)
@@ -528,9 +528,11 @@ Every tool that talks to an AI uses the provider you set in **Settings → AI**:
   <img src="assets/readme/illustration-agents.png" alt="Loop at a terminal handing a folder of files to a small robot that hands back a link, with microphone, subtitle and video tiles above the screen" width="900" />
 </p>
 
-Two doors, depending on where your agent lives.
+Three doors, depending on where your agent lives.
 
-**Inside the app: the MCP server.** Turn it on in Tools → AI → MCP server and OmniGet exposes 37 of its tools over the Model Context Protocol on the same local bridge the browser extension uses, behind the same per-install token. An agent can queue a URL and watch, pause, resume or cancel it in the Downloads panel, merge, split, render, extract text from or sanitize PDFs, transcribe a file with whisper.cpp, run text to speech and OCR, resize images, find duplicates, search files, read X posts, threads, profiles, searches and trends, look up an Instagram profile through your session, compare LLM prices, humanize text, scan disks and caches, list startup items and installed apps, and pull large files or galleries with aria2 and gallery-dl. The page prints the config snippet for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, so it is a paste, not a setup. *beta*
+**Inside the app: the MCP server.** Turn it on in Tools → AI → MCP server and OmniGet exposes 49 of its tools over the Model Context Protocol on the same local bridge the browser extension uses, behind the same per-install token. An agent can queue a URL and watch, pause, resume or cancel it in the Downloads panel, merge, split, render, extract text from or sanitize PDFs, transcribe a file with whisper.cpp, run text to speech and OCR, resize images, find duplicates, search files, read X posts, threads, profiles, searches and trends, look up an Instagram profile through your session, compare LLM prices, humanize text, scan disks and caches, list startup items and installed apps, and pull large files or galleries with aria2 and gallery-dl. New in 0.10, the same server carries the coding tools of the built-in harness, confined to the folder you attached in the app (read, list, glob, grep, edit, write, apply a patch, run a sandboxed command, keep a plan), the project knowledge base (`kb_search`, `kb_write`) and `agent_delegate`, which hands a task to an agent of your roster. The page prints the config snippet for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, so it is a paste, not a setup. *beta*
+
+**The other way round: MCP servers for your agents.** In **LLM → MCP** you plug external MCP servers into OmniGet, over stdio or streamable HTTP, and their tools show up next to the built-in ones as `mcp:<server>:<tool>`. Each agent gets them one by one, as *auto*, *ask* or *deny*, and a server can never shadow a built-in tool. Secrets in a server's environment or headers are stored as references and resolved only when the server starts. Nothing connects until you enable a server. *beta*
 
 **Inside Claude Code: the `omniget` plugin.** The [`claude-plugin/`](claude-plugin/omniget) folder ships a plugin for [Claude Code](https://claude.com/claude-code) that needs no desktop app at all. Paste a video, audio or social post URL with a request and the `omniget-fetch` and `omniget-transcribe` skills trigger on their own. The slash commands are there when you want to be explicit:
 
@@ -586,11 +588,37 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 
 ---
 
-## Built-in chat, off by default
+## Agents and the World
 
-OmniGet ships a Discord-style chat called OmniDisc for servers you host yourself with [omnidisc-server](https://github.com/tonhowtf/omnidisc-server). Text channels, direct messages, friends, roles and permissions, pins, search, voice, video and screen sharing. Direct messages and the files sent in them are end-to-end encrypted with MLS, and the key for an encrypted call is derived from the same group, so the server operator cannot listen in. Voice runs in Rust rather than the web view and screen sharing uses the machine's hardware encoder. Files sent through chat are encrypted at rest and deleted from the server after thirty minutes.
+New in 0.10. OmniGet now carries the system that goes around an AI agent, and a small world where your agents live. Everything runs on your machine; nothing talks to the network until you add a key, start a local model or open your house.
 
-It is experimental and does nothing until you turn it on in **Settings → Advanced → Chat (OmniDisc)** and add a server.
+**Talk and code (`LLM` in the sidebar).** Pick an agent, attach a folder and ask for a change. The agent reads, searches, edits, applies patches and runs commands inside that folder only, under a macOS sandbox for the shell. Anything that writes asks first and shows the command or the diff; **Always** remembers the kind of call (`git status`, `npm run test`), never the whole line. **Undo** puts the folder back to how it was before the last turn, from a shadow git that never touches your repository. Each conversation has its own folder. Models come from a local server (Ollama, LM Studio, llama-server) or your own keys, with a router that falls back when a quota runs out.
+
+**Leave it working (`LLM → Jobs` and `Loops`).** A job is one agent turn that outlives the window. A Loop repeats rounds until a check command exits 0, or until the rounds or minutes you gave it run out. Triggers start a job from a five-field cron line or from a webhook on the local bridge. `omniget agent run`, `omniget agent loop --check "npm test"` and `omniget agent jobs` drive the same queue from a terminal.
+
+**Use what you already have.** Claude Code and Codex accounts plug in as agents with their quota on screen. Any CLI that speaks the [Agent Client Protocol](https://agentclientprotocol.com) (Gemini CLI, claude-code-acp, codex-acp, goose, opencode) joins the roster from **LLM → Accounts**, keeps its own login and model, and asks permission through OmniGet. Agents share a project knowledge base: `AGENTS.md` plus markdown notes in `.omniget/kb/` that they search and write. Skills install from a folder, a zip, or `owner/repo` as in `npx skills add`, and go through a scanner first. MCP servers plug in as tools, and OmniGet's own tools, the coding ones included, are served over MCP to other clients.
+
+**The World (`World` in the sidebar).** A house is made on your first visit and the agents of your roster move in. They follow a routine, walk to the desk when a turn starts and to the workbench when a tool runs, and their energy is their quota. Furniture goes in slots. Agents only think through a model if you switch that on.
+
+**Visits.** **Open the house** gives you a code; a friend types it and walks into your house, sees your agents and the other guests, and chats. Your app stays the authority and the room server only relays, so your keys and quota never leave your machine. There are no accounts: the hello is signed with the key of your local profile. `omniworld-server` is a single binary with a `docker-compose.yml` in `scripts/omniworld-server/` if you want to host your own; set its address in **Settings → World → Room server**. Closing the house closes the only socket there is.
+
+**The pet.** A floating Omni reacts to what the agents do, including Claude Code or Codex running in a terminal outside the app, and answers permission prompts.
+
+Where the ideas come from, and what OmniGet does with each:
+
+| Piece | Read from | In OmniGet |
+| --- | --- | --- |
+| Coding tools, edit cascade, output caps | opencode, Codex, aider | 9 tools bound to one folder, V4A patches, fuzzy block match, seatbelt shell |
+| Undo | opencode snapshots, cline checkpoints | shadow git per folder, one snapshot per writing turn |
+| Permission rules | opencode | per agent, by command prefix, last match wins |
+| Durable jobs, loops, triggers | compozy, codex-loop, cc-loop | SQLite queue, loop until a check passes, own cron parser, webhook |
+| Any CLI as an agent | Agent Client Protocol | own JSON-RPC client over stdio, no SDK |
+| Project memory | compozy/kb, mem0, letta | markdown in the repo, index in the prompt, search and write tools |
+| Tool output compression | headroom | deterministic, no model: repeated lines, compact JSON, log tail |
+| Context pruning with a judge | yoshi, fast-jev-compaction | local MiniLM judge or a remote one, decisions kept between turns |
+| Agents that live somewhere | ai-town, smallville, generative agents | own simulation and WebGL2 renderer, routine, memory, energy = quota |
+
+This part of the app is young: it shipped before its benchmark pass, and sandboxing of the agent's shell exists on macOS only. Voice by proximity and a shared TV in the house come next.
 
 ---
 
@@ -695,6 +723,11 @@ omniget download <url> -q 1080 -o ~/Videos
 omniget download <url> --audio-only --subs en,pt
 omniget batch links.txt -m 3           # one URL per line, 3 at a time
 omniget import-cookies cookies.txt     # Netscape format
+
+# agents, through the running desktop app
+omniget agent run "fix the failing test in src/cart.js"        # current folder is the workspace
+omniget agent loop "make the suite pass" --check "npm test" --minutes 30
+omniget agent jobs                     # recent jobs; `omniget agent jobs <id>` follows one
 ```
 
 ---

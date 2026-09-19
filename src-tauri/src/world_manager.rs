@@ -1572,6 +1572,8 @@ mod tests {
         let (m, root) = manager("open");
         let sink = Arc::new(Collector::default());
         let bytes = m.open(sink.clone()).unwrap();
+        // Stepped by hand from here on; see `dozing_advances_…`.
+        m.stop_thread();
         let snap = Snapshot::decode(&bytes).expect("the route can decode what open returns");
         assert_eq!(snap.tick, 0);
         assert_eq!(snap.sleep, SleepState::Active);
@@ -1601,6 +1603,8 @@ mod tests {
     fn an_idle_world_sends_nothing_at_all() {
         let (m, root) = manager("idle");
         m.open(Arc::new(Collector::default())).unwrap();
+        // Stepped by hand from here on; see `dozing_advances_…`.
+        m.stop_thread();
         let mut now = Instant::now();
         let mut blobs = Vec::new();
         for _ in 0..20 {
@@ -1665,8 +1669,13 @@ mod tests {
         let (m, root) = manager("doze-rate");
         m.open(Arc::new(Collector::default())).unwrap();
         m.close();
+        // Stepped by hand below: on some machines the live tick thread takes
+        // the due step first, pushes `next_due` ahead and leaves this pump with
+        // nothing to do (0 ticks instead of 50).
+        m.stop_thread();
         let before = m.tick();
-        let now = Instant::now();
+        // Past any `next_due` the thread may have left behind before it stopped.
+        let now = Instant::now() + Duration::from_secs(30);
         pump(&m, now);
         // One step plus the catch-up of the other 4.9 s = 50 ticks of world.
         assert_eq!(m.tick() - before, SleepState::Dozing.stride());
@@ -1837,6 +1846,8 @@ mod tests {
     fn eight_agents_at_ten_hertz_fit_in_the_diff_budget() {
         let (m, root) = manager("diff-budget");
         m.open(Arc::new(Collector::default())).unwrap();
+        // Stepped by hand from here on; see `dozing_advances_…`.
+        m.stop_thread();
         let spots = [
             (2, 2),
             (4, 2),

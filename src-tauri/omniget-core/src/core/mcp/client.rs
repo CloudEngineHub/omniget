@@ -36,7 +36,8 @@ use super::types::{
 const MAX_TOOL_PAGES: usize = 20;
 
 enum Wire {
-    Stdio(StdioTransport),
+    // Boxed: on Linux the stdio transport is almost three times the HTTP one.
+    Stdio(Box<StdioTransport>),
     Http(HttpTransport),
 }
 
@@ -106,9 +107,9 @@ impl McpClient {
                 args,
                 env,
                 cwd,
-            } => Wire::Stdio(
+            } => Wire::Stdio(Box::new(
                 StdioTransport::connect(command, args, env, cwd.as_deref(), lookup).await?,
-            ),
+            )),
             Transport::Http { url, headers } => {
                 Wire::Http(HttpTransport::connect(url, headers, lookup)?)
             }

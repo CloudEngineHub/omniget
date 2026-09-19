@@ -525,11 +525,9 @@ pub async fn start(model: &Path, port: u16) -> Result<String, String> {
     let mut cmd = tokio::process::Command::new(exe);
     cmd.args(server_args(model, port, 8192));
     cmd.kill_on_drop(true);
+    // tokio's `Command` has `creation_flags` itself on Windows.
     #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
-    }
+    cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
     let child = cmd.spawn().map_err(|e| format!("{ERR_LOCAL_SPAWN}: {e}"))?;
     *guard = Some(child);
     Ok(format!("http://127.0.0.1:{port}"))

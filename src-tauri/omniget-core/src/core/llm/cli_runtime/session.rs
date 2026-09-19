@@ -280,7 +280,9 @@ pub fn exit_error(code: Option<i32>, stderr: &str) -> LlmError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(unix)]
     use std::io::Write;
+    #[cfg(unix)]
     use std::time::Instant;
 
     use super::super::parse::{QuotaSource, RateStatus, RateWindow};

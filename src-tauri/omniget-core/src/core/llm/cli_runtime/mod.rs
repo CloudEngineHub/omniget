@@ -392,8 +392,10 @@ mod tests {
     use super::*;
     use crate::core::llm::agent::{AgentRole, Budget, Candidate, CandidateRuntime, ModelPolicy};
     use crate::core::llm::router::ERR_CLI_RATE as ROUTER_ERR_CLI_RATE;
+    #[cfg(unix)]
     use crate::core::llm::runtime::{CompositeRuntime, NativeRuntime};
     use crate::core::llm::types::{GenParams, Message, ModelRef, ProviderId, Role};
+    #[cfg(unix)]
     use futures::StreamExt;
     use tokio_util::sync::CancellationToken;
 

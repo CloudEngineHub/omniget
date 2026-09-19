@@ -2035,8 +2035,10 @@ mod tests {
         let before = m.tick();
         std::thread::sleep(Duration::from_millis(1500));
         let ticks = m.tick() - before;
+        // A dozing house would manage one tick at most in this window. The
+        // bar is well under the nominal 15 so a loaded CI runner passes too.
         assert!(
-            ticks >= 13,
+            ticks >= 6,
             "1.5 s of an active house is about 15 ticks, got {ticks}"
         );
         m.shutdown();

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import { t } from "$lib/i18n";
 
   type Props = {
     source: string;
@@ -132,7 +133,7 @@
       type="button"
       class="abc-toggle"
       onclick={toggleMode}
-      title={mode === "render" ? "Editar source" : "Voltar pra partitura"}
+      title={mode === "render" ? $t("study.notes.nb.edit_source") : $t("study.notes.nb.back_to_score")}
     >
       {mode === "render" ? "‹/›" : "▶"}
     </button>
@@ -146,7 +147,7 @@
       onblur={onSourceBlur}
       spellcheck="false"
       rows={Math.max(6, editingValue.split("\n").length)}
-      aria-label="Source da partitura (notação ABC)"
+      aria-label={$t("study.notes.nb.abc_source_aria")}
     ></textarea>
   {:else if renderState.kind === "idle"}
     <p class="abc-state">Sem source. Clique em ‹/› para editar.</p>
@@ -156,7 +157,7 @@
     <div class="abc-error">
       <p class="abc-error-msg">erro: {renderState.message}</p>
       <button type="button" class="abc-edit-btn" onclick={toggleMode}
-        >Editar source</button>
+        >{$t("study.notes.nb.edit_source")}</button>
     </div>
   {/if}
 

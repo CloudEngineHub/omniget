@@ -149,7 +149,7 @@
     const labels: Record<string, string> = {
       "pomodoro-25": "Pomodoro 25",
       "deep-50": "Deep Work 50",
-      "stopwatch": "Cronômetro",
+      "stopwatch": $t("study.misc.stopwatch"),
     };
     return labels[presetId] ?? presetId;
   }
@@ -309,7 +309,7 @@
   }
 
   async function actionCreatePage() {
-    const name = window.prompt("Nome da nova página:");
+    const name = window.prompt($t("study.notes.new_page_prompt"));
     if (!name || !name.trim()) return;
     try {
       const r = await (
@@ -1098,8 +1098,7 @@
             ></div>
           </div>
           <span class="palette-hint"
-            >{xpState.level_progress_pct}% até L{xpState.level + 1} ·
-            {xpState.xp_to_next} XP</span
+            >{$t("study.layout.palette_hint", { pct: xpState.level_progress_pct, lvl: xpState.level + 1, xp: xpState.xp_to_next })}</span
           >
         </footer>
       {/if}

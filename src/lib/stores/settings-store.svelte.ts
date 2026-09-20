@@ -92,8 +92,17 @@ export type AppSettings = {
     large_image_key: string;
   };
   omnidisc?: {
-    enabled?: boolean;
     voice?: OmnidiscVoiceSettings;
+  };
+  world?: {
+    enabled?: boolean;
+    tier_override?: number | null;
+    tier_measured?: number | null;
+    measured_median_ms?: number | null;
+    measured_app_version?: string | null;
+    thinking?: boolean;
+    think_interval_s?: number;
+    room_server?: string;
   };
   league?: {
     enabled?: boolean;

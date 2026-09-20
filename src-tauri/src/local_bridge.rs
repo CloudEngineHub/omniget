@@ -227,6 +227,16 @@ pub async fn spawn(app: AppHandle) {
         .route("/v1/log/{id}", get(download_log))
         .route("/v1/cookies", post(cookies_export))
         .route("/mcp", post(mcp_post).get(mcp_get).delete(mcp_get))
+        .merge(crate::local_bridge_llm::router(
+            crate::local_bridge_llm::LlmBridgeState::from_bridge(&state),
+        ))
+        .merge(crate::local_bridge_jobs::router(
+            crate::local_bridge_jobs::JobsBridgeState::from_bridge(&state),
+        ))
+        .merge(crate::local_bridge_debug::router(
+            state.app.clone(),
+            state.token.clone(),
+        ))
         .with_state(state)
         .layer(cors);
 

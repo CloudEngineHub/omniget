@@ -5,7 +5,7 @@
 //! (OS keyring on macOS/Windows, encrypted file elsewhere, see `store.rs`), so
 //! "sign out" and "forget this instance" already drop it.
 
-use super::api::Api;
+use super::http::Api;
 use super::{normalize_instance_url, store};
 use base64::Engine;
 use omnidisc_proto::rest::Device;

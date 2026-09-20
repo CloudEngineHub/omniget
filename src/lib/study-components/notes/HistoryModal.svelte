@@ -6,6 +6,7 @@
     notesBlocksGet,
     type ContentSnapshot,
   } from "$lib/notes-bridge";
+import { t } from "$lib/i18n";
   import DiffView from "./DiffView.svelte";
 
   type Props = {
@@ -113,26 +114,25 @@
       if (e.target === e.currentTarget) onClose();
     }}
   >
-    <div class="modal" role="dialog" aria-label="Histórico do bloco" aria-modal="true">
+    <div class="modal" role="dialog" aria-label={$t("study.notes.history_modal.block_aria")} aria-modal="true">
       <header class="head">
-        <h3>Histórico do bloco</h3>
+        <h3>{$t("study.notes.history_modal.title")}</h3>
         <button type="button" class="btn ghost sm" onclick={onClose}>×</button>
       </header>
 
       {#if loading}
         <div class="state muted">Carregando…</div>
       {:else if blockId === null}
-        <div class="state muted">Selecione um bloco para ver seu histórico.</div>
+        <div class="state muted">{$t("study.notes.history_modal.select")}</div>
       {:else if error}
         <div class="state err">{error}</div>
       {:else if snapshots.length === 0}
         <div class="state muted">
-          Nenhum snapshot ainda. O backend grava snapshots automaticamente
-          em edições; abra esta página em sessões diferentes para acumular versões.
+          {$t("study.notes.history_modal.none_yet")}
         </div>
       {:else}
         <div class="layout">
-          <ul class="list" role="listbox" aria-label="Versões">
+          <ul class="list" role="listbox" aria-label={$t("study.notes.history_modal.versions_aria")}>
             {#each snapshots as s, i (s.id)}
               <li>
                 <button
@@ -158,7 +158,7 @@
               </div>
               <DiffView oldText={selected.content} newText={currentContent} />
             {:else}
-              <div class="state muted">Escolha uma versão.</div>
+              <div class="state muted">{$t("study.notes.history_modal.choose")}</div>
             {/if}
           </div>
         </div>
@@ -172,7 +172,7 @@
             onclick={() => (confirmClearOpen = true)}
             disabled={restoring}
           >
-            Limpar histórico ({snapshots.length})
+            {$t("study.notes.history_modal.clear_count", { n: snapshots.length })}
           </button>
         {/if}
         <span class="spacer"></span>
@@ -185,7 +185,7 @@
           onclick={restoreSelected}
           disabled={!selected || restoring || blockId === null}
         >
-          {restoring ? "Restaurando…" : "Restaurar esta versão"}
+          {restoring ? $t("study.notes.history_modal.restoring") : $t("study.notes.history_modal.restore_this")}
         </button>
       </footer>
     </div>
@@ -200,12 +200,12 @@
       if (e.target === e.currentTarget) confirmClearOpen = false;
     }}
   >
-    <div class="modal small" role="dialog" aria-label="Limpar histórico" aria-modal="true">
-      <h3>Limpar histórico?</h3>
+    <div class="modal small" role="dialog" aria-label={$t("study.notes.history_modal.clear_aria")} aria-modal="true">
+      <h3>{$t("study.notes.history_modal.clear_question")}</h3>
       <p class="warn">
         {snapshots.length === 1
-          ? "Isso apaga o snapshot deste bloco. Não dá pra desfazer."
-          : `Isso apaga ${snapshots.length} snapshots deste bloco. Não dá pra desfazer.`}
+          ? $t("study.notes.history_modal.clear_warn")
+          : $t("study.notes.history_modal.clear_warn_multi", { n: snapshots.length })}
       </p>
       <footer class="foot">
         <span class="spacer"></span>

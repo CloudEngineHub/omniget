@@ -115,6 +115,33 @@ pub fn tool_keys_use(id: String) -> Result<(), String> {
     ai_keys::use_in_app(&id).map_err(err)
 }
 
+// ── Sign in with OpenRouter (OAuth PKCE, sem backend) ──
+//
+// Two steps, because the browser round-trip happens in between: the UI opens
+// `url`, OpenRouter sends the user back to `omniget://openrouter-auth?state=…`
+// with `code` appended, and the deep-link handler hands both to `_finish`. The
+// state is mandatory there: a callback without the one this process generated is
+// refused. The verifier stays in the core and the key goes straight into the
+// secret store — neither ever reaches the frontend.
+
+/// Starts the flow: returns the URL to open and the state to echo back.
+#[tauri::command]
+pub fn tool_ai_keys_openrouter_pkce() -> ai_keys::PkceStart {
+    ai_keys::pkce_start()
+}
+
+/// Exchanges the code for a key and files it in the vault. Returns the masked
+/// view of the entry it created or updated.
+#[tauri::command]
+pub async fn tool_ai_keys_openrouter_pkce_finish(
+    code: String,
+    state: Option<String>,
+) -> Result<ai_keys::KeyView, String> {
+    ai_keys::pkce_finish(&code, state.as_deref())
+        .await
+        .map_err(err)
+}
+
 // ── Servidor MCP ──
 
 #[derive(Serialize)]

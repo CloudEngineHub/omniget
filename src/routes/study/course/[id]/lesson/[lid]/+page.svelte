@@ -816,7 +816,7 @@
   async function captureScreenshot() {
     if (!videoRef || !lesson) return;
     if (!videoRef.videoWidth || !videoRef.videoHeight) {
-      screenshotToast = "Vídeo ainda não carregou";
+      screenshotToast = $t("study.course.lesson.video_not_loaded");
       setTimeout(() => (screenshotToast = ""), 2400);
       return;
     }
@@ -1228,7 +1228,7 @@
         </div>
       </div>
 
-      <nav class="panel-tabs" aria-label="painéis da aula">
+      <nav class="panel-tabs" aria-label={$t("study.course.lesson.panels_aria")}>
         <SegmentedControl
           bind:value={activePanel}
           options={panelOptions}
@@ -1263,12 +1263,12 @@
         <div class="info-panel">
           {#if lesson}
             <dl class="info-grid">
-              <dt>Aula</dt>
+              <dt>{$t("study.course.lesson.lesson_label")}</dt>
               <dd>{lesson.title}</dd>
-              <dt>Posição</dt>
+              <dt>{$t("study.course.lesson.position")}</dt>
               <dd>#{lesson.position}</dd>
               {#if lesson.duration_ms}
-                <dt>Duração</dt>
+                <dt>{$t("study.course.lesson.duration")}</dt>
                 <dd>{formatTime(lesson.duration_ms / 1000)}</dd>
               {/if}
               <dt>Status</dt>

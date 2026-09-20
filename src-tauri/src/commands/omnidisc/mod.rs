@@ -1,20 +1,12 @@
-pub mod api;
-pub mod auth;
 pub mod device;
 pub mod ducking;
 pub mod gateway;
+pub mod http;
 pub mod mls;
 pub mod store;
 pub mod stream;
 pub mod upload;
 pub mod voice;
-
-#[cfg(test)]
-mod e2e_lock;
-#[cfg(test)]
-mod e2e_test;
-#[cfg(test)]
-mod e2ee_e2e_test;
 
 use serde::Serialize;
 use serde_json::Value;

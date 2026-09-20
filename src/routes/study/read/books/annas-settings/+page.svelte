@@ -136,7 +136,7 @@
       );
       okMsg =
         r.removed === 0
-          ? "Cache já estava vazio"
+          ? $t("study.read.annas.cache_was_empty")
           : r.removed === 1
             ? "1 entrada de cache removida"
             : `${r.removed} entradas de cache removidas`;
@@ -293,10 +293,9 @@
     </section>
 
     <section class="block">
-      <h3>Cache de busca</h3>
+      <h3>{$t("study.read.annas.cache_title")}</h3>
       <p class="muted small">
-        Resultados são guardados em memória pra não bombardear os mirrors.
-        Limpe se você está vendo dados desatualizados.
+        {$t("study.read.annas.cache_hint")}
       </p>
       <button
         type="button"
@@ -323,9 +322,9 @@
             aria-hidden="true"
           ></span>
           <span>
-            {browserStatus.enabled ? "Habilitado" : "Desabilitado"}
+            {browserStatus.enabled ? $t("study.read.annas.enabled") : $t("study.read.annas.disabled")}
             {#if browserStatus.available === false}
-              · não detectado no sistema
+              {$t("study.read.annas.not_detected")}
             {/if}
           </span>
         </div>

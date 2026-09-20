@@ -26,7 +26,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <b>下载 Udemy 和 Hotmart 课程、YouTube、Instagram、X、Pinterest、TikTok 以及 1,800 多个其他网站。<br/>然后对保存的内容进行转写、转换、阅读和学习。一个免费的桌面应用，不用命令行。</b>
+  <b>yt-dlp 图形界面、Udemy 和 Hotmart 课程下载器、YouTube 视频下载器，也是运行 AI 智能体的桌面应用。<br/>免费开源，支持 Windows、macOS 和 Linux，不用命令行。</b><br/>下载 Instagram、TikTok、X、Pinterest 以及 1,800 多个其他网站，然后对保存的内容进行转写、转换、阅读和学习。<br/>把 Claude Code、Codex、Gemini CLI 和本地 Ollama 模型当作智能体运行，带权限确认、撤销、后台任务和循环。
 </p>
 
 <p align="center">
@@ -46,7 +46,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 
 <p align="center">
   <sub>免费。GPL-3.0 开源。不用注册账号，没有广告，不会上报你下载了什么。文件只留在你的电脑上。</sub><br/>
-  <sub>GitHub 上超过 9,500 个 Star。在 <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>、<a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> 和 <a href="https://github.com/topics/course-downloader">course-downloader</a> 主题下 Star 数最多的仓库。</sub>
+  <sub>GitHub 上超过 13,800 个 Star。在 <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>、<a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> 和 <a href="https://github.com/topics/course-downloader">course-downloader</a> 主题下 Star 数最多的仓库。</sub>
 </p>
 
 <p align="center">
@@ -72,6 +72,25 @@ spicetify, 下载管理器, tauri, rust, svelte.
 - [命令行](#命令行)
 - [从源码构建](#从源码构建)
 - [参与贡献与翻译](#参与贡献与翻译)
+
+---
+
+## 桌面上的 AI 智能体：Claude Code、Codex、Gemini CLI 和 Ollama
+
+<p align="center">
+  <img src="assets/readme/agents-hero.gif" alt="OmniGet 的吉祥物 Loop 站在等距视角的小屋中间，三个机器人智能体各自在自己的工作台前干活，头顶的气泡显示正在使用的工具" width="900" />
+</p>
+
+0.10 的新功能，现在是应用的核心。一条命令，大约 15 秒，测试变绿：这是 Claude Code 通过 OmniGet 修复一个失败的测试，并带着 diff 向你请求权限。
+
+- **带权限和撤销的编码智能体。** 选一个智能体，挂载一个文件夹，提出修改。它只在这个文件夹里读取、编辑和运行命令，写入前先询问，一键撤销整个回合。
+- **给 Claude Code、Codex 和 Gemini CLI 一个图形界面。** 在 **LLM → Accounts** 添加账号，额度显示在屏幕上。任何支持 Agent Client Protocol 的 CLI（Gemini CLI、goose、opencode）都能成为智能体。
+- **用 Ollama、LM Studio 或 llama-server 运行本地智能体**，离线，不需要密钥。`qwen3:8b` 大约 3 分钟修好演示里的 bug。
+- **Jobs、Loops 和触发器。** 关掉窗口任务照样运行。Loop 会一轮一轮重复，直到你的检查命令（`npm test`）通过。cron 和 webhook 可以启动任务。
+- **内置 MCP 服务器，49 个工具**，可接入 Claude Code、Cursor 和 VS Code。
+- **世界。** 一座等距视角的小屋，每个智能体走到自己的工作台，用气泡显示正在用的工具，需要你时向你招手。打开小屋，把代码发给朋友，对方就能进来做客。
+
+完整说明见[英文 README](README.md#agents-and-the-world)。
 
 ---
 

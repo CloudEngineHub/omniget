@@ -31,17 +31,17 @@
     | "notes"
     | "maintenance";
 
-  const TABS = $derived<{ key: TabKey; label: string }[]>([
+  const TABS = $derived([
     { key: "player", label: "Player" },
     { key: "subtitles", label: "Legendas" },
     { key: "audio", label: "Áudio" },
     { key: "behavior", label: "Comportamento" },
     { key: "library", label: "Biblioteca" },
-    { key: "music", label: "Música" },
+    { key: "music", label: $t("study.settings.tabs.music") },
     { key: "youtube", label: "YouTube" },
     { key: "diagnostic", label: $t("study.settings.tab_diagnostic") as string },
     { key: "notes", label: "Notas" },
-    { key: "maintenance", label: "Manutenção" },
+    { key: "maintenance", label: $t("study.settings.tabs.maintenance") },
   ]);
 
   let activeTab = $state<TabKey>("player");
@@ -159,7 +159,7 @@
   <header class="head">
     <div class="head-text">
       <h1>{$t("study.hub.settings")}</h1>
-      <p class="hint">Ajustes do player, legendas, biblioteca e manutenção.</p>
+      <p class="hint">{$t("study.settings.page_hint")}</p>
     </div>
     <div class="status">
       {#if savingState === "saving"}
@@ -180,7 +180,7 @@
         class:active={activeTab === tab.key}
         role="tab"
         aria-selected={activeTab === tab.key}
-        onclick={() => pickTab(tab.key)}
+        onclick={() => pickTab(tab.key as TabKey)}
       >
         {tab.label}
       </button>

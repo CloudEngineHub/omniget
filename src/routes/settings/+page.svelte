@@ -15,6 +15,7 @@
   import SettingsRules from "$components/settings/SettingsRules.svelte";
   import SettingsStorage from "$components/settings/SettingsStorage.svelte";
   import SettingsAppearance from "$components/settings/SettingsAppearance.svelte";
+  import SettingsProfile from "$components/settings/SettingsProfile.svelte";
   import SettingsNetwork from "$components/settings/SettingsNetwork.svelte";
   import SettingsDownloads from "$components/settings/SettingsDownloads.svelte";
   import SettingsTypography from "$components/settings/SettingsTypography.svelte";
@@ -22,6 +23,7 @@
   import SettingsCookies from "$components/settings/SettingsCookies.svelte";
   import SettingsChannels from "$components/settings/SettingsChannels.svelte";
   import SettingsAI from "$components/settings/SettingsAI.svelte";
+  import SettingsWorld from "$components/settings/SettingsWorld.svelte";
 
   type DependencyStatus = {
     name: string;
@@ -155,7 +157,7 @@
     await updateSettings({ download: { video_quality: value } });
   }
 
-  type SettingsCategory = "downloads" | "appearance" | "typography" | "network" | "cookies" | "channels" | "ai" | "plugins" | "advanced";
+  type SettingsCategory = "downloads" | "appearance" | "profile" | "typography" | "network" | "cookies" | "channels" | "ai" | "world" | "plugins" | "advanced";
 
   const SETTINGS_NAV_GROUPS: {
     labelKey: string;
@@ -165,6 +167,7 @@
       labelKey: "settings.group_general",
       items: [
         ["appearance", "settings.cat_appearance"],
+        ["profile", "settings.cat_profile"],
         ["typography", "settings.cat_typography"],
       ],
     },
@@ -179,6 +182,7 @@
         ["cookies", "settings.cat_cookies"],
         ["channels", "settings.cat_channels"],
         ["ai", "settings.cat_ai"],
+        ["world", "settings.cat_world"],
         ["plugins", "settings.cat_plugins"],
       ],
     },
@@ -195,7 +199,7 @@
     if (tabApplied || typeof window === "undefined") return;
     tabApplied = true;
     const tab = new URLSearchParams(window.location.search).get("tab");
-    const valid = ["downloads", "appearance", "typography", "network", "cookies", "channels", "ai", "plugins", "advanced"];
+    const valid = ["downloads", "appearance", "profile", "typography", "network", "cookies", "channels", "ai", "world", "plugins", "advanced"];
     if (tab && valid.includes(tab)) {
       activeCategory = tab as SettingsCategory;
     }
@@ -351,7 +355,9 @@
 
   const CATEGORY_ICONS: Record<string, string> = {
     appearance: "M12 3a9 9 0 1 0 0 18c1.2 0 1.6-.9 1.2-1.7-.5-1 .1-2.3 1.3-2.3H16a5 5 0 0 0 5-5c0-5-4-9-9-9zM7.5 12a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm3-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm5 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z",
+    profile: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20a8 8 0 0 1 16 0",
     typography: "M4 7V5h16v2M12 5v14M9 19h6",
+    world: "M12 3l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5",
     downloads: "M12 4v11m0 0 4-4m-4 4-4-4M5 20h14",
     network: "M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM3 12h18M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16",
     cookies: "M12 3a9 9 0 1 0 9 9 3 3 0 0 1-3-3 3 3 0 0 1-3-3 3 3 0 0 1-3-3zM8 12h.01M12 16h.01M9 8h.01M15 13h.01",
@@ -565,6 +571,12 @@
       </div>
     {/if}
 
+    {#if isSearching || activeCategory === "profile"}
+      <div class="settings-panel" data-settings-cat="profile">
+        <SettingsProfile />
+      </div>
+    {/if}
+
     {#if isSearching || activeCategory === "typography"}
       <div class="settings-panel" data-settings-cat="typography">
         <SettingsTypography />
@@ -610,6 +622,12 @@
     {#if isSearching || activeCategory === "ai"}
       <div class="settings-panel" data-settings-cat="ai">
         <SettingsAI />
+      </div>
+    {/if}
+
+    {#if isSearching || activeCategory === "world"}
+      <div class="settings-panel" data-settings-cat="world">
+        <SettingsWorld />
       </div>
     {/if}
 

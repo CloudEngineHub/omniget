@@ -35,12 +35,103 @@ pub struct AppSettings {
     pub accessibility: AccessibilitySettings,
     #[serde(default)]
     pub omnidisc: OmnidiscSettings,
+    #[serde(default)]
+    pub world: WorldSettings,
+    #[serde(default)]
+    pub llm: LlmSettings,
+}
+
+/// Settings of the `/llm` section that are not per-agent.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmSettings {
+    /// Context pruning master switch. Off: the Coordinator keeps a disabled
+    /// pruner and nothing is judged or rewritten.
+    #[serde(default)]
+    pub prune_enabled: bool,
+    /// `"local"` (offline MiniLM) or `"jev"` (TypeSafe System One). Anything
+    /// unknown parses as local, so a typo never sends spans to a third party.
+    /// The Jev key is not here: it lives in the secret store.
+    #[serde(default = "default_prune_judge")]
+    pub prune_judge: String,
+    /// Conversation size (estimated tokens) under which nothing is judged.
+    /// The ported default suits cloud models; a small local context wants less.
+    #[serde(default = "default_prune_min_tokens")]
+    pub prune_min_tokens: u32,
+}
+
+fn default_prune_min_tokens() -> u32 {
+    50_000
+}
+
+fn default_prune_judge() -> String {
+    "local".into()
+}
+
+impl Default for LlmSettings {
+    fn default() -> Self {
+        Self {
+            prune_enabled: false,
+            prune_judge: default_prune_judge(),
+            prune_min_tokens: default_prune_min_tokens(),
+        }
+    }
+}
+
+/// Settings of the agents' world (`/world`). Phase 6 only carries the render
+/// tier: `tier_override` pins a tier by hand (None = automatic, i.e. measured),
+/// and the `tier_measured*` trio is the last calibration, kept so the UI can show
+/// it and so a version change can trigger a recalibration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorldSettings {
+    /// Shows `/world` in the navigation.
+    #[serde(default = "default_world_enabled")]
+    pub enabled: bool,
+    #[serde(default)]
+    pub tier_override: Option<u8>,
+    #[serde(default)]
+    pub tier_measured: Option<u8>,
+    #[serde(default)]
+    pub measured_median_ms: Option<f64>,
+    #[serde(default)]
+    pub measured_app_version: Option<String>,
+    /// Lets the agents in the house think through the LLM stack (plan, reflect).
+    /// Off by default: it is the only part of the world that spends tokens.
+    #[serde(default)]
+    pub thinking: bool,
+    /// Minimum real seconds between two thoughts in the whole house.
+    #[serde(default = "default_think_interval_s")]
+    pub think_interval_s: u32,
+    /// Room server for open houses and visits (`wss://host/v1/room`). Empty =
+    /// the built-in default; a self-hosted `omniworld-server` goes here.
+    #[serde(default)]
+    pub room_server: String,
+}
+
+fn default_world_enabled() -> bool {
+    true
+}
+
+fn default_think_interval_s() -> u32 {
+    120
+}
+
+impl Default for WorldSettings {
+    fn default() -> Self {
+        Self {
+            enabled: default_world_enabled(),
+            tier_override: None,
+            tier_measured: None,
+            measured_median_ms: None,
+            measured_app_version: None,
+            thinking: false,
+            think_interval_s: default_think_interval_s(),
+            room_server: String::new(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OmnidiscSettings {
-    #[serde(default)]
-    pub enabled: bool,
     #[serde(default)]
     pub voice: OmnidiscVoiceSettings,
 }
@@ -627,10 +718,26 @@ impl Default for TypographySettings {
     }
 }
 
+impl AppSettings {
+    /// One-time upgrades of a stored settings file. Returns true when
+    /// something changed and the file should be written back.
+    ///
+    /// v2 (0.10.0): the World left the experimental flag. Installs from before
+    /// have `world.enabled: false` on disk and would never see `/world`.
+    pub fn migrate(&mut self) -> bool {
+        if self.schema_version >= 2 {
+            return false;
+        }
+        self.world.enabled = true;
+        self.schema_version = 2;
+        true
+    }
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            schema_version: 1,
+            schema_version: 2,
             appearance: AppearanceSettings {
                 theme: "system".into(),
                 language: "en".into(),
@@ -722,6 +829,8 @@ impl Default for AppSettings {
             league: LeagueSettings::default(),
             accessibility: AccessibilitySettings::default(),
             omnidisc: OmnidiscSettings::default(),
+            world: WorldSettings::default(),
+            llm: LlmSettings::default(),
         }
     }
 }
@@ -729,6 +838,21 @@ impl Default for AppSettings {
 #[cfg(test)]
 mod backcompat_tests {
     use super::*;
+
+    #[test]
+    fn an_install_from_before_the_world_gets_it_switched_on_once() {
+        let mut old = AppSettings {
+            schema_version: 1,
+            ..AppSettings::default()
+        };
+        old.world.enabled = false;
+        assert!(old.migrate());
+        assert!(old.world.enabled);
+        // The user's later choice is theirs: no second migration.
+        old.world.enabled = false;
+        assert!(!old.migrate());
+        assert!(!old.world.enabled);
+    }
 
     #[test]
     fn settings_da_v0_7_6_carregam_com_tls_verificado() {

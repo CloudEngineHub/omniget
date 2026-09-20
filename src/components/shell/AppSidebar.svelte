@@ -2,6 +2,8 @@
   import { page } from "$app/state";
   import { t } from "$lib/i18n";
   import NavIcon from "$components/shell/NavIcon.svelte";
+  import Avatar from "$components/omni/Avatar.svelte";
+  import { getProfile, loadProfile } from "$lib/stores/profile-store.svelte";
   import type { NavItem } from "$lib/nav-config";
 
   interface Props {
@@ -10,7 +12,6 @@
     pluginNav?: NavItem[];
     badgeLabel?: string;
     badgeCount?: number;
-    chatBadgeCount?: number;
   }
 
   let {
@@ -19,10 +20,13 @@
     pluginNav = [],
     badgeLabel = "",
     badgeCount = 0,
-    chatBadgeCount = 0,
   }: Props = $props();
 
-  let chatBadgeLabel = $derived(chatBadgeCount > 99 ? "99+" : String(chatBadgeCount));
+
+  // Loads once per session and never throws: while `profile_*` answers ERR_STUB
+  // the store stays null and the footer simply does not render.
+  loadProfile();
+  let profile = $derived(getProfile());
 
   const PLUGINS_KEY = "omniget.sidebar.plugins_expanded";
   let pluginsExpanded = $state(
@@ -60,8 +64,6 @@
     <span class="mac-nav-label">{title}</span>
     {#if item.badge === "downloads" && badgeCount > 0}
       <span class="mac-nav-badge live">{badgeLabel}</span>
-    {:else if item.badge === "omnidisc" && chatBadgeCount > 0}
-      <span class="mac-nav-badge live">{chatBadgeLabel}</span>
     {/if}
   </a>
 {/snippet}
@@ -109,4 +111,42 @@
       {/if}
     </nav>
   {/if}
+
+  {#if profile}
+    <a class="mac-sidebar-profile" href="/settings" title={$t("omni.sidebar_profile")}>
+      <Avatar tint={profile.skin?.tint} size={28} />
+      <span class="mac-sidebar-profile-nick">{profile.nickname}</span>
+    </a>
+  {/if}
 </aside>
+
+<style>
+  .mac-sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--text-dim);
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .mac-sidebar-profile:hover {
+    background: var(--fill-quaternary, rgba(127, 127, 127, 0.12));
+    color: var(--text);
+  }
+
+  .mac-sidebar-profile-nick {
+    font-size: var(--text-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mac-sidebar-profile:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+</style>

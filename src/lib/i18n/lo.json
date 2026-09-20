@@ -3687,14 +3687,18 @@
     "view_history": "ປະຫວັດ",
     "view_tools": "ເຄື່ອງມື",
     "status_bar": {
-      "region_label": "Download progress",
-      "active": "{{count}} downloading",
-      "queued": "{{count}} queued",
-      "paused_all": "All paused",
-      "eta": "ETA {{eta}}",
-      "open": "View downloads",
-      "indeterminate": "Downloading, total size unknown",
-      "complete": "Downloads complete"
+      "region_label": "ຄວາມຄືບໜ້າການດາວໂຫຼດ",
+      "active": "ກຳລັງດາວໂຫຼດ {{count}} ລາຍການ",
+      "queued": "ລໍຖ້າ {{count}} ລາຍການ",
+      "paused_all": "ຢຸດຊົ່ວຄາວທັງໝົດ",
+      "eta": "ເຫຼືອປະມານ {{eta}}",
+      "open": "ເບິ່ງການດາວໂຫຼດ",
+      "indeterminate": "ກຳລັງດາວໂຫຼດ, ບໍ່ຮູ້ຂະໜາດທັງໝົດ",
+      "complete": "ດາວໂຫຼດສຳເລັດແລ້ວ",
+      "paused": "ຢຸດຊົ່ວຄາວ {{count}} ລາຍການ",
+      "failed": "ລົ້ມເຫຼວ {{count}} ລາຍການ",
+      "dismiss": "ປິດການແຈ້ງເຕືອນ",
+      "transferred": "ດາວໂຫຼດແລ້ວ {{size}}"
     }
   },
   "toast": {

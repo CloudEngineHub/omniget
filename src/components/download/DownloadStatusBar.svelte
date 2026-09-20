@@ -1,284 +1,377 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
+  import { page } from "$app/state";
   import { t, locale } from "$lib/i18n";
-  import NavIcon from "$components/shell/NavIcon.svelte";
   import DownloadSpeedGraph from "./DownloadSpeedGraph.svelte";
   import {
     getAggregate,
     getAggregateSpeedHistory,
+    dismissAggregateFailures,
     formatBytes,
     formatSpeed,
     formatEta,
   } from "$lib/stores/download-store.svelte";
 
-  const GRACE_MS = 2000;
-
   let agg = $derived(getAggregate());
-  let busy = $derived(agg.activeCount + agg.queuedCount + agg.pausedCount > 0);
-
-  let visible = $state(false);
-  let showComplete = $state(false);
-  let graceTimer: ReturnType<typeof setTimeout> | null = null;
-  let wasBusy = false;
-
-  $effect(() => {
-    if (busy) {
-      if (graceTimer) {
-        clearTimeout(graceTimer);
-        graceTimer = null;
-      }
-      wasBusy = true;
-      showComplete = false;
-      visible = true;
-    } else if (wasBusy) {
-      wasBusy = false;
-      showComplete = true;
-      graceTimer = setTimeout(() => {
-        graceTimer = null;
-        visible = false;
-        showComplete = false;
-      }, GRACE_MS);
-    }
-  });
-
-  onDestroy(() => {
-    if (graceTimer) clearTimeout(graceTimer);
-  });
-
-  let allPaused = $derived(agg.activeCount === 0 && agg.pausedCount > 0);
+  let busy = $derived(agg.outcome === "working");
+  let expiredBatch = $state(-1);
+  let showComplete = $derived(
+    agg.outcome === "complete" && agg.failedCount === 0 && expiredBatch !== agg.batchId,
+  );
+  let visible = $derived(busy || agg.failedCount > 0 || showComplete);
+  let onDownloads = $derived(page.url.pathname.replace(/\/$/, "") === "/downloads");
+  let allPaused = $derived(agg.activeCount === 0 && agg.queuedCount === 0 && agg.pausedCount > 0);
+  let percent = $derived(agg.percent === null ? null : Math.floor(agg.percent));
   let etaText = $derived(formatEta(agg.etaSeconds));
-  let percentRounded = $derived(agg.percent !== null ? Math.round(agg.percent) : null);
-  let indeterminate = $derived(!showComplete && agg.percent === null && agg.activeCount > 0);
-  let sizeLabel = $derived(
-    percentRounded !== null ? `${percentRounded}%` : formatBytes(agg.downloadedBytes),
+  let indeterminate = $derived(busy && agg.percent === null && agg.activeCount > 0);
+  let stateIcon = $derived(
+    agg.failedCount > 0 ? "shield-warning"
+      : showComplete ? "list-checks"
+      : allPaused ? "pause"
+      : "tray-arrow-down",
   );
-
-  let countLabel = $derived(
-    agg.activeCount > 0
-      ? ($t("downloads.status_bar.active", { count: agg.activeCount }) as string)
-      : allPaused
-        ? ($t("downloads.status_bar.paused_all") as string)
-        : ($t("downloads.status_bar.queued", { count: agg.queuedCount }) as string),
-  );
-
-  let announceKey = $derived(
-    !visible
-      ? ""
-      : showComplete
-        ? `done:${$locale}`
-        : `${$locale}:${agg.activeCount}:${percentRounded === null ? "x" : Math.floor(percentRounded / 25)}`,
-  );
-
-  let announceText = $state("");
-  let lastAnnounceKey = "";
-
-  function buildAnnouncement(): string {
+  let summary = $derived.by(() => {
     if (showComplete) return $t("downloads.status_bar.complete") as string;
-    const parts = [countLabel];
-    if (percentRounded !== null) parts.push(`${percentRounded}%`);
-    else if (agg.activeCount > 0) parts.push($t("downloads.status_bar.indeterminate") as string);
-    if (etaText) parts.push($t("downloads.status_bar.eta", { eta: etaText }) as string);
-    return parts.join(", ");
-  }
-
-  $effect(() => {
-    const key = announceKey;
-    if (key === lastAnnounceKey) return;
-    lastAnnounceKey = key;
-    announceText = key ? buildAnnouncement() : "";
+    const parts: string[] = [];
+    if (agg.activeCount) parts.push($t("downloads.status_bar.active", { count: agg.activeCount }) as string);
+    if (agg.pausedCount) {
+      parts.push(allPaused
+        ? $t("downloads.status_bar.paused_all") as string
+        : $t("downloads.status_bar.paused", { count: agg.pausedCount }) as string);
+    }
+    if (agg.queuedCount) parts.push($t("downloads.status_bar.queued", { count: agg.queuedCount }) as string);
+    if (agg.failedCount) parts.push($t("downloads.status_bar.failed", { count: agg.failedCount }) as string);
+    return parts.join(" · ");
   });
+  let progressText = $derived.by(() => {
+    if (agg.totalBytes !== null) {
+      return `${percent}% · ${formatBytes(agg.downloadedBytes)} / ${formatBytes(agg.totalBytes)}`;
+    }
+    const transferred = $t("downloads.status_bar.transferred", {
+      size: formatBytes(agg.downloadedBytes),
+    }) as string;
+    return percent === null ? transferred : `${percent}% · ${transferred}`;
+  });
+
+  let completionKey = $derived(agg.outcome === "complete" ? agg.batchId : null);
+  $effect(() => {
+    const batch = completionKey;
+    if (batch === null) return;
+    const timer = setTimeout(() => { expiredBatch = batch; }, 2000);
+    return () => clearTimeout(timer);
+  });
+
+  let announceKey = $derived(!visible ? "" : [
+    $locale, agg.batchId, agg.outcome,
+    agg.activeCount, agg.queuedCount, agg.pausedCount, agg.failedCount,
+    percent === null ? "unknown" : Math.floor(percent / 25),
+  ].join(":"));
+  let announcement = $state("");
+  let lastKey = "";
+  $effect(() => {
+    if (announceKey === lastKey) return;
+    lastKey = announceKey;
+    announcement = visible ? summary + (busy && percent !== null ? `, ${percent}%` : "") : "";
+  });
+
+  function dismissFailures() {
+    const target = document.querySelector<HTMLElement>(busy && !onDownloads ? ".dl-link" : "main");
+    if (target) {
+      const hadTabIndex = target.hasAttribute("tabindex");
+      if (!hadTabIndex) target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+      if (!hadTabIndex) {
+        target.addEventListener("blur", () => target.removeAttribute("tabindex"), { once: true });
+      }
+    }
+    dismissAggregateFailures();
+  }
 </script>
 
+<span class="dl-sr" aria-live="polite" aria-atomic="true">{announcement}</span>
 {#if visible}
-  <div
+  <section
     class="dl-status-bar"
     class:is-complete={showComplete}
-    role="region"
+    class:has-failures={agg.failedCount > 0}
     aria-label={$t("downloads.status_bar.region_label") as string}
   >
-    <div
-      class="progress dl-track"
-      class:indeterminate={indeterminate}
-      role="progressbar"
-      aria-label={$t("downloads.status_bar.region_label") as string}
-      aria-valuemin="0"
-      aria-valuemax="100"
-      aria-valuenow={showComplete ? 100 : (percentRounded ?? undefined)}
-      aria-valuetext={indeterminate
-        ? ($t("downloads.status_bar.indeterminate") as string)
-        : undefined}
-    >
+    {#if busy || showComplete}
       <div
-        class="progress-fill"
-        class:success={showComplete}
-        class:paused={!showComplete && allPaused}
-        style:width={showComplete
-          ? "100%"
-          : percentRounded !== null
-            ? `${agg.percent}%`
-            : undefined}
-      ></div>
-    </div>
-
-    <div class="dl-row">
-      <NavIcon icon="downloads" size={14} />
-      {#if showComplete}
-        <span class="dl-label">{$t("downloads.status_bar.complete")}</span>
-      {:else}
-        <span class="dl-label">{countLabel}</span>
-        {#if agg.activeCount > 0}
-          <span class="dl-sep" aria-hidden="true">&middot;</span>
-          <span class="dl-metric">{formatSpeed(agg.speedBps)}</span>
-        {/if}
-        {#if etaText}
-          <span class="dl-sep" aria-hidden="true">&middot;</span>
-          <span class="dl-metric">{$t("downloads.status_bar.eta", { eta: etaText })}</span>
-        {/if}
-        {#if agg.speedBps > 0}
-          <span class="dl-graph">
-            <DownloadSpeedGraph points={getAggregateSpeedHistory()} width={72} height={16} />
-          </span>
-        {/if}
-        {#if agg.activeCount > 0 && agg.queuedCount > 0}
-          <span class="dl-sep dl-opt" aria-hidden="true">&middot;</span>
-          <span class="dl-metric dl-opt">
-            {$t("downloads.status_bar.queued", { count: agg.queuedCount })}
-          </span>
-        {/if}
+        class="progress dl-track"
+        class:indeterminate={indeterminate}
+        role="progressbar"
+        aria-label={$t("downloads.status_bar.region_label") as string}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={showComplete ? 100 : percent ?? undefined}
+        aria-valuetext={showComplete ? summary : `${summary}, ${progressText}`}
+      >
+        <div
+          class="progress-fill"
+          class:success={showComplete}
+          class:paused={allPaused}
+          style:width={showComplete ? "100%" : agg.percent !== null ? `${agg.percent}%` : indeterminate ? undefined : "0%"}
+        ></div>
+      </div>
+    {/if}
+    <div class="dl-content">
+      <div class="dl-summary">
+        <span class="dl-icon" style:--glyph={`url(/icons/${stateIcon}.svg)`} aria-hidden="true"></span>
+        <span>{summary}</span>
+      </div>
+      {#if busy}
+        <div class="dl-metrics">
+          <bdi class="dl-size" dir={agg.totalBytes !== null ? "ltr" : "auto"}>{progressText}</bdi>
+          {#if agg.activeCount > 0}
+            <bdi dir="ltr">{formatSpeed(agg.speedBps)}</bdi>
+          {/if}
+          {#if etaText}
+            <span class="dl-eta">{$t("downloads.status_bar.eta", { eta: etaText })}</span>
+          {/if}
+          {#if agg.activeCount > 0}
+            <span class="dl-graph" aria-hidden="true">
+              <DownloadSpeedGraph
+                points={getAggregateSpeedHistory()}
+                windowMs={30_000}
+                width={132}
+                height={30}
+                showTooltip={false}
+                status
+              />
+            </span>
+          {/if}
+        </div>
       {/if}
-      <span class="dl-spacer"></span>
-      {#if !showComplete}
-        <span class="dl-metric dl-size">{sizeLabel}</span>
-      {/if}
-      <a class="dl-link" href="/downloads">{$t("downloads.status_bar.open")}</a>
+      <div class="dl-actions">
+        {#if !onDownloads}
+          <a class="dl-link" href="/downloads">{$t("downloads.status_bar.open")}</a>
+        {/if}
+        {#if agg.failedCount > 0}
+          <button class="dl-dismiss" onclick={dismissFailures}>{$t("downloads.status_bar.dismiss")}</button>
+        {/if}
+      </div>
     </div>
-
-    <span class="dl-sr" aria-live="polite" aria-atomic="true">{announceText}</span>
-  </div>
+  </section>
 {/if}
 
 <style>
-  .dl-status-bar {
-    position: relative;
+  .dl-status-bar  {
     flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-2) var(--space-4)
-      calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    min-width: 0;
     background: var(--surface-mut);
     border-top: var(--hairline) solid var(--border);
-    box-shadow: var(--elev-1);
-    animation: dl-status-bar-in var(--duration-base) var(--ease-out);
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    container-type: inline-size;
   }
 
-  @keyframes dl-status-bar-in {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  :global(body:has(.global-player-bar)) .dl-status-bar {
-    margin-bottom: 80px;
-  }
-
-  .dl-track {
+  .dl-track  {
     height: 3px;
+    margin-block-end: var(--space-2);
   }
 
-  .dl-row {
+  .dl-track .progress-fill:not(.success):not(.paused)  {
+    background: var(--accent-text);
+  }
+
+  .dl-content  {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .dl-summary  {
     display: flex;
     align-items: center;
     gap: var(--space-2);
     min-width: 0;
-    overflow: hidden;
-    font-size: var(--text-xs);
-    line-height: var(--leading-xs);
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: var(--leading-base);
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  .dl-icon  {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    mask: var(--glyph) center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  .is-complete .dl-icon  {
+    color: var(--success);
+  }
+
+  .has-failures .dl-icon  {
+    color: var(--error);
+  }
+
+  .dl-metrics  {
+    grid-column: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
   }
 
-  .dl-label {
+  .dl-size  {
     color: var(--text);
-    font-weight: 500;
-    white-space: nowrap;
   }
 
-  .dl-metric {
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .dl-sep {
-    opacity: 0.45;
-  }
-
-  .dl-graph {
+  .dl-graph  {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
   }
 
-  .dl-spacer {
-    flex: 1 1 auto;
-    min-width: var(--space-2);
+  .dl-actions  {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
   }
 
-  .dl-size {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .dl-link {
-    flex: 0 0 auto;
-    padding: 2px var(--space-2);
+  .dl-link, .dl-dismiss  {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: var(--space-1) var(--space-2);
+    border: 0;
     border-radius: var(--radius-sm);
-    color: var(--accent);
-    text-decoration: none;
+    background: transparent;
+    font: inherit;
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
     font-weight: 500;
-    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
   }
 
-  @media (hover: hover) {
-    .dl-link:hover {
+  .dl-link  {
+    color: var(--accent-text);
+  }
+
+  .dl-dismiss  {
+    color: var(--text-muted);
+  }
+
+  @media (hover: hover)  {
+    .dl-link:hover, .dl-dismiss:hover  {
       background: var(--accent-soft);
+      color: var(--text);
     }
+
   }
 
-  .dl-link:active {
+  .dl-link:active, .dl-dismiss:active  {
     background: var(--accent-soft);
   }
 
-  .dl-link:focus-visible {
-    outline: var(--focus-ring);
+  .dl-link:focus-visible, .dl-dismiss:focus-visible  {
+    outline: 2px solid var(--accent-text);
     outline-offset: var(--focus-ring-offset);
   }
 
-  .dl-sr {
+  @container (min-width: 1000px)  {
+    .dl-content  {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
+    .dl-metrics  {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .dl-actions  {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+  }
+
+  @container (max-width: 640px)  {
+    .dl-metrics  {
+      grid-column: 1 / -1;
+    }
+
+    .dl-actions  {
+      grid-row: 1;
+      max-width: 160px;
+    }
+
+    .dl-graph  {
+      display: none;
+    }
+
+  }
+
+  @container (max-width: 360px)  {
+    .dl-content  {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dl-actions  {
+      grid-column: 1;
+      grid-row: auto;
+      max-width: none;
+      justify-content: flex-start;
+    }
+
+    .dl-eta  {
+      display: none;
+    }
+
+  }
+
+  .dl-sr  {
     position: absolute;
     width: 1px;
     height: 1px;
-    margin: -1px;
     padding: 0;
-    border: 0;
+    margin: -1px;
     overflow: hidden;
-    clip: rect(0 0 0 0);
     clip-path: inset(50%);
     white-space: nowrap;
   }
 
-  @media (max-width: 640px) {
-    .dl-status-bar {
-      padding-inline: var(--space-3);
+  @media (forced-colors: active)  {
+    .dl-icon  {
+      background: CanvasText;
     }
 
-    .dl-graph,
-    .dl-opt {
-      display: none;
+    .dl-track  {
+      border: 1px solid CanvasText;
     }
+
+    .dl-track .progress-fill  {
+      background: Highlight;
+    }
+
   }
 
+  @media (prefers-reduced-motion: reduce)  {
+    .dl-track .progress-fill  {
+      animation: none;
+      transition: none;
+      transform: none;
+    }
+
+  }
+
+  :global([data-reduce-motion="true"]) .dl-track .progress-fill  {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
 </style>

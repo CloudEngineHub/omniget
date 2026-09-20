@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 type DownloadStore = typeof import("./download-store.svelte");
 
@@ -45,6 +45,10 @@ beforeAll(async () => {
     callback(0);
     return 0;
   });
+});
+
+beforeEach(async () => {
+  vi.resetModules();
   store = await import("./download-store.svelte");
 });
 
@@ -82,6 +86,25 @@ describe("generic download progress", () => {
       status: "downloading",
     });
   });
+
+  it("does not let late progress resurrect a cancelled item", () => {
+    const id = 903;
+    store.syncQueueState([queueItem(id)]);
+    store.syncQueueState([
+      queueItem(id, {
+        status: { type: "Error", data: { message: "Cancelled", retryable: false } },
+        speed_bytes_per_sec: 0,
+      }),
+    ]);
+
+    store.upsertGenericProgress(id, "Example video", "youtube", 50, 10, 50, 100, "downloading");
+
+    expect(store.getDownloads().get(id)).toMatchObject({
+      status: "error",
+      speed: 0,
+      error: "Cancelled",
+    });
+  });
 });
 
 describe("getAggregate", () => {
@@ -113,15 +136,15 @@ describe("getAggregate", () => {
     expect(agg.etaSeconds).toBeCloseTo(0.875);
   });
 
-  it("falls back to the largest per-item ETA when a total size is unknown", () => {
+  it("uses reported progress and the largest per-item ETA when a total size is unknown", () => {
     store.syncQueueState([
-      queueItem(1, { speed_bytes_per_sec: 1000, downloaded_bytes: 200, total_bytes: 1000, eta_seconds: 4 }),
-      queueItem(2, { speed_bytes_per_sec: 500, downloaded_bytes: 100, total_bytes: null, eta_seconds: 42 }),
+      queueItem(1, { percent: 20, speed_bytes_per_sec: 1000, downloaded_bytes: 200, total_bytes: 1000, eta_seconds: 4 }),
+      queueItem(2, { percent: 18, speed_bytes_per_sec: 500, downloaded_bytes: 100, total_bytes: null, eta_seconds: 42 }),
     ]);
 
     const agg = store.getAggregate();
     expect(agg.totalBytes).toBeNull();
-    expect(agg.percent).toBeNull();
+    expect(agg.percent).toBe(19);
     expect(agg.speedBps).toBe(1500);
     expect(agg.etaSeconds).toBe(42);
   });
@@ -137,7 +160,7 @@ describe("getAggregate", () => {
     expect(agg.etaSeconds).toBeNull();
   });
 
-  it("excludes queued, paused, complete and seeding items from the maths", () => {
+  it("retains queued and paused progress but excludes historical completions and seeds", () => {
     store.syncQueueState([
       queueItem(1, { status: { type: "Active" }, speed_bytes_per_sec: 1000, downloaded_bytes: 500, total_bytes: 1000 }),
       queueItem(2, { status: { type: "Queued" }, speed_bytes_per_sec: 9000, downloaded_bytes: 999, total_bytes: 9999 }),
@@ -151,9 +174,10 @@ describe("getAggregate", () => {
     expect(agg.pausedCount).toBe(1);
     expect(agg.activeCount).toBe(1);
     expect(agg.speedBps).toBe(1000);
-    expect(agg.downloadedBytes).toBe(500);
-    expect(agg.totalBytes).toBe(1000);
-    expect(agg.percent).toBeCloseTo(50);
+    expect(agg.downloadedBytes).toBe(2498);
+    expect(agg.totalBytes).toBe(20998);
+    expect(agg.percent).toBeCloseTo(2498 / 20998 * 100);
+    expect(agg.etaSeconds).toBeNull();
   });
 
   it("reports a seeding-only queue as idle so the bar does not stay pinned", () => {
@@ -211,7 +235,7 @@ describe("getAggregate", () => {
     }
   });
 
-  it("lets a course item contribute speed but forces percent to null", () => {
+  it("uses item progress when a course makes the aggregate byte total unknowable", () => {
     store.syncQueueState([
       queueItem(1, { speed_bytes_per_sec: 1000, downloaded_bytes: 200, total_bytes: 1000, eta_seconds: 5 }),
     ]);
@@ -220,9 +244,9 @@ describe("getAggregate", () => {
     const agg = store.getAggregate();
     expect(agg.activeCount).toBe(2);
     expect(agg.totalBytes).toBeNull();
-    expect(agg.percent).toBeNull();
+    expect(agg.percent).toBe(15);
     expect(agg.downloadedBytes).toBe(200 + 4096);
-    expect(agg.etaSeconds).toBe(5);
+    expect(agg.etaSeconds).toBeNull();
 
     store.removeDownload(77);
   });
@@ -241,5 +265,119 @@ describe("getAggregate", () => {
     } finally {
       nowSpy.mockRestore();
     }
+  });
+});
+
+describe("aggregate batch lifecycle", () => {
+  it("keeps progress when every download pauses and restores speed on resume", () => {
+    store.syncQueueState([queueItem(1, { downloaded_bytes: 40, speed_bytes_per_sec: 10 })]);
+    store.syncQueueState([queueItem(1, { status: { type: "Paused" }, downloaded_bytes: 40 })]);
+    expect(store.getAggregate()).toMatchObject({ percent: 40, downloadedBytes: 40, totalBytes: 100, speedBps: 0, etaSeconds: null, pausedCount: 1, outcome: "working" });
+    store.syncQueueState([queueItem(1, { downloaded_bytes: 50, speed_bytes_per_sec: 10 })]);
+    expect(store.getAggregate()).toMatchObject({ percent: 50, speedBps: 10, etaSeconds: 5 });
+  });
+
+  it("retains completed work after clearing history while another item downloads", () => {
+    store.syncQueueState([queueItem(1, { downloaded_bytes: 90 }), queueItem(2, { downloaded_bytes: 20 })]);
+    const before = store.getAggregate().percent!;
+    store.markGenericComplete(1, true);
+    expect(store.getAggregate().percent).toBeGreaterThanOrEqual(before);
+    expect(store.getAggregate()).toMatchObject({ downloadedBytes: 120, totalBytes: 200, percent: 60 });
+    store.clearFinished();
+    expect(store.getAggregate()).toMatchObject({ downloadedBytes: 120, totalBytes: 200, percent: 60 });
+  });
+
+  it("starts a fresh batch after completion and accepts newly queued work within a batch", () => {
+    store.syncQueueState([queueItem(1, { downloaded_bytes: 90 })]);
+    const firstBatch = store.getAggregate().batchId;
+    store.markGenericComplete(1, true);
+    expect(store.getAggregate().outcome).toBe("complete");
+    store.syncQueueState([queueItem(1, { status: { type: "Complete" } }), queueItem(2, { downloaded_bytes: 20 })]);
+    expect(store.getAggregate()).toMatchObject({ batchId: firstBatch + 1, downloadedBytes: 20, totalBytes: 100, percent: 20 });
+    store.syncQueueState([queueItem(2, { downloaded_bytes: 20 }), queueItem(3, { status: { type: "Queued" } })]);
+    expect(store.getAggregate()).toMatchObject({ batchId: firstBatch + 1, totalBytes: 200, percent: 10, etaSeconds: null });
+  });
+
+  it("does not carry a historical failure into a healthy active batch", () => {
+    store.syncQueueState([
+      queueItem(1, { status: { type: "Error", data: "Old failure" } }),
+      queueItem(2, { speed_bytes_per_sec: 10, downloaded_bytes: 25 }),
+    ]);
+
+    expect(store.getDownloads().get(1)?.status).toBe("error");
+    expect(store.getDownloads().get(2)?.status).toBe("downloading");
+    expect(store.getAggregate()).toMatchObject({
+      outcome: "working",
+      activeCount: 1,
+      failedCount: 0,
+      downloadedBytes: 25,
+      totalBytes: 100,
+      percent: 25,
+    });
+  });
+
+  it("never reports successful completion when work is cancelled or fails", () => {
+    store.syncQueueState([queueItem(1), queueItem(2)]);
+    store.removeDownload(1);
+    store.markGenericComplete(2, true);
+    expect(store.getAggregate().outcome).toBe("stopped");
+    store.syncQueueState([queueItem(3)]);
+    store.markGenericComplete(3, false, "Network unavailable");
+    expect(store.getAggregate()).toMatchObject({ outcome: "stopped", failedCount: 1 });
+  });
+
+  it("acknowledges failures without removing items and resurfaces a failed retry", () => {
+    store.syncQueueState([queueItem(1)]);
+    store.markGenericComplete(1, false, "Network unavailable");
+    store.dismissAggregateFailures();
+    expect(store.getAggregate().failedCount).toBe(0);
+    expect(store.getDownloads().get(1)?.status).toBe("error");
+    store.syncQueueState([queueItem(1)]);
+    store.markGenericComplete(1, false, "Network unavailable");
+    expect(store.getAggregate().failedCount).toBe(1);
+  });
+
+  it("shows a new failure even when a different failed item was dismissed", () => {
+    store.syncQueueState([queueItem(1), queueItem(2)]);
+    store.markGenericComplete(1, false);
+    store.dismissAggregateFailures();
+    store.markGenericComplete(2, false);
+    expect(store.getAggregate().failedCount).toBe(1);
+  });
+
+  it("retains a torrent's completed bytes when it starts seeding", () => {
+    store.syncQueueState([queueItem(1, { downloaded_bytes: 90 }), queueItem(2, { downloaded_bytes: 20 })]);
+    store.syncQueueState([queueItem(1, { status: { type: "Seeding" }, downloaded_bytes: 100 }), queueItem(2, { downloaded_bytes: 20 })]);
+    expect(store.getAggregate()).toMatchObject({ activeCount: 1, downloadedBytes: 120, totalBytes: 200 });
+    store.markGenericComplete(2, true);
+    expect(store.getAggregate().outcome).toBe("complete");
+  });
+
+  it("does not estimate a partial ETA for missing or invalid estimates", () => {
+    for (const eta of [null, NaN, Infinity, -1, 0]) {
+      store.syncQueueState([
+        queueItem(1, { speed_bytes_per_sec: 10, eta_seconds: 5 }),
+        queueItem(2, { speed_bytes_per_sec: 10, total_bytes: null, eta_seconds: eta }),
+      ]);
+      expect(store.getAggregate().etaSeconds).toBeNull();
+    }
+  });
+
+  it("hides ETA for stalled work even while another transfer is flowing", () => {
+    store.syncQueueState([queueItem(1, { speed_bytes_per_sec: 10 }), queueItem(2)]);
+    expect(store.getAggregate().etaSeconds).toBeNull();
+  });
+
+  it("distinguishes a mixed paused and queued state", () => {
+    store.syncQueueState([queueItem(1, { status: { type: "Paused" }, downloaded_bytes: 20 }), queueItem(2, { status: { type: "Queued" } })]);
+    expect(store.getAggregate()).toMatchObject({ activeCount: 0, queuedCount: 1, pausedCount: 1, downloadedBytes: 20, percent: 10, etaSeconds: null });
+  });
+
+  it("keeps unknown-sized byte counts and reported progress when paused", () => {
+    store.syncQueueState([queueItem(1, { percent: 18, downloaded_bytes: 40, total_bytes: null })]);
+    store.syncQueueState([queueItem(1, { status: { type: "Paused" }, percent: 18, downloaded_bytes: 40, total_bytes: null })]);
+    expect(store.getAggregate()).toMatchObject({ downloadedBytes: 40, percent: 18 });
+    store.markGenericComplete(1, true);
+    expect(store.getAggregate()).toMatchObject({ downloadedBytes: 40, totalBytes: 40, percent: 100, outcome: "complete" });
   });
 });

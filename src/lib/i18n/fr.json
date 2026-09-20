@@ -3691,10 +3691,14 @@
       "active": "{{count}} en cours",
       "queued": "{{count}} en file",
       "paused_all": "Tout en pause",
-      "eta": "{{eta}} restant",
+      "eta": "Environ {{eta}} restantes",
       "open": "Voir les téléchargements",
       "indeterminate": "Téléchargement, taille totale inconnue",
-      "complete": "Téléchargements terminés"
+      "complete": "Téléchargements terminés",
+      "paused": "{{count}} en pause",
+      "failed": "{{count}} en échec",
+      "dismiss": "Masquer le message",
+      "transferred": "{{size}} téléchargés"
     }
   },
   "toast": {

@@ -3691,10 +3691,14 @@
       "active": "{{count}} در حال دانلود",
       "queued": "{{count}} در صف",
       "paused_all": "همه متوقف شده",
-      "eta": "{{eta}} باقی‌مانده",
+      "eta": "حدود {{eta}} باقی مانده",
       "open": "مشاهده دانلودها",
       "indeterminate": "در حال دانلود، حجم کل نامشخص",
-      "complete": "دانلودها کامل شد"
+      "complete": "دانلودها کامل شد",
+      "paused": "{{count}} متوقف‌شده",
+      "failed": "{{count}} ناموفق",
+      "dismiss": "بستن اعلان",
+      "transferred": "{{size}} دانلود شده"
     }
   },
   "toast": {

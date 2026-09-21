@@ -1,5 +1,27 @@
 <script lang="ts">
   import "../app.css";
+  import "$lib/style/workspace-design.css";
+  import { getWorkspaceDesign, initWorkspaceDesign } from "$lib/stores/workspace-design.svelte";
+  let workspaceDesign = $derived(getWorkspaceDesign());
+  let designScope = $derived(page.url.pathname === "/" || page.url.pathname === "/downloads" || page.url.pathname === "/llm" || page.url.pathname.startsWith("/llm/") || page.url.pathname === "/help" || page.url.pathname.startsWith("/help/"));
+  onMount(initWorkspaceDesign);
+  // Document-level scope includes native chrome and portals; cleanup restores
+  // the legacy module contract when leaving the workspace.
+  $effect(() => {
+    if (!designScope) return;
+    const root = document.documentElement;
+    const previous = { preset: root.getAttribute("data-ds-preset"), mode: root.getAttribute("data-ds-mode"), scoped: root.classList.contains("ds-scope") };
+    root.classList.add("ds-scope");
+    root.setAttribute("data-ds-preset", workspaceDesign.preset);
+    root.setAttribute("data-ds-mode", workspaceDesign.resolvedMode);
+    return () => {
+      if (!previous.scoped) root.classList.remove("ds-scope");
+      for (const [key, value] of [["data-ds-preset", previous.preset], ["data-ds-mode", previous.mode]]) {
+        if (value === null) root.removeAttribute(key!); else root.setAttribute(key!, value!);
+      }
+    };
+  });
+
   import "$lib/style/queue-kinds.css";
   import { page } from "$app/state";
   import { isMac } from "$lib/platform";
@@ -278,6 +300,7 @@
         keywords: "plugins extensions store",
         action: () => goto("/marketplace"),
       },
+      { id: "nav-help", label: get(t)("nav.help"), group: get(t)("command_palette.group_nav"), keywords: "help ajuda guias docs assinatura agente monitor", action: () => goto("/help") },
       {
         id: "nav-about",
         label: get(t)("nav.about"),
@@ -398,7 +421,7 @@
       </div>
     {/if}
 
-    <main id="main-content" class="content">
+    <main id="main-content" class="content" class:ds-scope={designScope} data-ds-preset={designScope ? workspaceDesign.preset : undefined} data-ds-mode={designScope ? workspaceDesign.resolvedMode : undefined}>
       <div class="mac-pane" class:mac-pane--flush={isFlushRoute}>
         {#if isStudyRoute}
           <div class="study-shell">

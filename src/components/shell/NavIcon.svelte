@@ -19,6 +19,7 @@
     downloads: { glyph: "tray-arrow-down", from: "#FFB340", to: "#F28500" },
     chat: { glyph: "chats-circle", from: "#4CD964", to: "#2AA845" },
     llm: { glyph: "sparkle", from: "#C77DFF", to: "#7B3FE4" },
+    help: { glyph: "book-open-text", from: "var(--accent)", to: "var(--accent)" },
     world: { glyph: "globe-hemisphere-west", from: "#67D27E", to: "#2F9E52" },
     marketplace: { glyph: "storefront", from: "#6E8CFF", to: "#3D5BF0" },
     settings: { glyph: "gear-six", from: "#A3A3A8", to: "#6F6F75" },

@@ -107,6 +107,21 @@ describe("loadServers", () => {
 });
 
 describe("saveServer / removeServer", () => {
+  it("keeps a server visible if deletion fails", async () => {
+    invoke.mockResolvedValue([ROW]);
+    await store.loadServers();
+    invoke.mockRejectedValue("ERR_MCP_CONFIG");
+    expect(await store.removeServer("fetch")).toBe(false);
+    expect(store.getServers()).toEqual([ROW]);
+  });
+  it("does not replace saved servers with demo connections after a read failure", async () => {
+    invoke.mockResolvedValue([ROW]);
+    await store.loadServers();
+    invoke.mockRejectedValue("ERR_IO");
+    await store.loadServers(true);
+    expect(store.getServers()).toEqual([ROW]);
+    expect(store.isDemo()).toBe(false);
+  });
   it("sends the config and takes the list the backend answers", async () => {
     invoke.mockResolvedValue([ROW]);
     await store.loadServers();
@@ -130,6 +145,7 @@ describe("saveServer / removeServer", () => {
     invoke.mockRejectedValue("ERR_MCP_CONFIG: url");
     expect(await store.saveServer(ROW.config)).toBe(false);
     expect(store.getErrorKey()).toBe("llm.mcp.err.config");
+    expect(store.getServers()).toEqual([]);
   });
 
   it("removes a server by id", async () => {
@@ -201,6 +217,12 @@ describe("testServer", () => {
 });
 
 describe("setGrant", () => {
+  it("keeps permissions unchanged when a grant is refused", async () => {
+    const a = agent();
+    invoke.mockRejectedValue("ERR_MCP_CONFIG");
+    expect(await store.setGrant(a, "fetch", "fetch", "auto")).toBe(false);
+    expect(a.tools).toEqual([]);
+  });
   it("uses llm_mcp_grant when it exists", async () => {
     invoke.mockResolvedValue([]);
     const a = agent();

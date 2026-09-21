@@ -60,6 +60,27 @@ async function startTurn(): Promise<string> {
 }
 
 describe("roster", () => {
+  it("keeps a real empty roster empty instead of inventing a team", async () => {
+    invoke.mockResolvedValue([]);
+    await store.loadRoster();
+    expect(store.getAgents()).toEqual([]);
+    expect(store.isDemoRoster()).toBe(false);
+  });
+  it("does not substitute demo agents for a failed real read", async () => {
+    invoke.mockRejectedValue("ERR_IO");
+    await store.loadRoster();
+    expect(store.getAgents()).toEqual([]);
+    expect(store.isDemoRoster()).toBe(false);
+  });
+  it("preserves the effective model when the backend refuses a switch", async () => {
+    invoke.mockRejectedValue("ERR_STUB");
+    await store.loadRoster();
+    store.selectAgent(store.getAgents()[0].id);
+    const previous = store.getActiveConversation()?.model;
+    invoke.mockRejectedValue("ERR_LLM_PROVIDER");
+    expect(await store.switchModel({ provider: "new", model: "missing" })).toBe(false);
+    expect(store.getActiveConversation()?.model).toEqual(previous);
+  });
   it("falls back to the demo roster on ERR_STUB and keeps the section usable", async () => {
     invoke.mockRejectedValue("ERR_STUB");
     await store.loadRoster();
@@ -89,6 +110,39 @@ describe("roster", () => {
     await store.loadRoster();
     expect(store.isDemoRoster()).toBe(true);
     expect(store.getAgents().length).toBeGreaterThan(0);
+  });
+});
+
+describe("turn launch recovery", () => {
+  it("cancels the real server request when stop precedes the startup response", async () => {
+    let finishStart!: (value: string) => void;
+    const started = new Promise<string>(resolve => { finishStart = resolve; });
+    invoke.mockImplementation((cmd: string) => {
+      if (cmd === "llm_roster_list") return Promise.reject("ERR_STUB");
+      if (cmd === "llm_turn_start") return started;
+      return Promise.resolve(null);
+    });
+    await store.loadRoster();
+    store.selectAgent(store.getAgents()[0].id);
+    const sending = store.sendMessage("stop during startup");
+    await store.cancelTurn();
+    finishStart("real-request");
+    expect(await sending).toBe(false);
+    expect(invoke).toHaveBeenCalledWith("llm_turn_cancel", { requestId: "real-request" });
+    expect(store.getActiveTurn()).toBeNull();
+  });
+
+  it("preserves retry input without simulated output or duplicate optimistic messages on a real launch failure", async () => {
+    const agent = { id: "real", name: "Real", role: "worker", system_prompt: "", model: { policy: "fixed", model: { provider: "openai", model: "gpt-5" } }, runtime: { kind: "native" } };
+    invoke.mockImplementation((cmd: string) => cmd === "llm_roster_list" ? Promise.resolve([agent]) : Promise.reject("ERR_NETWORK"));
+    await store.loadRoster();
+    store.selectAgent("real");
+    expect(await store.sendMessage("keep my draft")).toBe(false);
+    expect(store.getActiveTurn()).toBeNull();
+    expect(store.getMessages()).toEqual([]);
+    expect(await store.sendMessage("keep my draft")).toBe(false);
+    expect(store.getMessages()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 
@@ -158,6 +212,25 @@ describe("turn buffer", () => {
 });
 
 describe("cancellation", () => {
+  it("keeps the real stream and permission request when backend actions fail", async () => {
+    const agent = { id: "real", name: "Real", role: "worker", system_prompt: "", model: { policy: "fixed", model: { provider: "openai", model: "gpt-5" } }, runtime: { kind: "native" } };
+    invoke.mockImplementation((cmd: string) => {
+      if (cmd === "llm_roster_list") return Promise.resolve([agent]);
+      if (cmd === "llm_turn_start") return Promise.resolve("real-request");
+      return Promise.reject("ERR_NETWORK");
+    });
+    await store.loadRoster();
+    store.selectAgent("real");
+    expect(await store.sendMessage("work")).toBe(true);
+    await expect(store.cancelTurn()).rejects.toBe("ERR_NETWORK");
+    expect(store.getActiveTurn()?.requestId).toBe("real-request");
+    store.handleToolAsk({ agent: "real", request_id: "real-request", tool_call_id: "permission", tool: "files.write" });
+    await expect(store.answerTool("permission", true)).rejects.toBe("ERR_NETWORK");
+    expect(store.getToolAsk()?.tool_call_id).toBe("permission");
+    invoke.mockRejectedValue("ERR_LLM_NO_TURN");
+    await expect(store.cancelTurn()).resolves.toBeUndefined();
+    expect(store.getActiveTurn()).toBeNull();
+  });
   it("clears turn, buffer and frame, and keeps what streamed so far", async () => {
     const requestId = await startTurn();
     store.handleTurnEvent(requestId, { type: "text_delta", text: "partial" });
@@ -224,6 +297,7 @@ describe("conversations", () => {
     const a = store.selectAgent(first.id);
     store.selectAgent(second.id);
     expect(store.selectAgent(first.id)).toBe(a);
+    invoke.mockResolvedValue(null); // The override is shown only after the backend accepts it.
     await store.switchModel({ provider: "openai", model: "gpt-5" });
     expect(store.getActiveConversation()!.model).toEqual({ provider: "openai", model: "gpt-5" });
   });
@@ -242,5 +316,45 @@ describe("fake turn helpers", () => {
     expect(events.filter((e) => e.type === "text_delta")).toHaveLength(3);
     expect(events[events.length - 2].type).toBe("usage");
     expect(events[events.length - 1]).toEqual({ type: "finished", reason: "stop" });
+  });
+});
+
+describe("roster persistence failures", () => {
+  async function existingAgent() {
+    invoke.mockRejectedValue("ERR_STUB");
+    await store.loadRoster();
+    return structuredClone(store.getAgents()[0]);
+  }
+
+  it("keeps the saved roster while an update is pending and after failure", async () => {
+    const original = await existingAgent();
+    let reject!: (reason: unknown) => void;
+    invoke.mockImplementation(() => new Promise((_, fail) => { reject = fail; }));
+    const pending = store.saveAgent({ ...original, name: "Unsaved edit" });
+    expect(store.getAgents().find(a => a.id === original.id)?.name).toBe(original.name);
+    reject("disk full");
+    expect(await pending).toBe(false);
+    expect(store.getAgents().find(a => a.id === original.id)?.name).toBe(original.name);
+  });
+
+  it("does not publish a failed create and publishes a successful retry once", async () => {
+    const original = await existingAgent();
+    const draft = { ...original, id: "new-agent", name: "New agent" };
+    invoke.mockRejectedValue("disk full");
+    expect(await store.saveAgent(draft)).toBe(false);
+    expect(store.getAgents().some(a => a.id === draft.id)).toBe(false);
+    invoke.mockResolvedValue(undefined);
+    expect(await store.saveAgent(draft)).toBe(true);
+    expect(store.getAgents().filter(a => a.id === draft.id)).toEqual([draft]);
+  });
+
+  it("retains the agent and conversation when deletion fails", async () => {
+    const original = await existingAgent();
+    store.selectAgent(original.id);
+    const conversations = structuredClone(store.getConversations());
+    invoke.mockRejectedValue("disk full");
+    expect(await store.deleteAgent(original.id)).toBe(false);
+    expect(store.getAgents().some(a => a.id === original.id)).toBe(true);
+    expect(store.getConversations()).toEqual(conversations);
   });
 });

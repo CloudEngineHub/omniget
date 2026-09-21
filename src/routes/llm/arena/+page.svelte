@@ -1,5 +1,7 @@
 <script lang="ts">
   /** Placeholder for the arena tab; it is built in a later phase. */
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   import { t } from "$lib/i18n";
 </script>
 
@@ -7,7 +9,10 @@
 
 <div class="page soon">
   <h1 class="page-title">{$t("llm.tab.arena")}</h1>
-  <p class="page-lede">{$t("llm.soon_title")} — {$t("llm.soon_body")}</p>
+  <span class="tag">{$surfaceCopy.unavailableFeature}</span>
+  <SurfaceGuide text={$surfaceCopy.arenaHint} steps={$surfaceCopy.arenaSteps.split("|")} href="/help?article=models#guide" />
+  <p class="page-lede">{$t("llm.arena.explanation")}</p>
+  <a class="button" href="/llm">{$t("llm.tab.chat")} →</a>
 </div>
 
 <style>

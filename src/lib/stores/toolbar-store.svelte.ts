@@ -36,6 +36,8 @@ export type ToolbarState = {
 };
 
 let state = $state<ToolbarState>({});
+// Registration identity must not depend on the proxy created by $state.
+let owner: symbol | null = null;
 
 export function getToolbar(): ToolbarState {
   return state;
@@ -43,12 +45,15 @@ export function getToolbar(): ToolbarState {
 
 /** Replace the toolbar contents. Returns a cleanup that clears them. */
 export function setToolbar(next: ToolbarState): () => void {
+  const registration = Symbol("toolbar");
+  owner = registration;
   state = next;
   return () => {
-    if (state === next) state = {};
+    if (owner === registration) clearToolbar();
   };
 }
 
 export function clearToolbar(): void {
+  owner = null;
   state = {};
 }

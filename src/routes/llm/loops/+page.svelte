@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Loops: the same prompt run round after round until a check command
    * passes or the round/minute budget runs out.
@@ -28,7 +30,8 @@
   let name = $state("");
   let prompt = $state("");
   let workspace = $state<string | null>(null);
-  let maxRounds = $state<number | null>(null);
+  let reviewing = $state(false);
+  let maxRounds = $state<number | null>(10);
   let maxMinutes = $state<number | null>(null);
   let checkCommand = $state("");
   let creating = $state(false);
@@ -56,7 +59,7 @@
   }
 
   function reason(loop: LoopDef): string {
-    return loop.stop_reason ?? "";
+    return loop.stop_reason === "check_passed" ? $t("llm.loops.check_passed") : loop.stop_reason ?? "";
   }
 
   async function create() {
@@ -67,12 +70,13 @@
       prompt: prompt.trim(),
       name: name.trim() || undefined,
       workspace,
-      max_rounds: positive(maxRounds),
+      max_rounds: positive(maxRounds) ?? 10,
       max_minutes: positive(maxMinutes),
       check_command: checkCommand.trim() || null,
     });
     creating = false;
     if (loop) {
+      reviewing = false;
       prompt = "";
       name = "";
     }
@@ -84,11 +88,13 @@
 <div class="page page-wide loops-page">
   <header class="page-head">
     <div>
-      <h1 class="page-title">{$t("llm.loops.title")}</h1>
+      <h1 class="page-title">{$surfaceCopy.routines}</h1>
       <p class="page-lede">{$t("llm.loops.lede")}</p>
     </div>
   </header>
+  <SurfaceGuide text={$surfaceCopy.loopsHint} href="/help?article=routines#guide" />
 
+  <details class="creation-panel"><summary>{$surfaceCopy.createRoutine}</summary>
   <section class="surface-card form">
     <h2 class="section-header-title">{$t("llm.loops.new_title")}</h2>
     <div class="form-row">
@@ -123,7 +129,7 @@
     <div class="form-row">
       <label class="field small">
         <span class="field-label">{$t("llm.loops.max_rounds")}</span>
-        <input class="input" type="number" min="1" bind:value={maxRounds} />
+        <input class="input" type="number" min="1" placeholder="10" bind:value={maxRounds} />
       </label>
       <label class="field small">
         <span class="field-label">{$t("llm.loops.max_minutes")}</span>
@@ -134,13 +140,23 @@
         <input class="input mono" type="text" bind:value={checkCommand} placeholder="npm test" />
       </label>
     </div>
-    <p class="hint">{$t("llm.loops.stop_hint")}</p>
-    <div>
-      <button type="button" class="button active" disabled={creating || !agentId || !prompt.trim()} onclick={create}>
-        {$t("llm.loops.start")}
-      </button>
-    </div>
+    <p class="hint">{$t("llm.loops.summary", { rounds: positive(maxRounds) ?? 10 })}</p>
+    {#if !checkCommand.trim()}<p class="hint">{$t("llm.loops.no_check")}</p>{/if}
+    {#if reviewing}
+      <div class="loop-review" role="region" aria-label={$t("llm.loops.review")}>
+        <strong>{agentName(agentId)} · {name || $t("llm.loops.new_title")}</strong>
+        <p>{prompt}</p>
+        {#if workspace}<p><code>{workspace}</code></p>{/if}
+        {#if checkCommand.trim()}<p><code>{checkCommand}</code></p>{/if}
+        {#if positive(maxMinutes)}<p>{$t("llm.loops.max_minutes")}: {positive(maxMinutes)}</p>{/if}
+        <button type="button" class="button active" disabled={creating || !agentId || !prompt.trim()} onclick={create}>{$t("llm.loops.start")}</button>
+        <button type="button" class="button" disabled={creating} onclick={() => reviewing = false}>{$t("llm.loops.edit")}</button>
+      </div>
+    {:else}
+      <div><button type="button" class="button active" disabled={!agentId || !prompt.trim()} onclick={() => reviewing = true}>{$t("llm.loops.review")}</button></div>
+    {/if}
   </section>
+  </details>
 
   <section class="stack">
     <h2 class="section-header-title">{$t("llm.loops.list_title")}</h2>
@@ -221,6 +237,11 @@
 </div>
 
 <style>
+  .creation-panel { margin-bottom:24px; }
+  .creation-panel summary { cursor:pointer; padding:14px 16px; border:1px solid var(--separator); border-radius:var(--radius-lg); color:var(--text); font-weight:600; }
+  .creation-panel[open] summary { margin-bottom:12px; }
+  .creation-panel summary:focus-visible { outline:var(--focus-ring); }
+  .loop-review { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-mut); padding: var(--space-4); overflow-wrap: anywhere; }
   .loops-page {
     flex: 1;
     min-height: 0;

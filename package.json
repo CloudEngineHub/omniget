@@ -1,10 +1,34 @@
 {
   "name": "omniget",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Udemy, Hotmart and YouTube downloader with a yt-dlp GUI for 1,800+ sites, and a desktop app to run AI agents (Claude Code, Codex, Gemini CLI, Ollama) with permissions, undo, jobs, loops and an MCP server. Free and open source for Windows, macOS and Linux.",
-  "keywords": ["downloader", "yt-dlp", "yt-dlp-gui", "youtube-downloader", "video-downloader", "udemy-downloader", "hotmart-downloader", "course-downloader", "instagram-downloader", "tiktok-downloader", "ai-agents", "claude-code", "codex", "gemini-cli", "ollama", "mcp-server", "agent-client-protocol", "coding-agent", "desktop-app", "tauri"],
+  "keywords": [
+    "downloader",
+    "yt-dlp",
+    "yt-dlp-gui",
+    "youtube-downloader",
+    "video-downloader",
+    "udemy-downloader",
+    "hotmart-downloader",
+    "course-downloader",
+    "instagram-downloader",
+    "tiktok-downloader",
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "gemini-cli",
+    "ollama",
+    "mcp-server",
+    "agent-client-protocol",
+    "coding-agent",
+    "desktop-app",
+    "tauri"
+  ],
   "homepage": "https://github.com/tonhowtf/omniget",
-  "repository": {"type": "git", "url": "git+https://github.com/tonhowtf/omniget.git"},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonhowtf/omniget.git"
+  },
   "type": "module",
   "packageManager": "pnpm@10.29.3",
   "scripts": {

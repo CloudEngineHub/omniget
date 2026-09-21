@@ -633,6 +633,7 @@ pub async fn llm_accounts_create(
     cli: String,
     label: String,
     share: Option<bool>,
+    request_id: Option<String>,
 ) -> Result<AccountsSnapshot, String> {
     let kind = CliKind::parse(&cli).ok_or_else(|| format!("{}: {}", ERR_ACCOUNTS_CLI, cli))?;
     let store_ = account_store()?;
@@ -642,7 +643,26 @@ pub async fn llm_accounts_create(
     } else {
         label.trim().to_string()
     };
-    let id = account_id(kind, &label, &taken);
+    let id = if let Some(request) = request_id {
+        if request.is_empty()
+            || request.len() > 100
+            || !request
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '-')
+        {
+            return Err(format!("{ERR_ACCOUNTS_IO}: invalid request id"));
+        }
+        let id = format!("setup-{request}");
+        if let Some(existing) = store_.get(&id) {
+            if existing.cli != kind || existing.label != label {
+                return Err(format!("{ERR_ACCOUNTS_IO}: request id conflict"));
+            }
+            return snapshot();
+        }
+        id
+    } else {
+        account_id(kind, &label, &taken)
+    };
     let config_dir = store::default_profile_dir(&id)
         .ok_or_else(|| format!("{}: no app data dir", ERR_ACCOUNTS_IO))?;
     let account = CliAccount {

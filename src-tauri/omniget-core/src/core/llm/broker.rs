@@ -406,7 +406,8 @@ impl ToolBroker {
             }
         }
 
-        let result = executor.execute(name, input).await;
+        let result =
+            super::code_tools::scope_tool_call(tool_call_id, executor.execute(name, input)).await;
         let ms = start.elapsed().as_millis() as u32;
         match result {
             Ok(content) => {

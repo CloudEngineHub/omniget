@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { page } from "$app/state";
+  import { goto } from "$app/navigation";
+  import WorkspaceAppearance from "$components/settings/WorkspaceAppearance.svelte";
   import { tick } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
@@ -194,15 +197,10 @@
 
   let activeCategory = $state<SettingsCategory>("downloads");
 
-  let tabApplied = false;
   $effect(() => {
-    if (tabApplied || typeof window === "undefined") return;
-    tabApplied = true;
-    const tab = new URLSearchParams(window.location.search).get("tab");
+    const tab = page.url.searchParams.get("tab");
     const valid = ["downloads", "appearance", "profile", "typography", "network", "cookies", "channels", "ai", "world", "plugins", "advanced"];
-    if (tab && valid.includes(tab)) {
-      activeCategory = tab as SettingsCategory;
-    }
+    activeCategory = tab && valid.includes(tab) ? tab as SettingsCategory : "downloads";
   });
 
   let searchQuery = $state("");
@@ -546,7 +544,7 @@
                     class="settings-mac-cat"
                     class:active={!isSearching && activeCategory === cat}
                     class:search-match={isSearching && (categoryMatchCounts[cat] ?? 0) > 0}
-                    onclick={() => { activeCategory = cat; searchQuery = ""; }}
+                    onclick={() => { searchQuery = ""; void goto(`/settings?tab=${cat}`, { noScroll: true, keepFocus: true }); }}
                   >
                     <span class="settings-mac-cat-icon" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d={CATEGORY_ICONS[cat] ?? "M12 6v12M6 12h12"} /></svg>
@@ -567,6 +565,7 @@
 
     {#if isSearching || activeCategory === "appearance"}
       <div class="settings-panel" data-settings-cat="appearance">
+        <WorkspaceAppearance />
         <SettingsAppearance searchActive={isSearching} />
       </div>
     {/if}
@@ -574,6 +573,7 @@
     {#if isSearching || activeCategory === "profile"}
       <div class="settings-panel" data-settings-cat="profile">
         <SettingsProfile />
+        <WorkspaceAppearance />
       </div>
     {/if}
 

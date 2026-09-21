@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Observatory — the instrument panel of the LLM section.
    *
@@ -40,6 +42,7 @@
 
   let windowKey = $state<WindowKey>("24h");
   let busy = $state(false);
+  let diagnosticsOpen = $state(false);
 
   let snapshot = $derived(getTelemetry());
   let dataState = $derived(getTelemetryState());
@@ -85,12 +88,14 @@
 
   onMount(() => {
     let stop: (() => void) | null = null;
+    let disposed = false;
     const demoFlag = $page.url.searchParams.get("demo") === "1";
     startTelemetry({ demo: demoFlag }).then((fn) => {
+      if (disposed) { fn(); return; }
       stop = fn;
       if (!demoFlag) void loadCostFallback();
     });
-    return () => stop?.();
+    return () => { disposed = true; stop?.(); };
   });
 </script>
 
@@ -108,6 +113,7 @@
       {/each}
     </div>
   </header>
+  <SurfaceGuide text={$surfaceCopy.observatoryHint} href="/help?article=activity#guide" />
 
   {#if dataState === "unavailable" && snapshot.agents.length === 0 && !demo}
     <div class="empty-state">
@@ -118,6 +124,11 @@
       </button>
     </div>
   {:else}
+    <div class="activity-summary">
+      <a href="/llm/jobs"><strong>{snapshot.agents.filter(a => a.state === "streaming").length}</strong>{$t("llm.observatory.running")}</a>
+      <a href="/llm/jobs"><strong>{snapshot.agents.filter(a => a.state === "waiting_tool").length}</strong>{$t("llm.observatory.waiting")}</a>
+      <a href="/llm/jobs"><strong>{snapshot.agents.filter(a => a.state === "error").length}</strong>{$t("llm.observatory.failures")}</a>
+    </div>
     {#if chain.length}
       <section>
         <span class="group-label">{$t("llm.observatory.quota")}</span>
@@ -163,11 +174,10 @@
       {/if}
     </section>
 
-    <section>
-      <!-- No group label here: WireProbePanel already renders its own title and
-           description, and two "Wire probe" headings stacked read as a bug. -->
-      <WireProbePanel />
-    </section>
+    <details class="diagnostic-disclosure" ontoggle={(event) => diagnosticsOpen = event.currentTarget.open}>
+      <summary>{$surfaceCopy.advanced}</summary>
+      {#if diagnosticsOpen}<WireProbePanel />{/if}
+    </details>
 
     <section>
       <span class="group-label">{$t("llm.observatory.diagnostics")}</span>
@@ -187,14 +197,25 @@
 </div>
 
 <style>
+  .diagnostic-disclosure summary { cursor:pointer; padding:16px; font-weight:600; color:var(--text); border-bottom:1px solid var(--separator); }
+  .activity-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); }
+  .activity-summary a { display: flex; flex-direction: column; padding: var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-muted); text-decoration: none; }
+  .activity-summary strong { font-size: var(--text-xl); color: var(--text); }
   .observatory {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
     padding: var(--space-5);
-    max-width: 1100px;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+    width: 100%;
+    box-sizing: border-box;
   }
+  .observatory > :global(*) { flex-shrink: 0; min-width: 0; }
   .page-head {
+    flex-wrap: wrap;
     display: flex;
     align-items: flex-end;
     gap: var(--space-4);
@@ -240,7 +261,7 @@
   }
   .agents {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
     gap: var(--space-4);
   }
   code {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Jobs: background agent runs. A form to start one, the list with live
    * state, the pending permission ask inline, and the triggers (cron and
@@ -35,6 +37,15 @@
 
   let agents = $derived(getAgents());
   let jobs = $derived(getJobs());
+  let filter = $state("all");
+  const filters = ["all", "active", "attention", "done"];
+  function matches(job: Job, key: string) {
+    if (key === "active") return isActive(job);
+    if (key === "attention") return job.state === "waiting_approval" || job.state === "failed";
+    if (key === "done") return !isActive(job);
+    return true;
+  }
+  let visibleJobs = $derived(jobs.filter(job => matches(job, filter)));
   let triggers = $derived(getTriggers());
   let bridge = $derived(getBridge());
   let asks = $derived(getAsks());
@@ -177,11 +188,13 @@
 <div class="page page-wide jobs-page">
   <header class="page-head">
     <div>
-      <h1 class="page-title">{$t("llm.jobs.title")}</h1>
+      <h1 class="page-title">{$surfaceCopy.tasks}</h1>
       <p class="page-lede">{$t("llm.jobs.lede")}</p>
     </div>
   </header>
+  <SurfaceGuide text={$surfaceCopy.jobsHint} href="/help?article=tasks#guide" />
 
+  <details class="creation-panel"><summary>{$surfaceCopy.create}</summary>
   <section class="surface-card form">
     <h2 class="section-header-title">{$t("llm.jobs.new_title")}</h2>
     <div class="form-row">
@@ -218,14 +231,18 @@
       </button>
     </div>
   </section>
+  </details>
 
   <section class="stack">
     <h2 class="section-header-title">{$t("llm.jobs.list_title")}</h2>
-    {#if jobs.length === 0}
-      <p class="hint">{$t("llm.jobs.empty")}</p>
+    <div class="job-filters" role="group" aria-label={$t("llm.jobs.list_title")}>
+      {#each filters as key}<button class="button" type="button" aria-pressed={filter === key} onclick={() => filter = key}>{$t(`llm.jobs.filter_${key}`)} · {jobs.filter(job => matches(job, key)).length}</button>{/each}
+    </div>
+    {#if visibleJobs.length === 0}
+      <p class="hint">{$t(jobs.length ? "llm.jobs.no_matches" : "llm.jobs.empty")}</p>
     {:else}
       <div class="rows">
-        {#each jobs as job (job.id)}
+        {#each visibleJobs as job (job.id)}
           {@const ask = job.state === "waiting_approval" ? asks.find((a) => a.request_id === job.request_id) : undefined}
           <div class="row" class:open={openId === job.id}>
             <button type="button" class="row-head" aria-expanded={openId === job.id} onclick={() => toggle(job)}>
@@ -406,6 +423,12 @@
 </div>
 
 <style>
+  .creation-panel { margin-bottom:24px; }
+  .creation-panel summary { cursor:pointer; padding:14px 16px; border:1px solid var(--separator); border-radius:var(--radius-lg); color:var(--text); font-weight:600; }
+  .creation-panel[open] summary { margin-bottom:12px; }
+  .creation-panel summary:focus-visible { outline:var(--focus-ring); }
+  .job-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .job-filters [aria-pressed="true"] { color: var(--accent-hi); background: var(--accent-soft); }
   .jobs-page {
     flex: 1;
     min-height: 0;

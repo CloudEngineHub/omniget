@@ -616,7 +616,7 @@
     {/if}
 
     {#if viewMode === "active"}
-    <div class="filter-pills segmented" role="tablist" aria-label={$t('downloads.filter_label')}>
+    <div class="filter-pills segmented" role="group" aria-label={$t('downloads.filter_label')}>
       {#each [
         { value: 'all', labelKey: 'downloads.filter.all', count: filterCounts.all },
         { value: 'active', labelKey: 'downloads.filter.active', count: filterCounts.active },
@@ -628,8 +628,7 @@
           type="button"
           class="filter-pill segmented-btn"
           class:active={statusFilter === pill.value}
-          role="tab"
-          aria-selected={statusFilter === pill.value}
+          aria-pressed={statusFilter === pill.value}
           onclick={() => { statusFilter = pill.value as StatusFilter; finishedVisibleCount = FINISHED_PAGE_SIZE; }}
         >
           <span>{$t(pill.labelKey)}</span>

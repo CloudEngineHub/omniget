@@ -1,5 +1,7 @@
 <script lang="ts">
   /** Placeholder for the local tab; it is built in a later phase. */
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   import { t } from "$lib/i18n";
 </script>
 
@@ -7,7 +9,9 @@
 
 <div class="page soon">
   <h1 class="page-title">{$t("llm.tab.local")}</h1>
-  <p class="page-lede">{$t("llm.soon_title")} — {$t("llm.soon_body")}</p>
+  <SurfaceGuide text={$surfaceCopy.localHint} steps={$surfaceCopy.localSteps.split("|")} href="/help?article=local#guide" />
+  <p class="page-lede">{$t("llm.local.explanation")}</p>
+  <a class="button" href="/llm/models">{$t("llm.tab.models")} →</a>
 </div>
 
 <style>

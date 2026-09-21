@@ -1,4 +1,5 @@
 <script lang="ts">
+  // The three real steps follow the 21st Onboarding Stepper Progress pattern (19143). This original Svelte implementation retains the existing agent model and permission editor.
   /**
    * Editor of one agent: name, role, system prompt, model policy (Fixed or a
    * Route chain), granted tools and budget. Tools are read-only until the MCP
@@ -6,6 +7,8 @@
    * nothing is silently dropped on save.
    */
   import { onMount, untrack } from "svelte";
+  import { surfaceCopy } from "./surface-copy";
+  import { modelLabel } from "$lib/llm/types";
   import { t } from "$lib/i18n";
   import type { AgentDef, AgentRole, Candidate, ModelRef } from "$lib/llm/types";
   import { getSkills, loadSkills } from "$lib/stores/llm-skills-store.svelte";
@@ -13,16 +16,20 @@
 
   let {
     agent,
+    busy = false,
     onsave,
     oncancel,
     ondelete,
   }: {
     agent: AgentDef;
+    busy?: boolean;
     onsave: (agent: AgentDef) => void;
     oncancel: () => void;
     ondelete?: (id: string) => void;
   } = $props();
 
+  let step = $state(0);
+  let steps = $derived([$surfaceCopy.identity, $surfaceCopy.model, $surfaceCopy.review]);
   const ROLES = ["coordinator", "worker", "advisor"] as const;
 
   function cloneAgent(source: AgentDef): AgentDef {
@@ -38,6 +45,8 @@
   let draft = $state<AgentDef>(untrack(() => cloneAgent(agent)));
   let roleValue = $state(untrack(() => (typeof agent.role === "string" ? agent.role : "custom")));
   let customRole = $state(untrack(() => (typeof agent.role === "string" ? "" : agent.role.custom)));
+
+  let validModel = $derived(draft.model.policy === "fixed" ? !!draft.model.model.model.trim() : draft.model.chain.length > 0 && draft.model.chain.every(candidate => !!candidate.model.trim()));
 
   let isRoute = $derived(draft.model.policy === "route");
 
@@ -88,7 +97,12 @@
   }
 </script>
 
-<form class="editor" onsubmit={(e) => { e.preventDefault(); save(); }}>
+<form class="editor" aria-busy={busy} onsubmit={(e) => { e.preventDefault(); if (!busy && step === 2 && draft.name.trim() && validModel) save(); }}>
+  <ol class="setup-steps" aria-label={$surfaceCopy.configure}>
+    {#each steps as label, index}<li class:current={step === index} class:complete={step > index} aria-current={step === index ? "step" : undefined}><span>{index + 1}</span>{label}</li>{/each}
+  </ol>
+  <fieldset class="editor-fields" disabled={busy}>
+  {#if step === 0}
   <label class="field">
     <span class="field-label">{$t("llm.roster.name")}</span>
     <input class="input" bind:value={draft.name} required maxlength="48" />
@@ -98,7 +112,7 @@
     <span class="field-label">{$t("llm.roster.role")}</span>
     <select class="input" bind:value={roleValue}>
       {#each ROLES as r (r)}
-        <option value={r}>{$t(`llm.role.${r}`)}</option>
+        <option value={r}>{$surfaceCopy[r]}</option>
       {/each}
       <option value="custom">{$t("llm.role.custom")}</option>
     </select>
@@ -112,10 +126,12 @@
   {/if}
 
   <label class="field">
-    <span class="field-label">{$t("llm.roster.system_prompt")}</span>
+    <span class="field-label">{$surfaceCopy.purpose}</span>
     <textarea class="input prompt" rows="4" bind:value={draft.system_prompt}></textarea>
   </label>
 
+  {/if}
+  {#if step === 1}
   <fieldset class="group-block">
     <legend class="field-label">{$t("llm.roster.model_policy")}</legend>
     <div class="mac-segmented" role="tablist">
@@ -163,6 +179,10 @@
     {/if}
   </fieldset>
 
+  {/if}
+  {#if step === 2}
+  <section class="agent-review"><h2>{draft.name}</h2><p>{draft.system_prompt || $surfaceCopy.worker}</p><span>{modelLabel(draft.model)}</span></section>
+  <details class="agent-advanced"><summary>{$surfaceCopy.customize}</summary>
   <fieldset class="group-block">
     <legend class="field-label">{$t("llm.roster.tools")}</legend>
     {#if (draft.tools ?? []).length === 0}
@@ -177,7 +197,7 @@
             <span class="mono">
               {grant.source === "mcp" ? `${grant.server}/${grant.tool}` : grant.name}
             </span>
-            <select class="input mode" bind:value={grant.mode}>
+            <select class="input mode" aria-label={`${grant.source === "mcp" ? grant.tool : grant.name}: ${$t("llm.roster.tools")}`} bind:value={grant.mode}>
               <option value="auto">{$t("llm.inspector.grant_auto")}</option>
               <option value="ask">{$t("llm.inspector.grant_ask")}</option>
               <option value="deny">{$t("llm.inspector.grant_deny")}</option>
@@ -229,8 +249,12 @@
     </div>
   </fieldset>
 
+  </details>
+  {/if}
   <div class="actions">
-    <button type="submit" class="button primary">{$t("llm.roster.save")}</button>
+    {#if step > 0}<button type="button" class="button" onclick={() => step -= 1}>{$t("llm.mcp.back")}</button>{/if}
+    {#if step < 2}<button type="button" class="button primary" disabled={step === 0 ? !draft.name.trim() : !validModel} onclick={() => step += 1}>{steps[step + 1]}</button>
+    {:else}<button type="submit" class="button primary">{$t("llm.roster.save")}</button>{/if}
     <button type="button" class="button" onclick={oncancel}>{$t("llm.roster.cancel")}</button>
     {#if ondelete}
       <button type="button" class="button danger" onclick={() => ondelete?.(draft.id)}>
@@ -238,14 +262,26 @@
       </button>
     {/if}
   </div>
+  </fieldset>
 </form>
 
 <style>
+  .setup-steps { display:flex; list-style:none; gap:16px; margin:0 0 12px; padding:0; flex-wrap:wrap; }
+  .setup-steps li { display:flex; align-items:center; gap:8px; color:var(--text-muted); font-size:13px; }
+  .setup-steps li span { display:grid; place-items:center; width:28px; height:28px; border:1px solid var(--separator); border-radius:50%; }
+  .setup-steps .current { color:var(--text); font-weight:600; } .setup-steps .current span, .setup-steps .complete span { background:var(--accent-soft); border-color:var(--accent); }
+  .agent-review { padding:20px; border:1px solid var(--separator); border-radius:var(--radius-lg); }
+  .agent-review h2 { font-size:18px; margin:0 0 12px; } .agent-review p { white-space:pre-wrap; overflow-wrap:anywhere; font-size:14px; line-height:1.6; } .agent-review span { color:var(--text-muted); font-size:13px; }
+  .agent-advanced summary { cursor:pointer; padding:12px 0; font-weight:600; }
+  .agent-advanced .group-block { margin-top:16px; }
+
+  .editor-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
   .editor {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    max-width: 560px;
+    max-width: 760px;
+    width: 100%;
   }
 
   .group-block {

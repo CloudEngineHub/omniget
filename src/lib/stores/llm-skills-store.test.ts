@@ -346,6 +346,8 @@ describe("loading", () => {
     await store.loadSkills();
     expect(store.isSkillsAvailable()).toBe(true);
     expect(store.getSkillsErrorKey()).toBe("llm.skills.err_parse");
+    expect(store.getSkills()).toEqual([]);
+    expect(store.isDemoSkills()).toBe(false);
   });
 
   it("treats the screenshot harness `null` as demo", async () => {

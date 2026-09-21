@@ -199,6 +199,13 @@ fn core(f: CoreCall) -> ToolImpl {
 fn build() -> Vec<ToolEntry> {
     use CostHint::{Cheap, Local, Network, Paid};
     vec![
+        entry("help_connection_check", "Check local installation evidence without login or paid requests. Unknown authentication is not success.", obj(json!({"connectionId":{"type":"string"}}), &["connectionId"]), ToolImpl::Host, "help", Local, None),
+        entry("help_diagnostic_run", "Run a selected, allowlisted local check. Never runs a paid model probe.", obj(json!({"checkId":{"type":"string","enum":["connection","documentation"]},"targetId":{"type":"string"},"locale":{"type":"string"}}), &["checkId"]), ToolImpl::Host, "help", Local, None),
+        entry("help_docs_search", "Search bundled OmniGet help. Returns versioned citation sources.", obj(json!({"query":{"type":"string"},"locale":{"type":"string"},"limit":{"type":"integer","maximum":8}}), &["query"]), ToolImpl::Host, "help", Cheap, None),
+        entry("help_docs_read", "Read a bundled OmniGet help article.", obj(json!({"articleId":{"type":"string"},"locale":{"type":"string"}}), &["articleId"]), ToolImpl::Host, "help", Cheap, None),
+        entry("help_setup_inspect", "Inspect sanitized agent connections without secrets or network calls.", obj(json!({}), &[]), ToolImpl::Host, "help", Cheap, None),
+        entry("help_agent_plan", "Plan a new agent or edit an existing agent name/connection. New agents have no tools; edits preserve permissions. Does not save.", obj(json!({"sourceAgentId":{"type":"string"},"name":{"type":"string"},"agentId":{"type":"string"}}), &["sourceAgentId", "name"]), ToolImpl::Host, "help", Cheap, None),
+        entry("help_agent_apply", "Apply a previously reviewed agent plan idempotently. Requires the exact revision.", obj(json!({"planId":{"type":"string"},"expectedRevision":{"type":"string"},"idempotencyKey":{"type":"string"}}), &["planId", "expectedRevision", "idempotencyKey"]), ToolImpl::Host, "help", Cheap, None),
         // ── Coding harness (core/llm/code_tools.rs): confined to the workspace ──
         entry("fs_read", "Read a text file of the workspace with line numbers. A directory path lists it. Use offset/limit for long files.",
             obj(json!({ "path": { "type": "string" }, "offset": { "type": "integer", "minimum": 1 }, "limit": { "type": "integer", "minimum": 1 } }), &["path"]),
@@ -686,8 +693,8 @@ fn build() -> Vec<ToolEntry> {
         ),
         entry(
             "download_enqueue",
-            "Queue a URL in the Downloads panel using the app defaults, and return the queue item. mode audio downloads audio only.",
-            obj(json!({ "url": { "type": "string" }, "mode": { "type": "string", "enum": ["video", "audio"] } }), &["url"]),
+            "Queue a URL in the Downloads panel using the app defaults, and return the queue item. mode audio downloads audio only. Always supply a stable idempotencyKey per user intent; reuse it on retries.",
+            obj(json!({ "url": { "type": "string" }, "mode": { "type": "string", "enum": ["video", "audio"] }, "idempotencyKey": { "type": "string" } }), &["url"]),
             ToolImpl::Host,
             "downloads",
             Network,
@@ -792,7 +799,7 @@ mod tests {
     #[test]
     fn the_table_has_every_tool_once_with_an_object_schema() {
         let t = table();
-        assert_eq!(t.len(), 49, "the table lost or gained a tool");
+        assert_eq!(t.len(), 56, "the table lost or gained a tool");
         let names: std::collections::HashSet<_> = t.iter().map(|e| e.name).collect();
         assert_eq!(names.len(), t.len(), "duplicate tool name");
         for e in t {
@@ -821,6 +828,13 @@ mod tests {
         assert_eq!(
             host,
             vec![
+                "help_connection_check",
+                "help_diagnostic_run",
+                "help_docs_search",
+                "help_docs_read",
+                "help_setup_inspect",
+                "help_agent_plan",
+                "help_agent_apply",
                 "agent_delegate",
                 "download_url",
                 "instagram_profile",

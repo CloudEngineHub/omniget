@@ -444,6 +444,7 @@ export function loadSkills(force = false): Promise<void> {
   if (inFlight) return inFlight;
   if (loadedOnce && !force) return Promise.resolve();
   loading = true;
+  errorKey = null;
   inFlight = invoke<SkillManifest[] | null>("llm_skills_list")
     .then((list) => {
       if (Array.isArray(list)) {
@@ -458,8 +459,8 @@ export function loadSkills(force = false): Promise<void> {
       available = false;
     })
     .catch((err) => {
-      skills = DEMO_SKILLS;
-      demo = true;
+      if (isUnavailable(err)) { skills = DEMO_SKILLS; demo = true; }
+      else if (demo) { skills = []; demo = false; }
       available = !isUnavailable(err);
       if (!isUnavailable(err)) errorKey = skillErrorKey(err);
     })
@@ -477,16 +478,15 @@ export async function loadCatalog(force = false): Promise<void> {
   catalogLoadedOnce = true;
   try {
     const list = await invoke<SkillCatalogEntry[] | null>("llm_skills_catalog");
-    if (Array.isArray(list) && list.length > 0) {
+    if (Array.isArray(list)) {
       catalog = list;
       return;
     }
     catalog = DEMO_CATALOG;
     demo = true;
   } catch (err) {
-    catalog = DEMO_CATALOG;
-    demo = true;
-    if (!isUnavailable(err)) errorKey = skillErrorKey(err);
+    if (isUnavailable(err)) { catalog = DEMO_CATALOG; demo = true; }
+    else { catalog = []; errorKey = skillErrorKey(err); }
   }
 }
 

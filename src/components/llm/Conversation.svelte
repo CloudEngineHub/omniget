@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Presentation follows 21st Agent Chat by Serafim (12402): a bounded reading column, contextual empty state and an in-flow composer. Original Svelte implementation; backend contracts stay local.
+  import { surfaceCopy } from "./surface-copy";
   import WorkspaceChip from "./WorkspaceChip.svelte";
   /**
    * Centre column: header (agent, effective model, switch-model, new chat),
@@ -14,9 +16,9 @@
     getActiveConversation,
     getActiveTurn,
     getMessages,
+    getErrorKey,
     getToolAsk,
     answerTool,
-    newConversation,
     sendMessage,
     switchModel,
   } from "$lib/stores/llm-store.svelte";
@@ -28,6 +30,17 @@
 
   let scroller = $state<HTMLDivElement | null>(null);
   let pickerOpen = $state(false);
+  let draft = $state("");
+  let sendFailed = $state(false);
+  let actionFailed = $state(false);
+  let answering = $state(false);
+  let runtimeError = $derived(getErrorKey());
+  let switchFailed = $state(false);
+  let switching = $state(false);
+  let pickerTrigger = $state<HTMLButtonElement | null>(null);
+  let submittedText = "";
+  let sendGeneration = 0;
+  let cancelledGeneration = 0;
 
   let conversation = $derived(getActiveConversation());
   let messages = $derived(getMessages());
@@ -67,20 +80,52 @@
     if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 160) void stickToBottom();
   });
 
-  function onSend(text: string) {
-    void sendMessage(text).then(stickToBottom);
-    void stickToBottom();
+  async function onSend(text: string): Promise<boolean> {
+    const generation = ++sendGeneration;
+    sendFailed = false;
+    submittedText = text;
+    const sent = await sendMessage(text);
+    sendFailed = !sent && generation !== cancelledGeneration;
+    if (sent) void stickToBottom();
+    return sent;
   }
 
-  function onSwitch(ref: ModelRef) {
-    void switchModel(ref);
-    pickerOpen = false;
+  async function onStop() {
+    cancelledGeneration = sendGeneration;
+    sendFailed = false;
+    const interruptedText = submittedText;
+    actionFailed = false;
+    try {
+      await cancelTurn();
+      if (!draft.trim()) draft = interruptedText;
+    } catch { actionFailed = true; }
+  }
+
+  async function onAnswer(allow: boolean, always = false) {
+    if (!ask || answering) return;
+    answering = true;
+    actionFailed = false;
+    try { await answerTool(ask.tool_call_id, allow, always); }
+    catch { actionFailed = true; }
+    finally { answering = false; }
+  }
+
+  async function onSwitch(ref: ModelRef) {
+    if (switching) return;
+    switching = true;
+    switchFailed = false;
+    try {
+      if (await switchModel(ref)) {
+        pickerOpen = false;
+        await tick();
+        pickerTrigger?.focus();
+      } else switchFailed = true;
+    } finally { switching = false; }
   }
 
   // Follow the stream without a timer: the text length is the only trigger.
   $effect(() => {
-    turn?.text.length;
-    messages.length;
+    conversation?.id;
     void stickToBottom();
   });
 </script>
@@ -96,34 +141,39 @@
       <button
         type="button"
         class="button"
+        bind:this={pickerTrigger}
         onclick={() => (pickerOpen = !pickerOpen)}
         aria-expanded={pickerOpen}
         disabled={!conversation}
       >
         {$t("llm.conv.switch_model")}
       </button>
-      <button
-        type="button"
-        class="button"
-        disabled={!agent}
-        onclick={() => agent && newConversation(agent.id)}
-      >
-        {$t("llm.conv.new")}
-      </button>
+
     </div>
   </header>
 
   {#if pickerOpen}
     <div class="conv-picker">
-      <ModelPicker value={conversation?.model ?? null} onchange={onSwitch} />
+      <ModelPicker value={conversation?.model ?? (agent?.model.policy === "fixed" ? agent.model.model : null)} onchange={onSwitch} explicit busy={switching} />
+      {#if switchFailed}<p role="alert">{$surfaceCopy.unavailable}</p>{/if}
     </div>
   {/if}
 
   <div class="conv-scroll" bind:this={scroller}>
+    <div class="reading-column">
     {#if messages.length === 0 && !streamingMessage}
       <div class="empty-state">
         <p class="empty-state-title">{$t("llm.conv.empty_title")}</p>
         <p class="empty-state-body">{$t("llm.conv.empty_body")}</p>
+        {#if !agent}
+          <a class="button primary" href="/llm/accounts">{$surfaceCopy.connect}</a>
+        {:else}
+          <div class="task-suggestions">
+            {#each [$surfaceCopy.suggestion1, $surfaceCopy.suggestion2, $surfaceCopy.suggestion3] as suggestion}
+              <button type="button" onclick={() => draft = suggestion}>{suggestion}</button>
+            {/each}
+          </div>
+        {/if}
       </div>
     {:else}
       {#each messages as message (message.id)}
@@ -135,9 +185,9 @@
     {/if}
 
     {#if ask}
-      <div class="tool-ask" role="alertdialog" aria-labelledby="llm-tool-ask-title">
+      <div class="tool-ask" role="region" aria-labelledby="llm-tool-ask-title">
         <div class="tool-ask-text">
-          <span id="llm-tool-ask-title" class="tool-ask-title">{$t("llm.conv.tool_ask")}</span>
+          <span id="llm-tool-ask-title" class="tool-ask-title" role="status">{$t("llm.conv.tool_ask")}</span>
           <span class="tool-ask-tool">{ask.tool}</span>
           {#if ask.preview}<pre class="tool-ask-preview">{ask.preview}</pre>{/if}
         </div>
@@ -145,7 +195,8 @@
           <button
             type="button"
             class="button primary"
-            onclick={() => void answerTool(ask!.tool_call_id, true)}
+            disabled={answering}
+            onclick={() => void onAnswer(true)}
           >
             {$t("llm.conv.allow")}
           </button>
@@ -154,7 +205,8 @@
               type="button"
               class="button"
               title={$t("llm.conv.always_hint") as string}
-              onclick={() => void answerTool(ask!.tool_call_id, true, true)}
+              disabled={answering}
+              onclick={() => void onAnswer(true, true)}
             >
               {$t("llm.conv.always")}
             </button>
@@ -162,24 +214,37 @@
           <button
             type="button"
             class="button"
-            onclick={() => void answerTool(ask!.tool_call_id, false)}
+            disabled={answering}
+            onclick={() => void onAnswer(false)}
           >
             {$t("llm.conv.deny")}
           </button>
         </div>
       </div>
     {/if}
+    </div>
   </div>
+  {#if actionFailed || (runtimeError && turn)}<p class="send-error" role="alert">{$surfaceCopy.actionError}</p>{/if}
+  {#if sendFailed}<p class="send-error" role="alert">{$surfaceCopy.error}</p>{/if}
 
   <Composer
+    bind:value={draft}
     disabled={!agent}
     running={turn !== null}
     onsend={onSend}
-    onstop={() => void cancelTurn()}
+    onstop={() => void onStop()}
   />
 </section>
 
 <style>
+  .reading-column { width:100%; max-width:760px; margin:0 auto; }
+  .task-suggestions { display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:24px; }
+  .task-suggestions button { border:1px solid var(--separator); border-radius:var(--radius-lg); padding:12px 16px; color:var(--text); background:var(--fill-1); text-align:left; font:inherit; cursor:pointer; max-width:100%; transition:background 150ms; }
+  .task-suggestions button:hover { background:var(--accent-soft); }
+  .task-suggestions button:focus-visible { outline:var(--focus-ring); }
+  .send-error { color:var(--text); background:var(--accent-soft); padding:12px 16px; margin:0 20px; border-radius:var(--radius-md); font-size:13px; }
+  @media(max-width:680px) { .conv-head { flex-wrap:wrap; } .tool-ask { flex-direction:column; align-items:stretch; } .tool-ask-actions { flex-wrap:wrap; } }
+
   .tool-ask-preview {
     margin: var(--space-2) 0 0;
     padding: var(--space-2);

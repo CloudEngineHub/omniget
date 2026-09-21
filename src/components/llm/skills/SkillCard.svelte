@@ -58,6 +58,7 @@
     {/if}
   </header>
 
+  <a href="/llm/roster">{$t("llm.skills.assign")} →</a>
   <p class="description">{skill.description}</p>
 
   {#if detail || skill.path}

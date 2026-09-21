@@ -1490,6 +1490,8 @@ pub fn run() {
             commands::llm::chat::llm_conversation_get,
             commands::llm::chat::llm_conversation_delete,
             commands::llm::chat::llm_turn_start,
+            commands::llm::help::help_turn_start,
+            commands::llm::help::help_tool_call,
             commands::llm::chat::llm_turn_cancel,
             commands::llm::chat::llm_tool_answer,
             commands::llm::chat::llm_tool_asks_pending,

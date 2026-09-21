@@ -9,6 +9,7 @@
     variant = "bar",
     advanced = false,
     onInput,
+    onAnalyze,
     onModeChange,
     onAdvanced,
   }: {
@@ -17,6 +18,7 @@
     variant?: "bar" | "stage";
     advanced?: boolean;
     onInput: () => void;
+    onAnalyze?: () => void;
     onModeChange?: (mode: HomeInputMode) => void;
     onAdvanced?: () => void;
   } = $props();
@@ -37,7 +39,10 @@
 
 <div class="home-url-bar" class:stage={variant === "stage"}>
   {#if mode === "url"}
-    <OmniboxInput bind:url onInput={onInput} prominent={variant === "stage"} />
+    <div class="url-action">
+      <OmniboxInput bind:url onInput={onInput} prominent={variant === "stage"} />
+      <button type="button" class="button primary analyze" disabled={!url.trim()} onclick={onAnalyze ?? onInput}>{$t("home.analyze")}</button>
+    </div>
   {/if}
   <div class="home-secondary">
     {#each secondary as item (item.mode)}
@@ -56,6 +61,9 @@
 </div>
 
 <style>
+  .url-action { display: flex; align-items: center; gap: var(--space-2); width: 100%; }
+  .analyze { flex-shrink: 0; min-height: 44px; }
+  @media (max-width: 640px) { .url-action { flex-wrap: wrap; } .analyze { width: 100%; } }
   .home-url-bar {
     display: flex;
     flex-direction: column;

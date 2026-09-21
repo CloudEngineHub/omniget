@@ -19,6 +19,7 @@
   import { page } from "$app/state";
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import ConnectionWizard from "$components/llm/accounts/ConnectionWizard.svelte";
   import AccountList from "$components/llm/accounts/AccountList.svelte";
   import UsageDashboard from "$components/llm/accounts/UsageDashboard.svelte";
   import AcpAgents from "$components/llm/accounts/AcpAgents.svelte";
@@ -121,6 +122,8 @@
     </div>
   </header>
 
+  <ConnectionWizard initial={page.url.searchParams.get("guide") ?? ""} />
+
   {#if detected.length > 0}
     <p class="detected">
       {$t("llm.accounts.detected")}
@@ -154,7 +157,6 @@
     </section>
   {/if}
 
-  <AcpAgents />
   <LimitsStrip />
 
   <section class="surface-card rotation">
@@ -219,6 +221,8 @@
       {/each}
     </ol>
   {/if}
+
+  <AcpAgents />
 
   <h2 class="section-title">{$t("llm.accounts.usage")}</h2>
   {#if getUsageState() === "unavailable"}

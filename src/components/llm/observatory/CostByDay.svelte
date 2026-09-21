@@ -17,9 +17,10 @@
 
   let { days }: Props = $props();
 
-  let max = $derived(Math.max(0.01, ...days.map((d) => d.cost_usd)));
+  let max = $derived(Math.max(0, ...days.map((d) => d.cost_usd)));
   /** Axis top rounded up to a clean 1 / 2 / 5 × 10ⁿ step. */
   let axisTop = $derived.by(() => {
+    if (max === 0) return 0.01;
     const exp = Math.floor(Math.log10(max));
     const base = Math.pow(10, exp);
     for (const m of [1, 2, 5, 10]) if (max <= m * base) return m * base;
@@ -31,7 +32,7 @@
   let hover = $state(-1);
 
   function usd(v: number): string {
-    return v >= 10 ? `$${v.toFixed(0)}` : `$${v.toFixed(2)}`;
+    return `$${v.toFixed(v === 0 ? 2 : Math.min(8, Math.max(2, 1 - Math.floor(Math.log10(Math.abs(v))))))}`;
   }
 
   function dayLabel(day: string): string {
@@ -52,14 +53,15 @@
         <div
           class="col"
           class:peak={i === peakIdx}
-          role="presentation"
+          role="img"
+          aria-label={`${d.day}: ${usd(d.cost_usd)}, ${d.calls} ${$t("llm.observatory.calls")}`}
           onpointerenter={() => (hover = i)}
           onpointerleave={() => (hover = -1)}
         >
           {#if i === peakIdx && d.cost_usd > 0}
             <span class="cap-label">{usd(d.cost_usd)}</span>
           {/if}
-          <div class="fill" style:height="{Math.max(1, (d.cost_usd / axisTop) * 100)}%"></div>
+          <div class="fill" style:height="{Math.max(0, (d.cost_usd / axisTop) * 100)}%"></div>
           {#if hover === i}
             <span class="tip">{dayLabel(d.day)} · {usd(d.cost_usd)} · {d.calls} {$t("llm.observatory.calls")}</span>
           {/if}
@@ -75,7 +77,18 @@
 </div>
 <div class="total">{$t("llm.observatory.cost_total")} <strong>{usd(total)}</strong></div>
 
+<details class="values">
+  <summary>{$t("llm.observatory.table")}</summary>
+  <table><caption>{$t("llm.observatory.cost_by_day")}</caption><tbody>
+    {#each days as day (day.day)}<tr><th scope="row">{day.day}</th><td>{usd(day.cost_usd)}</td><td>{day.calls} {$t("llm.observatory.calls")}</td></tr>{/each}
+  </tbody></table>
+</details>
 <style>
+  .values { margin-top: var(--space-3); font-size: var(--text-sm); }
+  summary { cursor: pointer; }
+  table { width: 100%; text-align: left; border-collapse: collapse; }
+  th, td { padding: var(--space-2); border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+
   .chart {
     display: flex;
     gap: var(--space-2);

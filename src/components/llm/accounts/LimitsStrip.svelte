@@ -4,73 +4,16 @@
   // box. One read of the prefs on mount, one `limits://prefs` listener (the
   // strip can be dragged to another edge), nothing polls.
   import { onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api/core";
-  import { listen } from "@tauri-apps/api/event";
   import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-
-  type Edge = "top" | "right" | "bottom" | "left";
-  type ProviderPref = { id: string; enabled: boolean; muted: boolean };
-  type Prefs = {
-    enabled: boolean;
-    edge: Edge;
-    along: Record<string, number>;
-    providers: ProviderPref[];
-    notify_thresholds: boolean;
-    thresholds: number[];
-    notify_reset: boolean;
-  };
-  type ProviderInfo = { id: string; label: string; local: boolean; beta: boolean; detected: boolean };
-  type Described = { prefs: Prefs; open: boolean; providers: ProviderInfo[] };
-
+  import { acquireLimitsMonitor, getLimitsMonitor, saveLimitsPrefs, type Edge, type ProviderInfo } from "$lib/stores/limits-monitor.svelte";
   const EDGES: Edge[] = ["top", "right", "bottom", "left"];
-
-  let prefs = $state<Prefs | null>(null);
-  let infos = $state<ProviderInfo[]>([]);
-  let busy = $state(false);
-  let unavailable = $state(false);
-
-  function take(described: Described) {
-    prefs = described.prefs;
-    infos = described.providers;
-  }
-
-  onMount(() => {
-    let off: (() => void) | undefined;
-    let gone = false;
-    void (async () => {
-      try {
-        take((await invoke("limits_strip_get_prefs")) as Described);
-      } catch {
-        unavailable = true;
-        return;
-      }
-      const un = await listen<Prefs>("limits://prefs", (event) => {
-        prefs = event.payload;
-      });
-      if (gone) un();
-      else off = un;
-    })();
-    return () => {
-      gone = true;
-      off?.();
-    };
-  });
-
-  async function save(next: Prefs) {
-    if (busy) return;
-    busy = true;
-    const before = prefs;
-    prefs = next;
-    try {
-      take((await invoke("limits_strip_set_prefs", { prefs: next })) as Described);
-    } catch (error) {
-      prefs = before;
-      showToast("error", String(error));
-    } finally {
-      busy = false;
-    }
-  }
+  let monitor = $derived(getLimitsMonitor());
+  let prefs = $derived(monitor.prefs);
+  let infos = $derived(monitor.providers);
+  let busy = $derived(monitor.busy);
+  let unavailable = $derived(!prefs && !!monitor.error);
+  const save = saveLimitsPrefs;
+  onMount(acquireLimitsMonitor);
 
   function toggleMaster() {
     if (prefs) void save({ ...prefs, enabled: !prefs.enabled });
@@ -97,6 +40,7 @@
   <h2 class="section-title">{$t("llm.limits.title")}</h2>
   <p class="field-hint">{$t("llm.limits.hint")}</p>
 
+  {#if monitor.error}<p role="alert" class="field-hint">{monitor.error}</p>{/if}
   {#if unavailable}
     <p class="field-hint">{$t("llm.limits.unavailable")}</p>
   {:else if prefs}

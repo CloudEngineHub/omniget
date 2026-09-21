@@ -6,7 +6,7 @@
 //! Owned by f2-llm-commands.
 
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 
 use super::agent::{
     AgentDef, AgentRole, Budget, GrantMode, ModelPolicy, RuntimeKind, ToolGrant, ToolSource,
@@ -266,6 +266,7 @@ pub fn template(name: &str) -> Option<Vec<AgentDef>> {
 /// Cached, atomically written roster file.
 pub struct RosterStore {
     path: PathBuf,
+    mutation: Mutex<()>,
     cache: RwLock<Option<Arc<Vec<AgentDef>>>>,
 }
 
@@ -273,6 +274,7 @@ impl RosterStore {
     pub fn at(path: impl Into<PathBuf>) -> Self {
         Self {
             path: path.into(),
+            mutation: Mutex::new(()),
             cache: RwLock::new(None),
         }
     }
@@ -293,6 +295,10 @@ impl RosterStore {
         }
         let loaded = Arc::new(self.read_from_disk());
         if let Ok(mut g) = self.cache.write() {
+            // Another reader or writer may have filled the cache while disk was read.
+            if let Some(current) = g.as_ref() {
+                return current.clone();
+            }
             *g = Some(loaded.clone());
         }
         loaded
@@ -303,6 +309,7 @@ impl RosterStore {
     }
 
     pub fn create(&self, agent: AgentDef) -> Result<AgentDef> {
+        let _guard = self.mutation.lock().unwrap_or_else(|e| e.into_inner());
         if !valid_id(&agent.id) {
             return Err(RosterError::new(
                 ERR_ROSTER_ID,
@@ -322,6 +329,7 @@ impl RosterStore {
     }
 
     pub fn update(&self, agent: AgentDef) -> Result<AgentDef> {
+        let _guard = self.mutation.lock().unwrap_or_else(|e| e.into_inner());
         let mut all = (*self.list()).clone();
         let slot = all.iter_mut().find(|a| a.id == agent.id).ok_or_else(|| {
             RosterError::new(ERR_ROSTER_MISSING, format!("no agent {}", agent.id))
@@ -331,7 +339,63 @@ impl RosterStore {
         Ok(agent)
     }
 
+    /// Compare and swap under the same mutation lock used by every roster writer.
+    /// A retried intent can recognize its exact saved result without repeating a write.
+    pub fn apply_planned(
+        &self,
+        agent: AgentDef,
+        before: Option<AgentDef>,
+        source: AgentDef,
+    ) -> Result<AgentDef> {
+        let _guard = self.mutation.lock().unwrap_or_else(|e| e.into_inner());
+        if !valid_id(&agent.id) {
+            return Err(RosterError::new(ERR_ROSTER_ID, "invalid planned id"));
+        }
+        let mut all = (*self.list()).clone();
+        let equal = |a: &AgentDef, b: &AgentDef| {
+            serde_json::to_value(a).ok() == serde_json::to_value(b).ok()
+        };
+        if let Some(existing) = all.iter().find(|a| a.id == agent.id) {
+            if equal(existing, &agent) {
+                return Ok(existing.clone());
+            }
+        }
+        if !all.iter().any(|a| a.id == source.id && equal(a, &source)) {
+            return Err(RosterError::new(
+                "ERR_HELP_REVISION",
+                "connection changed; prepare a new plan",
+            ));
+        }
+        match before {
+            Some(previous) => {
+                let slot = all
+                    .iter_mut()
+                    .find(|a| a.id == agent.id)
+                    .ok_or_else(|| RosterError::new("ERR_HELP_REVISION", "agent was removed"))?;
+                if !equal(slot, &previous) {
+                    return Err(RosterError::new(
+                        "ERR_HELP_REVISION",
+                        "agent changed; prepare a new plan",
+                    ));
+                }
+                *slot = agent.clone();
+            }
+            None => {
+                if all.iter().any(|a| a.id == agent.id) {
+                    return Err(RosterError::new(
+                        ERR_ROSTER_DUP,
+                        "planned id already exists",
+                    ));
+                }
+                all.push(agent.clone());
+            }
+        }
+        self.save(all)?;
+        Ok(agent)
+    }
+
     pub fn delete(&self, id: &str) -> Result<()> {
+        let _guard = self.mutation.lock().unwrap_or_else(|e| e.into_inner());
         let mut all = (*self.list()).clone();
         let before = all.len();
         all.retain(|a| a.id != id);
@@ -346,6 +410,7 @@ impl RosterStore {
 
     /// Replaces the whole roster (used by `apply_template`).
     pub fn replace_all(&self, agents: Vec<AgentDef>) -> Result<Arc<Vec<AgentDef>>> {
+        let _guard = self.mutation.lock().unwrap_or_else(|e| e.into_inner());
         self.save(agents)?;
         Ok(self.list())
     }
@@ -353,6 +418,7 @@ impl RosterStore {
     /// Applies a team template on top of the current roster: agents whose id
     /// already exists are left alone, so the call is idempotent.
     pub fn apply_template(&self, name: &str) -> Result<Arc<Vec<AgentDef>>> {
+        let _guard = self.mutation.lock().unwrap_or_else(|e| e.into_inner());
         let incoming = template(name).ok_or_else(|| {
             RosterError::new(ERR_ROSTER_TEMPLATE, format!("unknown template {name}"))
         })?;
@@ -401,6 +467,33 @@ impl RosterStore {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn planned_edit_rejects_concurrent_changes_and_retry_survives_restart() {
+        let store = temp_store("help-cas");
+        let source = store.list()[0].clone();
+        let mut draft = source.clone();
+        draft.id = "help-created".into();
+        draft.name = "First".into();
+        store
+            .apply_planned(draft.clone(), None, source.clone())
+            .unwrap();
+        let reopened = RosterStore::at(store.path());
+        reopened
+            .apply_planned(draft.clone(), None, source.clone())
+            .unwrap();
+        assert_eq!(
+            reopened.list().iter().filter(|a| a.id == draft.id).count(),
+            1
+        );
+        let mut edit = draft.clone();
+        edit.name = "Planned edit".into();
+        let mut concurrent = draft.clone();
+        concurrent.name = "User edit".into();
+        reopened.update(concurrent.clone()).unwrap();
+        assert!(reopened.apply_planned(edit, Some(draft), source).is_err());
+        assert_eq!(reopened.get(&concurrent.id).unwrap().name, "User edit");
+    }
 
     fn temp_store(tag: &str) -> RosterStore {
         let dir =

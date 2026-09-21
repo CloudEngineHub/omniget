@@ -25,8 +25,11 @@ fn normalized(s: &str) -> String {
         .to_lowercase()
 }
 fn locale(a: &Value) -> &str {
-    if a["locale"].as_str().unwrap_or("en").starts_with("pt") {
+    let wanted = a["locale"].as_str().unwrap_or("en");
+    if wanted.starts_with("pt") {
         "pt"
+    } else if wanted.starts_with("ru") {
+        "ru"
     } else {
         "en"
     }
@@ -344,7 +347,7 @@ mod tests {
     use super::*;
     #[test]
     fn corpus_has_both_locales_and_stable_sources() {
-        for lang in ["pt", "en"] {
+        for lang in ["pt", "en", "ru"] {
             let all = docs(&json!({"locale":lang}));
             assert_eq!(all.len(), 20);
             for d in all {

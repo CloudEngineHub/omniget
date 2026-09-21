@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "omniget"
-version = "0.10.0"
+version = "0.10.1"
 description = "Course and video downloader with a yt-dlp GUI, and a desktop app to run AI agents (Claude Code, Codex, Gemini CLI, Ollama) with permissions, undo, jobs, loops and an MCP server"
 authors = ["tonhowtf"]
 license = "GPL-3.0"

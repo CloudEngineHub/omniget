@@ -66,7 +66,7 @@ pub async fn llm_models_list(provider: String, refresh: Option<bool>) -> Result<
     } else {
         let view = ai_keys::list()
             .into_iter()
-            .find(|k| k.kind == provider && k.has_key)
+            .find(|k| (k.id == provider || k.kind == provider) && k.has_key)
             .ok_or_else(|| format!("{ERR_MODELS}: no saved account for {provider}"))?;
         let entry =
             ai_keys::entry_with_secret(&view.id).map_err(|e| format!("{ERR_MODELS}: {e}"))?;

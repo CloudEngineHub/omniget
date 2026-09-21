@@ -89,6 +89,7 @@ let frameCancel: (() => void) | null = null;
 let cancelFake: CancelFake | null = null;
 let unlisten: (() => void) | null = null;
 let idCounter = 0;
+let startingRequestId: string | null = null;
 
 function nextId(prefix: string): string {
   idCounter += 1;
@@ -142,9 +143,10 @@ export function loadRoster(force = false): Promise<void> {
   if (rosterInFlight) return rosterInFlight;
   if (rosterLoadedOnce && !force) return Promise.resolve();
   rosterLoading = true;
+  errorKey = null;
   rosterInFlight = invoke<AgentDef[] | null>("llm_roster_list")
     .then((list) => {
-      if (Array.isArray(list) && list.length > 0) {
+      if (Array.isArray(list)) {
         agents = list;
         rosterAvailable = true;
         demoRoster = false;
@@ -156,9 +158,9 @@ export function loadRoster(force = false): Promise<void> {
       rosterAvailable = Array.isArray(list);
     })
     .catch((err) => {
-      agents = DEMO_ROSTER;
-      demoRoster = true;
-      rosterAvailable = !isUnavailable(err);
+      if (isUnavailable(err)) { agents = DEMO_ROSTER; demoRoster = true; }
+      else if (demoRoster) { agents = []; demoRoster = false; }
+      rosterAvailable = false;
       if (!isUnavailable(err)) errorKey = llmErrorKey(err);
     })
     .finally(() => {
@@ -210,11 +212,11 @@ export function seedDemoConversation(): void {
 /** Creates or updates one agent. Returns false when the backend refused. */
 export async function saveAgent(agent: AgentDef): Promise<boolean> {
   const existing = agents.some((a) => a.id === agent.id);
-  agents = existing
-    ? agents.map((a) => (a.id === agent.id ? agent : a))
-    : [...agents, agent];
   try {
     await invoke(existing ? "llm_roster_update" : "llm_roster_create", { agent });
+    agents = existing
+      ? agents.map((a) => (a.id === agent.id ? agent : a))
+      : [...agents, agent];
     rosterAvailable = true;
     return true;
   } catch (err) {
@@ -224,13 +226,13 @@ export async function saveAgent(agent: AgentDef): Promise<boolean> {
 }
 
 export async function deleteAgent(agentId: string): Promise<boolean> {
-  agents = agents.filter((a) => a.id !== agentId);
-  conversations = conversations.filter((c) => c.agentId !== agentId);
-  if (!conversations.some((c) => c.id === activeConversationId)) {
-    activeConversationId = conversations[0]?.id ?? null;
-  }
   try {
     await invoke("llm_roster_delete", { agentId });
+    agents = agents.filter((a) => a.id !== agentId);
+    conversations = conversations.filter((c) => c.agentId !== agentId);
+    if (!conversations.some((c) => c.id === activeConversationId)) {
+      activeConversationId = conversations[0]?.id ?? null;
+    }
     return true;
   } catch (err) {
     rosterAvailable = !isUnavailable(err);
@@ -337,10 +339,10 @@ export function deleteConversation(id: string): void {
 export async function switchModel(model: ModelRef): Promise<boolean> {
   const conversation = getActiveConversation();
   if (!conversation) return false;
-  conversation.model = model;
-  conversation.updatedAtMs = Date.now();
   try {
     await invoke("llm_switch_model", { conversationId: conversation.id, modelRef: model });
+    conversation.model = model;
+    conversation.updatedAtMs = Date.now();
     return true;
   } catch (err) {
     rosterAvailable = !isUnavailable(err);
@@ -499,23 +501,24 @@ async function attachListener(): Promise<void> {
 }
 
 /**
- * Sends the user's text. Asks the backend first; when it answers `ERR_STUB`
- * (or nothing at all) the turn is played back locally so the UI still streams.
+ * Starts a real turn and reports whether the draft was accepted. Only a demo
+ * roster may play a stub response; real startup failures keep input recoverable.
  */
-export async function sendMessage(text: string): Promise<void> {
+export async function sendMessage(text: string): Promise<boolean> {
   const trimmed = text.trim();
-  if (!trimmed || turn) return;
+  if (!trimmed || turn || startingRequestId) return false;
   let conversation = getActiveConversation();
   if (!conversation) {
     const agentId = agents[0]?.id;
-    if (!agentId) return;
+    if (!agentId) return false;
     selectAgent(agentId);
     conversation = getActiveConversation();
-    if (!conversation) return;
+    if (!conversation) return false;
   }
+  const sentMessageId = nextId("msg");
   conversation.messages = [
     ...conversation.messages,
-    { id: nextId("msg"), role: "user", text: trimmed },
+    { id: sentMessageId, role: "user", text: trimmed },
   ];
   if (!conversation.title) conversation.title = trimmed.slice(0, 48);
   conversation.updatedAtMs = Date.now();
@@ -535,7 +538,10 @@ export async function sendMessage(text: string): Promise<void> {
     starting: true,
   };
 
+  const requestedTurn = turn;
+  startingRequestId = localRequestId;
   let requestId: string | null = null;
+  let canDemo = demoRoster;
   try {
     const answer = await invoke<string | { request_id?: string } | null>("llm_turn_start", {
       conversationId: conversation.id,
@@ -545,19 +551,43 @@ export async function sendMessage(text: string): Promise<void> {
     if (typeof answer === "string") requestId = answer;
     else if (answer && typeof answer === "object" && answer.request_id) requestId = answer.request_id;
   } catch (err) {
+    canDemo = demoRoster && isUnavailable(err);
     if (!isUnavailable(err)) {
       errorKey = llmErrorKey(err);
       rosterAvailable = false;
     }
   }
 
-  if (!turn) return; // cancelled while the command was in flight
+  if (!turn || turn.requestId !== localRequestId) {
+    // Stop may arrive before startup returns its server id. Cancel that late
+    // server request too, without touching a newer conversation's active turn.
+    if (requestId) {
+      try { await invoke("llm_turn_cancel", { requestId }); }
+      catch (err) {
+        if (!String(err).includes("ERR_LLM_NO_TURN")) {
+          errorKey = llmErrorKey(err);
+          turn = { ...requestedTurn, requestId };
+          void attachListener();
+        }
+      }
+    }
+    startingRequestId = null;
+    return false;
+  }
+  startingRequestId = null;
   if (requestId) {
     turn.requestId = requestId;
     void attachListener();
-    return;
+    return true;
   }
-  // Stub backend: local playback through the same event path.
+  if (!canDemo) {
+    // A failed launch must not fabricate a successful assistant response.
+    // Roll back only this optimistic message so explicit retry cannot duplicate it.
+    conversation.messages = conversation.messages.filter(message => message.id !== sentMessageId);
+    stopTurn();
+    return false;
+  }
+  // Explicit demo roster: local playback through the same event path.
   const events = fakeTurnEvents(localRequestId, {
     answer: DEMO_ANSWER,
     chunks: 40,
@@ -565,12 +595,18 @@ export async function sendMessage(text: string): Promise<void> {
     tool: { id: "call-1", name: "downloads.list", input: '{"status":"failed"}' },
   });
   cancelFake = runFakeTurn(events, (event) => handleTurnEvent(localRequestId, event), 24);
+  return true;
 }
 
 /** Stops the running turn: local timer first, then the backend. */
 export async function cancelTurn(): Promise<void> {
+  errorKey = null;
   const state = turn;
   if (!state) return;
+  if (startingRequestId === state.requestId) {
+    stopTurn(); // sendMessage cancels the server id as soon as startup returns.
+    return;
+  }
   const cancel = cancelFake;
   cancelFake = null;
   if (cancel) {
@@ -579,8 +615,8 @@ export async function cancelTurn(): Promise<void> {
   } else {
     try {
       await invoke("llm_turn_cancel", { requestId: state.requestId });
-    } catch {
-      // Backend not wired: drop the turn locally anyway.
+    } catch (err) {
+      if (!(demoRoster && isUnavailable(err)) && !String(err).includes("ERR_LLM_NO_TURN")) { errorKey = llmErrorKey(err); throw err; }
     }
     if (turn === state) {
       applyEvent({ type: "finished", reason: "cancelled" });
@@ -591,19 +627,21 @@ export async function cancelTurn(): Promise<void> {
 
 /** Answers a tool permission prompt (`GrantMode::Ask`). */
 export async function answerTool(toolCallId: string, allow: boolean, always = false): Promise<void> {
+  errorKey = null;
   const state = turn;
   if (!state) return;
-  if (toolAsk?.tool_call_id === toolCallId) toolAsk = null;
   try {
     await invoke("llm_tool_answer", { requestId: state.requestId, toolCallId, allow, always });
-  } catch {
-    // Stub backend: nothing to answer.
+  } catch (err) {
+    if (!(demoRoster && isUnavailable(err))) { errorKey = llmErrorKey(err); throw err; }
   }
+  if (toolAsk?.tool_call_id === toolCallId) toolAsk = null;
 }
 
 /** Test seam: drops every bit of state and every resource. */
 export function resetLlmStore(): void {
   stopTurn();
+  startingRequestId = null;
   agents = [];
   rosterLoading = false;
   rosterAvailable = true;

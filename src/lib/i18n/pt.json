@@ -484,7 +484,10 @@
     "collapse_plugins": "Collapse plugins",
     "tools": "Ferramentas",
     "llm": "LLM",
-    "world": "Mundo"
+    "world": "Mundo",
+    "help": "Help",
+    "help_subtitle": "Guias e assistente",
+    "profile_appearance": "Perfil e aparência"
   },
   "command_palette": {
     "open": "Search",
@@ -499,7 +502,7 @@
   },
   "home": {
     "inspector_title": "Download options",
-    "hero_title": "OmniGet",
+    "hero_title": "O que você quer baixar?",
     "hero_subtitle": "Cole um link ou pesquise. A gente cuida do resto.",
     "action_batch": "Many links at once",
     "action_torrent": "Open a .torrent file",
@@ -507,7 +510,8 @@
     "action_advanced": "Advanced options",
     "action_simple": "Back to the simple view",
     "value_line": "{{count}} files · {{size}} saved with OmniGet",
-    "value_first": "Your first download takes about a minute. Private content only needs your browser cookies."
+    "value_first": "Your first download takes about a minute. Private content only needs your browser cookies.",
+    "analyze": "Analisar link"
   },
   "tools": {
     "tab": "Ferramentas",
@@ -9669,7 +9673,11 @@
       "empty_title": "Ainda sem telemetria",
       "empty_hint": "O lado LLM não respondeu. Comece um turno, ou tente de novo:",
       "tokens_in_short": "entrada",
-      "tokens_out_short": "saída"
+      "tokens_out_short": "saída",
+      "table": "Ver valores por dia",
+      "running": "Em execução",
+      "waiting": "Aguardando ferramenta",
+      "failures": "Agentes com erros"
     },
     "quota": {
       "active": "em uso",
@@ -9683,7 +9691,7 @@
     "subtitle": "Seus agentes, os modelos deles e o que podem tocar.",
     "tab": {
       "chat": "Conversa",
-      "roster": "Elenco",
+      "roster": "Equipe de agentes",
       "models": "Modelos e rotas",
       "observatory": "Observatório",
       "mcp": "MCP",
@@ -9714,8 +9722,8 @@
       "custom": "Personalizado"
     },
     "conv": {
-      "empty_title": "Nada dito ainda",
-      "empty_body": "Pergunte algo ao agente. As chamadas de tool aparecem no meio da conversa.",
+      "empty_title": "O que vamos fazer?",
+      "empty_body": "Escolha um agente à esquerda, confira a pasta de trabalho e descreva o resultado que você precisa.",
       "you": "Você",
       "thinking": "Raciocínio",
       "tool_call": "Chamada de tool",
@@ -9757,7 +9765,7 @@
       "unlimited": "sem limite"
     },
     "roster": {
-      "title": "Elenco",
+      "title": "Equipe de agentes",
       "new": "Novo agente",
       "name": "Nome",
       "role": "Papel",
@@ -9780,7 +9788,9 @@
       "unavailable": "O backend do elenco ainda não está ligado — as mudanças não são salvas.",
       "saved": "Agente salvo.",
       "skills": "Skills",
-      "skills_empty": "Nenhuma skill instalada. Instale uma na aba Skills."
+      "skills_empty": "Nenhuma skill instalada. Instale uma na aba Skills.",
+      "save_error": "Não foi possível salvar. Suas alterações foram mantidas. Tente novamente.",
+      "roles_hint": "O coordenador divide e acompanha o trabalho. Executores realizam tarefas atribuídas; consultores ajudam a avaliar decisões."
     },
     "template": {
       "solo": "Solo",
@@ -9788,7 +9798,9 @@
       "duo": "Dupla",
       "duo_desc": "Um coordenador e um trabalhador que roda as tools.",
       "research": "Esquadrão de pesquisa",
-      "research_desc": "Coordenador, dois batedores e um crítico."
+      "research_desc": "Coordenador, dois batedores e um crítico.",
+      "effect": "Adiciona os agentes deste preset. Agentes existentes com o mesmo identificador são preservados.",
+      "preview": "Ver equipe"
     },
     "models": {
       "title": "Modelos e rotas",
@@ -9811,7 +9823,12 @@
       "rule_hint": "A regra é o padrão para agentes novos; cada agente pode sobrescrever.",
       "openrouter_started": "Termine o login no navegador.",
       "openrouter_ok": "Chave do OpenRouter salva.",
-      "openrouter_failed": "O login do OpenRouter falhou: {{error}}"
+      "openrouter_failed": "O login do OpenRouter falhou: {{error}}",
+      "routing_unavailable": "Estas estratégias ainda não são aplicadas. Configure um modelo fixo ou uma sequência de alternativas para cada agente em Equipe de agentes.",
+      "connect": "Conectar ou gerenciar provedores",
+      "local_hint": "Servidor local: verifique se está em execução e possui modelos instalados. Não é necessária uma chave de API salva.",
+      "no_models": "Este provedor não retornou modelos. Verifique os modelos disponíveis no servidor ou informe o identificador manualmente.",
+      "load_failed": "Não foi possível carregar os modelos: {{error}}"
     },
     "err": {
       "unavailable": "O backend de LLM ainda não está ligado.",
@@ -9827,7 +9844,8 @@
       "start": "Iniciar",
       "stop": "Parar",
       "bridgeTitle": "Ponte compatível com OpenAI",
-      "bridgeHint": "Deixa qualquer app que fala OpenAI usar seus agentes em omniget/<agente>. Desligada por padrão: quem tem o token da ponte gasta seus tokens."
+      "bridgeHint": "Deixa qualquer app que fala OpenAI usar seus agentes em omniget/<agente>. Desligada por padrão: quem tem o token da ponte gasta seus tokens.",
+      "explanation": "O gerenciamento de modelos locais ainda não está disponível aqui. Configure um provedor local existente em Modelos e roteamento."
     },
     "error": {
       "ERR_LLM_NO_AGENT": "Esse agente não existe mais.",
@@ -9931,7 +9949,11 @@
       "repo_title": "Instalar do GitHub",
       "repo_add": "Instalar",
       "repo_installing": "Instalando…",
-      "repo_hint": "A mesma escrita do `npx skills add`. O repositório é clonado e passa pelo scanner como qualquer outra instalação."
+      "repo_hint": "A mesma escrita do `npx skills add`. O repositório é clonado e passa pelo scanner como qualquer outra instalação.",
+      "unlicensed_badge": "Licença não informada",
+      "assign": "Atribuir a um agente",
+      "explore": "Explorar",
+      "search_installed": "Buscar skills instaladas"
     },
     "mcp": {
       "title": "MCP",
@@ -9979,8 +10001,8 @@
       "import_failed": "Nenhum servidor MCP encontrado nesse texto.",
       "registry": "Catálogo",
       "registry_hint": "Servidores conhecidos. Instalar preenche o formulário com uma configuração que funciona; nada é baixado e nada se conecta.",
-      "reg_install": "Instalar",
-      "reg_reinstall": "Instalar de novo",
+      "reg_install": "Configurar",
+      "reg_reinstall": "Reconfigurar",
       "reg_homepage": "Site",
       "reg_needs": "Falta você preencher: {{fields}}",
       "reg": {
@@ -10119,7 +10141,8 @@
       "acp_add": "Adicionar como agente",
       "acp_missing": "não instalado",
       "acp_added": "{{name}} entrou no roster",
-      "acp_custom_name": "Nome"
+      "acp_custom_name": "Nome",
+      "acp_command": "Comando"
     },
     "rules": {
       "title": "Regras de Sempre",
@@ -10175,7 +10198,25 @@
       "undone_full": "Desfeito: {{count}} arquivo(s) restaurado(s), {{messages}} mensagem(ns) removida(s)",
       "undo_not_restored": "Estes comandos também rodaram naquele turno; o que eles mudaram fora da pasta não foi desfeito: {{commands}}",
       "undo_unavailable": "Desfazer indisponível: git não encontrado",
-      "undone": "Desfeito: {{count}} arquivo(s) restaurado(s)"
+      "undone": "Desfeito: {{count}} arquivo(s) restaurado(s)",
+      "chat": "Conversar",
+      "agents": "Agentes",
+      "activity": "Atividade",
+      "configure": "Configurar",
+      "tasks": "Tarefas",
+      "routines": "Rotinas",
+      "performance": "Uso e desempenho",
+      "monitor": "Monitor de uso",
+      "off": "Desligado",
+      "on": "Ativo",
+      "attention": "Atenção",
+      "quotas": "Cotas da assinatura",
+      "usage": "Consumo registrado",
+      "activity_hint": "Ver atividade dos agentes",
+      "monitor_hint": "Desligar a barra interrompe seus leitores. O histórico e a telemetria das tarefas continuam disponíveis.",
+      "sources": "Fontes e preferências",
+      "updated": "Última leitura",
+      "unknown": "Indisponível"
     },
     "jobs": {
       "title": "Jobs",
@@ -10237,7 +10278,12 @@
         "fired": "Gatilho disparado",
         "fired_count": "Disparou {{count}}×",
         "copy_curl": "Copiar curl"
-      }
+      },
+      "filter_all": "Todas as tarefas",
+      "filter_active": "Em andamento",
+      "filter_attention": "Precisa de atenção",
+      "filter_done": "Finalizadas",
+      "no_matches": "Nenhuma tarefa neste filtro."
     },
     "loops": {
       "title": "Loops",
@@ -10269,7 +10315,12 @@
         "done": "Concluído",
         "failed": "Falhou",
         "cancelled": "Cancelado"
-      }
+      },
+      "check_passed": "Critério atingido",
+      "summary": "Até {{rounds}} rodadas. Para antes se atingir o critério configurado ou o limite de tempo.",
+      "no_check": "Sem comando de verificação: o encerramento será controlado pelo limite de rodadas ou tempo.",
+      "review": "Revisar loop",
+      "edit": "Editar configuração"
     },
     "limits": {
       "title": "Barra de limites",
@@ -10332,6 +10383,18 @@
           "error": "Não foi possível ler."
         }
       }
+    },
+    "chat": {
+      "details": "Detalhes do agente"
+    },
+    "nav": {
+      "work": "Trabalhar",
+      "configure": "Configurar",
+      "monitor": "Acompanhar",
+      "experimental": "Experimental"
+    },
+    "arena": {
+      "explanation": "Compare a mesma tarefa entre modelos. Este recurso ainda não está disponível; use o Chat para trabalhar com um agente configurado."
     }
   },
   "omni": {
@@ -10369,5 +10432,18 @@
       "deny": "Negar",
       "hint": "Clique no Omni para escolher"
     }
+  },
+  "design": {
+    "title": "Aparência do espaço de trabalho",
+    "hint": "Aplica-se ao Início, Downloads, LLM e Help, incluindo a moldura. Confira a prévia antes de aplicar.",
+    "apply": "Aplicar aparência",
+    "reset": "Restaurar Amber Minimal",
+    "applied": "Aparência aplicada neste dispositivo.",
+    "error": "Não foi possível salvar a aparência neste dispositivo.",
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "preview": "Seu espaço de trabalho",
+    "preview_body": "Agentes, arquivos e tarefas em um só lugar."
   }
 }

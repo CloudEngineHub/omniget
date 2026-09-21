@@ -74,6 +74,12 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.10.1" date="2026-09-21">
+      <description>
+        <p>Help is a new section with searchable product guides that work offline, a guided connection setup for a chat subscription, an API key or a local model, and an assistant that answers from the bundled documentation. The assistant can plan an agent, check a connection and enqueue a download after you allow the step; download results are redacted so paths and secrets stay out of the chat. Each Agents surface gains a short guide for what the page does, a usage monitor for quotas and running work, and Settings can switch workspace colour presets and light or dark mode without leaving the app.</p>
+        <p>The Agents workspace is clearer about first steps: empty states point to Connect my AI, jobs and loops filter by what needs attention, the model picker lists what a provider actually returned, and a roster save that fails shows the error instead of a success toast. Seven help tools join the shared tool table and the built-in MCP server so an external agent can search the same guides.</p>
+      </description>
+    </release>
     <release version="0.10.0" date="2026-09-19">
       <description>
         <p>OmniGet gains the system that goes around an AI agent. In the new LLM section you pick an agent, attach a folder and ask for a change: the agent reads, edits, applies patches and runs commands inside that folder only, asks before anything that writes and shows the command or the diff, and one click undoes a whole turn from a shadow git that never touches your repository. "Always" remembers a kind of command, such as git status, instead of a whole line. Jobs outlive the window, Loops repeat rounds until a check command passes or the rounds or minutes run out, and triggers start a job from a cron line or a webhook on the local bridge; the command line drives the same queue with omniget agent run, loop and jobs. Claude Code and Codex accounts plug in with their quota on screen, any CLI that speaks the Agent Client Protocol joins the roster as an agent, agents share a project knowledge base of markdown notes, and skills install from owner/repo after a scan. Models come from a local server or your own keys, with a router that falls back when a quota runs out.</p>

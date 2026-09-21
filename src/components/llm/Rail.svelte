@@ -133,7 +133,7 @@
       placeholder={$t("llm.rail.search")}
       aria-label={$t("llm.rail.search")}
     />
-    <button type="button" class="button primary rail-new" onclick={onnew}>
+    <button type="button" class="button primary rail-new" disabled={!agents.length} onclick={onnew}>
       {$t("llm.rail.new_chat")}
     </button>
   </div>
@@ -165,6 +165,7 @@
   </div>
 
   <footer class="rail-foot">
+    <a class="rail-foot-link" href="/llm/roster">{$t("llm.roster.new")}</a>
     <a class="rail-foot-link" href="/marketplace">{$t("llm.rail.marketplace")}</a>
     {#if profile}
       <div class="rail-profile">

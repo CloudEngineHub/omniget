@@ -62,6 +62,7 @@
     class="omnibox"
     type="text"
     placeholder={$t('omnibox.placeholder')}
+    aria-label={$t("omnibox.placeholder")}
     bind:value={url}
     oninput={onInput}
     autocomplete="off"

@@ -1,11 +1,5 @@
 <script lang="ts">
-  /**
-   * Default routing rule for new agents. The rule only orders the candidate
-   * chain a `ModelPolicy::Route` carries; the coordinator does the walking.
-   * It is stored in `localStorage` because it is a UI default, not state the
-   * backend owns — once `llm_roster_*` is wired this moves into the roster
-   * file (noted in the handoff as an open issue).
-   */
+  // Legacy preference is displayed read-only until execution consumes it.
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
 
@@ -17,15 +11,6 @@
   ];
 
   let rule = $state("cheap");
-
-  function pick(id: string) {
-    rule = id;
-    try {
-      localStorage.setItem(KEY, id);
-    } catch {
-      // Private mode or a blocked store: the rule just does not persist.
-    }
-  }
 
   onMount(() => {
     try {
@@ -39,12 +24,13 @@
 
 <div class="group rules-group">
   <div class="group-label">{$t("llm.models.routing")}</div>
+  <p class="group-footer" role="status">{$t("llm.models.routing_unavailable")}</p>
   {#each RULES as item (item.id)}
     <button
       type="button"
       class="group-row rule"
+      disabled
       aria-pressed={rule === item.id}
-      onclick={() => pick(item.id)}
     >
       <span class="group-row-content">
         <span class="group-row-title">{$t(item.title)}</span>
@@ -55,7 +41,7 @@
       </span>
     </button>
   {/each}
-  <div class="group-footer">{$t("llm.models.rule_hint")}</div>
+  <a class="group-footer" href="/llm/roster">{$t("llm.tab.roster")} →</a>
 </div>
 
 <style>
@@ -70,7 +56,7 @@
     border: none;
     background: transparent;
     text-align: left;
-    cursor: pointer;
+    cursor: default;
     color: inherit;
   }
 

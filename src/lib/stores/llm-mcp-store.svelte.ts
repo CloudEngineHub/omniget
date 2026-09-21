@@ -153,6 +153,7 @@ export function loadServers(force = false): Promise<void> {
   if (inFlight) return inFlight;
   if (loadedOnce && !force) return Promise.resolve();
   loading = true;
+  errorKey = null;
   inFlight = invoke<unknown>("llm_mcp_list")
     .then((answer) => {
       const list = toRows(answer);
@@ -169,8 +170,8 @@ export function loadServers(force = false): Promise<void> {
       available = false;
     })
     .catch((err) => {
-      rows = demoRows();
-      demo = true;
+      if (isStub(err)) { rows = demoRows(); demo = true; }
+      else if (demo) { rows = []; demo = false; }
       available = false;
       // `ERR_STUB` is the backend saying "not wired yet", which the banner
       // already explains; anything else is a failure worth naming.
@@ -188,17 +189,15 @@ export function loadServers(force = false): Promise<void> {
 export async function saveServer(config: McpServerConfig): Promise<boolean> {
   errorKey = null;
   const existing = rows.some((r) => r.config.id === config.id);
-  rows = existing
+  const nextRows = existing
     ? rows.map((r) => (r.config.id === config.id ? { ...r, config } : r))
     : [...rows, { config, tools: [], connected: false, last_error: null }];
   try {
     const answer = await invoke<unknown>("llm_mcp_upsert", { config });
     const list = toRows(answer);
-    if (list) {
-      rows = list;
-      demo = false;
-      available = true;
-    }
+    rows = list ?? nextRows;
+    demo = false;
+    available = true;
     return true;
   } catch (err) {
     if (!isStub(err)) {
@@ -206,18 +205,20 @@ export async function saveServer(config: McpServerConfig): Promise<boolean> {
       errorKey = mcpErrorKey(err);
       return false;
     }
-    return true; // stub backend: the optimistic row stands in
+    if (!demo) { available = false; errorKey = mcpErrorKey(err); return false; }
+    rows = nextRows;
+    return true; // Explicit demo roster only.
   }
 }
 
 export async function removeServer(id: string): Promise<boolean> {
   errorKey = null;
-  rows = rows.filter((r) => r.config.id !== id);
-  delete results[id];
+  const nextRows = rows.filter((r) => r.config.id !== id);
   try {
     const answer = await invoke<unknown>("llm_mcp_remove", { id });
     const list = toRows(answer);
-    if (list) rows = list;
+    rows = list ?? nextRows;
+    delete results[id];
     return true;
   } catch (err) {
     if (!isStub(err)) {
@@ -225,6 +226,9 @@ export async function removeServer(id: string): Promise<boolean> {
       errorKey = mcpErrorKey(err);
       return false;
     }
+    if (!demo) { available = false; errorKey = mcpErrorKey(err); return false; }
+    rows = nextRows;
+    delete results[id];
     return true;
   }
 }
@@ -318,12 +322,12 @@ export async function setGrant(
 ): Promise<boolean> {
   errorKey = null;
   const next = applyGrant(agent.tools, server, tool, mode);
-  agent.tools = next;
   try {
     await invoke("llm_mcp_grant", {
       agentId: agent.id,
       grant: { source: "mcp", server, tool, mode },
     });
+    agent.tools = next;
     return true;
   } catch (err) {
     if (!isStub(err)) {
@@ -331,7 +335,9 @@ export async function setGrant(
       return false;
     }
   }
-  return await saveAgent({ ...agent, tools: next });
+  const saved = await saveAgent({ ...agent, tools: next });
+  if (saved) agent.tools = next;
+  return saved;
 }
 
 /** Test seam: drops every bit of state. Nothing to cancel — nothing runs. */

@@ -3793,6 +3793,7 @@
     "qr_instruction": "Abre Telegram en tu teléfono y ve a Ajustes > Dispositivos > Vincular dispositivo de escritorio",
     "qr_loading": "Generando código QR...",
     "qr_error": "Error al generar código QR",
+    "qr_error_network": "Cannot reach Telegram. Note: the Telegram connection does not go through the app proxy yet — it needs direct network access (or a system-level VPN/TUN proxy).",
     "or_separator": "o",
     "use_phone": "Usar número de teléfono",
     "back_to_qr": "Volver al código QR",

@@ -6551,6 +6551,7 @@ export type TranslationKeys =
   | 'telegram.phone_placeholder'
   | 'telegram.pick_thumbnail'
   | 'telegram.qr_error'
+  | 'telegram.qr_error_network'
   | 'telegram.qr_instruction'
   | 'telegram.qr_loading'
   | 'telegram.qr_title'

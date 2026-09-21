@@ -424,6 +424,18 @@
     }
   }
 
+  // The plugin answers known failures with an i18n key (for example
+  // "telegram.qr_error_network"). Translate those with the app dictionary and
+  // show anything else exactly as the plugin sent it.
+  function pluginErrorText(msg: string, fallbackKey: string): string {
+    if (!msg) return $t(fallbackKey) as string;
+    if (/^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/.test(msg)) {
+      const translated = $t(msg) as string | undefined;
+      if (translated && translated !== msg) return translated;
+    }
+    return msg;
+  }
+
   async function startQrLogin() {
     qrLoading = true;
     qrError = "";
@@ -448,7 +460,7 @@
       if (msg.includes("already_authenticated")) {
         checkSession();
       } else {
-        qrError = msg || $t("telegram.qr_error");
+        qrError = pluginErrorText(msg, "telegram.qr_error");
       }
     }
   }
@@ -492,7 +504,8 @@
       await pluginInvoke("telegram", "telegram_send_code", { phone: phone.trim() });
       view = "code";
     } catch (e: any) {
-      error = typeof e === "string" ? e : e.message ?? $t("telegram.unknown_error");
+      const msg = typeof e === "string" ? e : e?.message ?? "";
+      error = pluginErrorText(msg, "telegram.unknown_error");
     } finally {
       loading = false;
     }
@@ -514,7 +527,7 @@
         passwordHint = msg.slice("password_required:".length);
         view = "password";
       } else {
-        error = msg || $t("telegram.unknown_error");
+        error = pluginErrorText(msg, "telegram.unknown_error");
       }
     } finally {
       loading = false;
@@ -565,7 +578,8 @@
     try {
       chats = await pluginInvoke<TelegramChat[]>("telegram", "telegram_list_chats");
     } catch (e: any) {
-      chatsError = typeof e === "string" ? e : e.message ?? $t("telegram.chats_error");
+      const msg = typeof e === "string" ? e : e?.message ?? "";
+      chatsError = pluginErrorText(msg, "telegram.chats_error");
     } finally {
       loadingChats = false;
     }
@@ -614,7 +628,8 @@
       mediaItems = items;
       hasMore = items.length >= 100;
     } catch (e: any) {
-      mediaError = typeof e === "string" ? e : e.message ?? $t("telegram.media_error");
+      const msg = typeof e === "string" ? e : e?.message ?? "";
+      mediaError = pluginErrorText(msg, "telegram.media_error");
     } finally {
       loadingMedia = false;
     }
@@ -669,7 +684,8 @@
       });
       mediaItems = items;
     } catch (e: any) {
-      mediaError = typeof e === "string" ? e : e.message ?? $t("telegram.media_error");
+      const msg = typeof e === "string" ? e : e?.message ?? "";
+      mediaError = pluginErrorText(msg, "telegram.media_error");
     } finally {
       loadingMedia = false;
       isSearching = false;

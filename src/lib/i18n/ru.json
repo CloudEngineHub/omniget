@@ -485,9 +485,9 @@
     "tools": "Инструменты",
     "llm": "LLM",
     "world": "Мир",
-    "help": "Help",
-    "help_subtitle": "Guides and assistant",
-    "profile_appearance": "Profile and appearance"
+    "help": "Справка",
+    "help_subtitle": "Руководства и помощник",
+    "profile_appearance": "Профиль и внешний вид"
   },
   "command_palette": {
     "open": "Поиск",
@@ -502,7 +502,7 @@
   },
   "home": {
     "inspector_title": "Параметры загрузки",
-    "hero_title": "OmniGet",
+    "hero_title": "Что хотите скачать?",
     "hero_subtitle": "Видео, аудио, картинки, курсы и торренты с 1000+ сайтов — сразу в вашу папку. Без аккаунта и рекламы.",
     "action_batch": "Много ссылок сразу",
     "action_torrent": "Открыть файл .torrent",
@@ -511,7 +511,7 @@
     "action_simple": "Вернуться к простому виду",
     "value_line": "{{count}} файлов · {{size}} сохранено с OmniGet",
     "value_first": "Первая загрузка займёт около минуты. Для приватного контента нужны только cookies вашего браузера.",
-    "analyze": "Analyze link"
+    "analyze": "Разобрать ссылку"
   },
   "tools": {
     "tab": "Инструменты",
@@ -9674,10 +9674,10 @@
       "empty_hint": "Сторона LLM не ответила. Запустите ход или попробуйте снова:",
       "tokens_in_short": "вх.",
       "tokens_out_short": "исх.",
-      "table": "View daily values",
-      "running": "Running",
-      "waiting": "Waiting for a tool",
-      "failures": "Agents with errors"
+      "table": "Показать значения по дням",
+      "running": "Работает",
+      "waiting": "Ждёт инструмент",
+      "failures": "Агентов с ошибками"
     },
     "quota": {
       "active": "действует",
@@ -9691,7 +9691,7 @@
     "subtitle": "Ваши агенты, их модели и то, к чему им разрешён доступ.",
     "tab": {
       "chat": "Чат",
-      "roster": "Состав",
+      "roster": "Команда агентов",
       "models": "Модели и маршрутизация",
       "observatory": "Обсерватория",
       "mcp": "MCP",
@@ -9722,8 +9722,8 @@
       "custom": "Свой"
     },
     "conv": {
-      "empty_title": "Пока ничего не сказано",
-      "empty_body": "Спросите агента о чём-нибудь. Вызовы инструментов появляются прямо в переписке.",
+      "empty_title": "Чем займёмся?",
+      "empty_body": "Выберите агента слева, проверьте папку рабочей области и опишите нужный результат.",
       "you": "Вы",
       "thinking": "Размышления",
       "tool_call": "Вызов инструмента",
@@ -9765,7 +9765,7 @@
       "unlimited": "без ограничений"
     },
     "roster": {
-      "title": "Состав",
+      "title": "Команда агентов",
       "new": "Новый агент",
       "name": "Название",
       "role": "Роль",
@@ -9789,8 +9789,8 @@
       "saved": "Агент сохранён.",
       "skills": "Навыки",
       "skills_empty": "Навык не установлен. Установите его на вкладке «Навыки».",
-      "save_error": "Could not save. Your changes are still here. Try again.",
-      "roles_hint": "The coordinator divides and follows the work. Workers carry out assigned tasks; advisors help evaluate decisions."
+      "save_error": "Не удалось сохранить. Изменения на месте. Попробуйте снова.",
+      "roles_hint": "Координатор распределяет работу и следит за ней. Исполнители выполняют порученные задачи; советники помогают оценивать решения."
     },
     "template": {
       "solo": "Соло",
@@ -9799,8 +9799,8 @@
       "duo_desc": "Координатор и исполнитель, который запускает инструменты.",
       "research": "Команда исследователей",
       "research_desc": "Координатор, два разведчика и критик.",
-      "effect": "Adds this preset’s agents. Existing agents with the same identifier are preserved.",
-      "preview": "Preview team"
+      "effect": "Добавляет агентов из этого пресета. Агенты с тем же идентификатором сохраняются.",
+      "preview": "Предпросмотр команды"
     },
     "models": {
       "title": "Модели и маршрутизация",
@@ -9824,11 +9824,11 @@
       "openrouter_started": "Завершите вход в браузере.",
       "openrouter_ok": "Ключ OpenRouter сохранён.",
       "openrouter_failed": "Не удалось войти в OpenRouter: {{error}}",
-      "routing_unavailable": "These strategies are not applied yet. Configure a fixed model or an ordered fallback chain for each agent in Agent team.",
-      "connect": "Connect or manage providers",
-      "local_hint": "Local server: make sure it is running and has models installed. No saved API key is required.",
-      "no_models": "This provider returned no models. Check the models available on the server or enter an identifier manually.",
-      "load_failed": "Could not load models: {{error}}"
+      "routing_unavailable": "Эти стратегии пока не применяются. Задайте каждому агенту фиксированную модель или упорядоченную цепочку резервных моделей в разделе «Команда агентов».",
+      "connect": "Подключить провайдеров или управлять ими",
+      "local_hint": "Локальный сервер: убедитесь, что он запущен и на нём установлены модели. Сохранённый ключ API не нужен.",
+      "no_models": "Провайдер не вернул ни одной модели. Проверьте, какие модели есть на сервере, или укажите идентификатор вручную.",
+      "load_failed": "Не удалось загрузить модели: {{error}}"
     },
     "err": {
       "unavailable": "Бэкенд LLM ещё не подключён.",
@@ -9845,7 +9845,7 @@
       "stop": "Остановить",
       "bridgeTitle": "Мост, совместимый с OpenAI",
       "bridgeHint": "Позволяет любому приложению, совместимому с OpenAI, использовать ваших агентов по адресу omniget/<agent>. По умолчанию выключено: тот, у кого есть токен моста, тратит ваши токены.",
-      "explanation": "Local model management is not available here yet. Configure an existing local provider in Models & Routing."
+      "explanation": "Управление локальными моделями здесь пока недоступно. Настройте существующего локального провайдера в разделе «Модели и маршрутизация»."
     },
     "error": {
       "ERR_LLM_NO_AGENT": "Такого агента больше нет.",
@@ -9950,10 +9950,10 @@
       "repo_add": "Установить",
       "repo_installing": "Устанавливаем…",
       "repo_hint": "То же написание, что и у `npx skills add`. Репозиторий клонируется и проходит через сканер, как и любая другая установка.",
-      "unlicensed_badge": "License not provided",
-      "assign": "Assign to an agent",
-      "explore": "Explore",
-      "search_installed": "Search installed skills"
+      "unlicensed_badge": "Лицензия не указана",
+      "assign": "Назначить агенту",
+      "explore": "Обзор",
+      "search_installed": "Поиск по установленным навыкам"
     },
     "mcp": {
       "title": "MCP",
@@ -10001,8 +10001,8 @@
       "import_failed": "В этом тексте не найдено ни одного сервера MCP.",
       "registry": "Реестр",
       "registry_hint": "Известные серверы. Установка заполняет форму рабочей конфигурацией; ничего не скачивается и не подключается.",
-      "reg_install": "Установить",
-      "reg_reinstall": "Переустановить",
+      "reg_install": "Настроить",
+      "reg_reinstall": "Перенастроить",
       "reg_homepage": "Домашняя страница",
       "reg_needs": "Останется заполнить: {{fields}}",
       "reg": {
@@ -10142,7 +10142,7 @@
       "acp_missing": "не установлен",
       "acp_added": "{{name}} в составе",
       "acp_custom_name": "Название",
-      "acp_command": "Command"
+      "acp_command": "Команда"
     },
     "rules": {
       "title": "Правила «Всегда»",
@@ -10199,24 +10199,24 @@
       "undo_not_restored": "В том ходе также выполнялись эти команды; всё, что они изменили вне папки, не отменено: {{commands}}",
       "undo_unavailable": "Отмена недоступна: git не найден",
       "undone": "Отменено: восстановлено файлов: {{count}}",
-      "chat": "Chat",
-      "agents": "Agents",
-      "activity": "Activity",
-      "configure": "Configure",
-      "tasks": "Tasks",
-      "routines": "Routines",
-      "performance": "Usage and performance",
-      "monitor": "Usage monitor",
-      "off": "Off",
-      "on": "On",
-      "attention": "Needs attention",
-      "quotas": "Subscription limits",
-      "usage": "Recorded usage",
-      "activity_hint": "View agent activity",
-      "monitor_hint": "Turning off the strip stops its readers. History and task telemetry remain available.",
-      "sources": "Sources and preferences",
-      "updated": "Last read",
-      "unknown": "Unavailable"
+      "chat": "Чат",
+      "agents": "Агенты",
+      "activity": "Активность",
+      "configure": "Настроить",
+      "tasks": "Задачи",
+      "routines": "Циклы",
+      "performance": "Использование и производительность",
+      "monitor": "Монитор использования",
+      "off": "Выкл.",
+      "on": "Вкл.",
+      "attention": "Требует внимания",
+      "quotas": "Лимиты подписок",
+      "usage": "Записанное использование",
+      "activity_hint": "Активность агентов",
+      "monitor_hint": "Если выключить полосу, её читатели остановятся. История и телеметрия задач останутся доступны.",
+      "sources": "Источники и настройки",
+      "updated": "Последнее чтение",
+      "unknown": "Недоступно"
     },
     "jobs": {
       "title": "Задачи",
@@ -10279,11 +10279,11 @@
         "fired_count": "Срабатываний: {{count}}",
         "copy_curl": "Копировать curl"
       },
-      "filter_all": "All tasks",
-      "filter_active": "In progress",
-      "filter_attention": "Needs attention",
-      "filter_done": "Finished",
-      "no_matches": "No tasks in this filter."
+      "filter_all": "Все задачи",
+      "filter_active": "В работе",
+      "filter_attention": "Требуют внимания",
+      "filter_done": "Завершены",
+      "no_matches": "В этом фильтре задач нет."
     },
     "loops": {
       "title": "Циклы",
@@ -10316,11 +10316,11 @@
         "failed": "Сбой",
         "cancelled": "Отменено"
       },
-      "check_passed": "Condition met",
-      "summary": "Up to {{rounds}} rounds. Stops earlier when a configured condition or time limit is reached.",
-      "no_check": "No check command: completion will be controlled by the round or time limit.",
-      "review": "Review loop",
-      "edit": "Edit configuration"
+      "check_passed": "Условие выполнено",
+      "summary": "До {{rounds}} кругов. Останавливается раньше, если выполнено заданное условие или истёк лимит времени.",
+      "no_check": "Команда проверки не задана: завершением будут управлять круги или лимит времени.",
+      "review": "Проверить цикл",
+      "edit": "Изменить настройки"
     },
     "limits": {
       "title": "Полоса лимитов",
@@ -10385,16 +10385,16 @@
       }
     },
     "chat": {
-      "details": "Agent details"
+      "details": "Подробности об агенте"
     },
     "nav": {
-      "work": "Work",
-      "configure": "Configure",
-      "monitor": "Monitor",
-      "experimental": "Experimental"
+      "work": "Работа",
+      "configure": "Настройка",
+      "monitor": "Мониторинг",
+      "experimental": "Экспериментальное"
     },
     "arena": {
-      "explanation": "Compare the same task across models. This feature is not available yet; use Chat to work with a configured agent."
+      "explanation": "Сравнивайте одну и ту же задачу на разных моделях. Эта функция пока недоступна; чтобы работать с настроенным агентом, откройте «Чат»."
     }
   },
   "omni": {
@@ -10434,16 +10434,16 @@
     }
   },
   "design": {
-    "title": "Workspace appearance",
-    "hint": "Applies to Home, Downloads and AI agents. Preview before applying.",
-    "apply": "Apply appearance",
-    "reset": "Restore Amber Minimal",
-    "applied": "Appearance applied on this device.",
-    "error": "Could not save appearance on this device.",
-    "system": "System",
-    "light": "Light",
-    "dark": "Dark",
-    "preview": "Your workspace",
-    "preview_body": "Agents, files and tasks in one place."
+    "title": "Внешний вид рабочей области",
+    "hint": "Применяется к Главной, Загрузкам, LLM и Справке, включая внешний вид окна. Перед применением посмотрите предпросмотр.",
+    "apply": "Применить внешний вид",
+    "reset": "Восстановить Amber Minimal",
+    "applied": "Внешний вид применён на этом устройстве.",
+    "error": "Не удалось сохранить внешний вид на этом устройстве.",
+    "system": "Системная",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "preview": "Ваша рабочая область",
+    "preview_body": "Агенты, файлы и задачи в одном месте."
   }
 }

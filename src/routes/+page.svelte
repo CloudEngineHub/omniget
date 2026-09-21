@@ -375,6 +375,11 @@
     scheduleAt = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  function handleAnalyze() {
+    handleInput();
+    pendingAutoDownload = false;
+  }
+
   function handleInput() {
     if (debounceTimer) clearTimeout(debounceTimer);
     clearMediaPreview();
@@ -995,6 +1000,7 @@
         bind:url
         bind:mode={homeInputMode}
         onInput={handleInput}
+        onAnalyze={handleAnalyze}
         onModeChange={handleHomeModeChange}
         onAdvanced={() => { advancedMode = true; }}
       />
@@ -1069,6 +1075,7 @@
         bind:url
         bind:mode={homeInputMode}
         onInput={handleInput}
+        onAnalyze={handleAnalyze}
         onModeChange={handleHomeModeChange}
         onAdvanced={() => { advancedMode = true; }}
       />

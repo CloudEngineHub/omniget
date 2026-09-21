@@ -29,11 +29,14 @@
     animate = "auto",
     pose,
     label,
+    compact = false,
   }: {
     /** RGB 0-255, straight from `profile.skin.tint` or `SKIN_TINTS`. */
     tint: readonly number[] | null | undefined;
     /** Side of the disc in CSS px. */
     size?: number;
+    /** Fits the complete official frame inside small profile discs. */
+    compact?: boolean;
     mood?: Mood | string;
     speaking?: boolean;
     /** `auto` animates on hover or while speaking; `always`/`never` force it. */
@@ -49,7 +52,7 @@
   // The sprite is 48x64 with the pivot at (24,60): drawn at 1:1 and anchored to
   // the bottom centre of the disc, the feet sit on the rim and the head fills the
   // top, which is what reads best in a circle. `scale` is the only size knob.
-  let scale = $derived(size / 40);
+  let scale = $derived(compact ? size / 72 : size / 40);
 </script>
 
 <span

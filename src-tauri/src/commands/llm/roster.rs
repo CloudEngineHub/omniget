@@ -81,6 +81,15 @@ pub async fn llm_acp_agent_create(
     if command.trim().is_empty() {
         return Err("ERR_LLM_ACP: empty command".into());
     }
+    // A retry of the same intent returns the existing roster, not another agent.
+    let roster = state.llm.roster();
+    if roster.iter().any(|a| {
+        a.name == name
+            && matches!(&a.runtime,
+        RuntimeKind::Acp { command: c, args: argv } if c == &command && argv == &args)
+    }) {
+        return serde_json::to_value(roster).map_err(|e| e.to_string());
+    }
     let base: String = name
         .to_lowercase()
         .chars()

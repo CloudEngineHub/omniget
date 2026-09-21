@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Models & Routing: the providers the user has keys for, the routing rule and
    * "Sign in with OpenRouter".
@@ -100,6 +102,7 @@
       {$t("llm.models.sign_in_openrouter")}
     </button>
   </header>
+  <SurfaceGuide text={$surfaceCopy.modelsHint} href="/help?article=models#guide" />
 
   <div class="group">
     <div class="group-label">{$t("llm.models.providers")}</div>
@@ -127,11 +130,15 @@
     {/if}
   </div>
 
+  <a class="button" href="/settings?tab=ai">{$t("llm.models.connect")} →</a>
+  <details class="routing-details"><summary>{$surfaceCopy.advanced}</summary>
   <RoutingRules />
+  </details>
   <PruneSettings />
 </div>
 
 <style>
+ .routing-details { margin-top:24px; } .routing-details summary { padding:16px 0; font-weight:600; cursor:pointer; }
   /* Same reason as the roster page: flex children would shrink and clip. */
   .models-page {
     flex: 1;

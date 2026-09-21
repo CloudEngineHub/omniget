@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
+  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * MCP tab, two halves.
    *
@@ -148,6 +150,7 @@
       </button>
     </div>
   </header>
+  <SurfaceGuide text={$surfaceCopy.mcpHint} href="/help?article=mcp#guide" />
 
   {#if half === "server"}
     <ServerHalf />
@@ -184,6 +187,7 @@
     {/if}
     {#if getErrorKey()}
       <p class="notice notice-danger" role="alert">{$t(getErrorKey()!)}</p>
+      <button type="button" class="button" disabled={isLoading()} onclick={() => void loadServers(true)}>{$surfaceCopy.retry}</button>
     {/if}
 
     <section class="stack">
@@ -213,6 +217,7 @@
       {/if}
     </section>
 
+    <details class="import-settings"><summary>{$surfaceCopy.advanced} · {$t("llm.mcp.import")}</summary>
     <section class="stack">
       <h2 class="section-header-title">{$t("llm.mcp.import")}</h2>
       <p class="hint">{$t("llm.mcp.import_hint")}</p>
@@ -233,6 +238,8 @@
       </div>
     </section>
 
+    </details>
+
     <section class="stack">
       <h2 class="section-header-title">{$t("llm.mcp.registry")}</h2>
       <p class="hint">{$t("llm.mcp.registry_hint")}</p>
@@ -246,6 +253,7 @@
 </div>
 
 <style>
+  .import-settings { margin:24px 0; } .import-settings summary { cursor:pointer; padding:14px 0; font-weight:600; color:var(--text); }
   /* Block layout: as a flex column the groups shrink to the viewport and clip
      their own rows instead of letting the page scroll. Same as the roster. */
   .mcp-page {
@@ -284,7 +292,7 @@
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
     gap: var(--space-3);
   }
 

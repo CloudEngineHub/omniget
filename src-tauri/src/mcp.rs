@@ -147,6 +147,7 @@ impl HostTools for AppHost {
     async fn call(&self, name: &str, a: Value) -> Result<Value, String> {
         let app = &self.app;
         match name {
+            n if n.starts_with("help_") => crate::commands::llm::help::dispatch(app, n, a).await,
             "download_url" => {
                 let url = s(&a, "url");
                 let action =
@@ -181,11 +182,76 @@ impl HostTools for AppHost {
                         ))
                     }
                 };
+                // Optional stable intent journal shared by Help and external MCP clients.
+                // A crash after enqueue never silently repeats the effect.
+                static ENQUEUE_LOCK: std::sync::OnceLock<tokio::sync::Mutex<()>> =
+                    std::sync::OnceLock::new();
+                let _enqueue_guard = ENQUEUE_LOCK
+                    .get_or_init(|| tokio::sync::Mutex::new(()))
+                    .lock()
+                    .await;
+                let receipt = if let Some(key) = a["idempotencyKey"].as_str() {
+                    if key.is_empty()
+                        || key.len() > 100
+                        || !key.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+                    {
+                        return Err("ERR_DOWNLOAD_IDEMPOTENCY_KEY".into());
+                    }
+                    Some(crate::commands::llm::help::folder()?.join(format!("download-{key}.json")))
+                } else {
+                    None
+                };
+                if let Some(path) = &receipt {
+                    if path.exists() {
+                        let record: Value =
+                            serde_json::from_slice(&std::fs::read(path).map_err(err)?)
+                                .map_err(err)?;
+                        if record["url"] != url || record["mode"] != json!(mode) {
+                            return Err("ERR_DOWNLOAD_IDEMPOTENCY_CONFLICT".into());
+                        }
+                        if !record["result"].is_null() {
+                            let mut result = record["result"].clone();
+                            if let Some(item) = queue_snapshot(app)
+                                .await
+                                .into_iter()
+                                .find(|i| Some(i.id) == result["item"]["id"].as_u64())
+                            {
+                                result["item"] = serde_json::to_value(item).map_err(err)?;
+                                result["historical"] = json!(false);
+                            } else {
+                                result["historical"] = json!(true);
+                                result["outcome"] = json!("recorded");
+                                result["note"]=json!("Saved enqueue receipt, not current download status. Check Downloads or recovery; no new download was started.");
+                            }
+                            return Ok(result);
+                        }
+                        // URL equality cannot identify this intent: an older completed
+                        // download may have the same URL. Never attach an unrelated item.
+                        return Err("ERR_DOWNLOAD_OUTCOME_UNKNOWN: interrupted intent; inspect Downloads/recovery before starting another intent".into());
+                    }
+                    crate::commands::llm::help::write(
+                        path,
+                        &json!({"url":url,"mode":mode,"result":null}),
+                    )?;
+                }
                 let before: std::collections::HashSet<u64> =
                     queue_snapshot(app).await.iter().map(|i| i.id).collect();
-                let outcome =
-                    crate::external_url::queue_url_with_defaults(app, url.clone(), false, mode)
-                        .await?;
+                let outcome = crate::external_url::queue_url_with_defaults(
+                    app,
+                    url.clone(),
+                    false,
+                    mode.clone(),
+                )
+                .await;
+                let outcome = match outcome {
+                    Ok(value) => value,
+                    Err(error) => {
+                        if let Some(path) = &receipt {
+                            let _ = std::fs::remove_file(path);
+                        }
+                        return Err(error);
+                    }
+                };
                 let after = queue_snapshot(app).await;
                 let item = after
                     .iter()
@@ -195,7 +261,14 @@ impl HostTools for AppHost {
                     crate::external_url::QueueUrlOutcome::Queued => "queued",
                     crate::external_url::QueueUrlOutcome::AlreadyQueued => "already-queued",
                 };
-                Ok(json!({ "url": url, "outcome": outcome, "item": item }))
+                let result = json!({ "url": url, "outcome": outcome, "item": item });
+                if let Some(path) = receipt {
+                    crate::commands::llm::help::write(
+                        &path,
+                        &json!({"url":url,"mode":mode,"result":result}),
+                    )?;
+                }
+                Ok(result)
             }
             "downloads_queue" => {
                 let want = s(&a, "status").trim().to_lowercase();
@@ -575,7 +648,7 @@ mod tests {
     fn a_lista_do_servidor_e_a_tabela_do_core() {
         let table = omniget_core::core::llm::tool_table::table();
         let list = tools();
-        assert_eq!(list.len(), 49, "a tabela mudou de tamanho");
+        assert_eq!(list.len(), 56, "a tabela mudou de tamanho");
         assert_eq!(list.len(), table.len());
         for (def, entry) in list.iter().zip(table) {
             assert_eq!(def.name, entry.name);
@@ -592,7 +665,7 @@ mod tests {
             .filter(|e| e.needs_host())
             .map(|e| e.name)
             .collect();
-        assert_eq!(host.len(), 9, "{:?}", host);
+        assert_eq!(host.len(), 16, "{:?}", host);
     }
 
     #[test]

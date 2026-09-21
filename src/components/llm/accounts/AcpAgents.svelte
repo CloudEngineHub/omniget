@@ -1,6 +1,7 @@
 <script lang="ts">
   // Any CLI that speaks the Agent Client Protocol becomes an agent of the
   // roster. One read on mount (a PATH lookup), nothing polls.
+  import { parseCommand } from "$lib/llm/connection-setup";
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
@@ -8,18 +9,21 @@
   import { loadRoster } from "$lib/stores/llm-store.svelte";
 
   type AcpCli = { id: string; name: string; command: string; args: string[]; path: string | null; installed: boolean };
+  let detectionError = $state("");
   let clis = $state<AcpCli[]>([]);
   let busy = $state<string | null>(null);
   let customName = $state("");
   let customCommand = $state("");
 
-  onMount(async () => {
+  async function detect() {
+    detectionError = "";
     try {
       clis = (await invoke("llm_acp_detect")) as AcpCli[];
-    } catch {
-      clis = [];
+    } catch (error) {
+      detectionError = String(error);
     }
-  });
+  }
+  onMount(() => { void detect(); });
 
   async function add(name: string, command: string, args: string[]) {
     busy = command;
@@ -27,25 +31,32 @@
       await invoke("llm_acp_agent_create", { name, command, args });
       await loadRoster();
       showToast("success", $t("llm.accounts.acp_added", { name }) as string);
+      return true;
     } catch (error) {
       showToast("error", String(error));
+      return false;
     } finally {
       busy = null;
     }
   }
 
-  function addCustom() {
-    const parts = customCommand.trim().split(/\s+/).filter(Boolean);
+  async function addCustom() {
+    if (busy) return;
+    let parts: string[];
+    try { parts = parseCommand(customCommand.trim()); }
+    catch (error) { showToast("error", String(error)); return; }
     if (parts.length === 0) return;
-    void add(customName.trim() || parts[0], parts[0], parts.slice(1));
-    customName = "";
-    customCommand = "";
+    if (await add(customName.trim() || parts[0], parts[0], parts.slice(1))) {
+      customName = "";
+      customCommand = "";
+    }
   }
 </script>
 
 <section class="surface-card acp">
   <h2 class="section-title">{$t("llm.accounts.acp_title")}</h2>
   <p class="field-hint">{$t("llm.accounts.acp_hint")}</p>
+  {#if detectionError}<p role="alert">{detectionError}</p><button class="button" onclick={detect}>{$t("llm.accounts.refresh")}</button>{/if}
   <ul class="acp-list">
     {#each clis as cli (cli.id)}
       <li class="acp-row" class:missing={!cli.installed}>
@@ -54,7 +65,7 @@
           <code class="acp-cmd">{cli.path ?? `${cli.command} ${cli.args.join(" ")}`}</code>
         </div>
         {#if cli.installed}
-          <button type="button" class="button" disabled={busy === cli.command} onclick={() => add(cli.name, cli.command, cli.args)}>
+          <button type="button" class="button" disabled={busy !== null} onclick={() => add(cli.name, cli.command, cli.args)}>
             {$t("llm.accounts.acp_add")}
           </button>
         {:else}
@@ -64,9 +75,9 @@
     {/each}
   </ul>
   <form class="acp-custom" onsubmit={(e) => { e.preventDefault(); addCustom(); }}>
-    <input type="text" bind:value={customName} placeholder={$t("llm.accounts.acp_custom_name") as string} />
-    <input type="text" class="grow" bind:value={customCommand} placeholder="my-agent --acp" spellcheck="false" autocapitalize="off" />
-    <button type="submit" class="button" disabled={!customCommand.trim()}>{$t("llm.accounts.acp_add")}</button>
+    <label>{$t("llm.accounts.acp_custom_name")}<input disabled={busy !== null} type="text" bind:value={customName} /></label>
+    <label class="grow">{$t("llm.accounts.acp_command")}<input disabled={busy !== null} type="text" bind:value={customCommand} placeholder="my-agent --acp" spellcheck="false" autocapitalize="off" /></label>
+    <button type="submit" class="button" disabled={busy !== null || !customCommand.trim()}>{$t("llm.accounts.acp_add")}</button>
   </form>
 </section>
 
@@ -76,6 +87,7 @@
     flex-direction: column;
     gap: var(--space-2);
     margin-top: var(--space-4);
+    padding: var(--space-5);
   }
   .acp-list {
     list-style: none;
@@ -92,7 +104,7 @@
     gap: var(--space-3);
   }
   .acp-row.missing {
-    opacity: 0.55;
+    color: var(--text-muted);
   }
   .acp-text {
     display: flex;
@@ -113,7 +125,10 @@
     font-size: var(--text-sm);
     color: var(--text-dim);
   }
+  .acp-custom label { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm); min-width: 0; }
   .acp-custom {
+    flex-wrap: wrap;
+    align-items: flex-end;
     display: flex;
     gap: var(--space-2);
   }

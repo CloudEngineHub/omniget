@@ -484,7 +484,10 @@
     "collapse_plugins": "بستن افزونه‌ها",
     "tools": "Tools",
     "llm": "LLM",
-    "world": "World"
+    "world": "World",
+    "help": "Help",
+    "help_subtitle": "Guides and assistant",
+    "profile_appearance": "Profile and appearance"
   },
   "command_palette": {
     "open": "Search",
@@ -507,7 +510,8 @@
     "action_advanced": "Advanced options",
     "action_simple": "Back to the simple view",
     "value_line": "{{count}} files · {{size}} saved with OmniGet",
-    "value_first": "Your first download takes about a minute. Private content only needs your browser cookies."
+    "value_first": "Your first download takes about a minute. Private content only needs your browser cookies.",
+    "analyze": "Analyze link"
   },
   "tools": {
     "tab": "Tools",
@@ -9669,7 +9673,11 @@
       "empty_title": "No telemetry yet",
       "empty_hint": "The LLM side has not answered. Start a turn, or try again:",
       "tokens_in_short": "in",
-      "tokens_out_short": "out"
+      "tokens_out_short": "out",
+      "table": "View daily values",
+      "running": "Running",
+      "waiting": "Waiting for a tool",
+      "failures": "Agents with errors"
     },
     "quota": {
       "active": "in use",
@@ -9780,7 +9788,9 @@
       "unavailable": "The roster backend is not wired yet — changes are not saved.",
       "saved": "Agent saved.",
       "skills": "Skills",
-      "skills_empty": "No skill installed. Install one in the Skills tab."
+      "skills_empty": "No skill installed. Install one in the Skills tab.",
+      "save_error": "Could not save. Your changes are still here. Try again.",
+      "roles_hint": "The coordinator divides and follows the work. Workers carry out assigned tasks; advisors help evaluate decisions."
     },
     "template": {
       "solo": "Solo",
@@ -9788,7 +9798,9 @@
       "duo": "Duo",
       "duo_desc": "A coordinator and a worker that runs the tools.",
       "research": "Research squad",
-      "research_desc": "Coordinator, two scouts and a critic."
+      "research_desc": "Coordinator, two scouts and a critic.",
+      "effect": "Adds this preset’s agents. Existing agents with the same identifier are preserved.",
+      "preview": "Preview team"
     },
     "models": {
       "title": "Models & Routing",
@@ -9811,7 +9823,12 @@
       "rule_hint": "The rule is a default for new agents; each agent can override it.",
       "openrouter_started": "Finish the sign-in in your browser.",
       "openrouter_ok": "OpenRouter key saved.",
-      "openrouter_failed": "OpenRouter sign-in failed: {{error}}"
+      "openrouter_failed": "OpenRouter sign-in failed: {{error}}",
+      "routing_unavailable": "These strategies are not applied yet. Configure a fixed model or an ordered fallback chain for each agent in Agent team.",
+      "connect": "Connect or manage providers",
+      "local_hint": "Local server: make sure it is running and has models installed. No saved API key is required.",
+      "no_models": "This provider returned no models. Check the models available on the server or enter an identifier manually.",
+      "load_failed": "Could not load models: {{error}}"
     },
     "err": {
       "unavailable": "The LLM backend is not wired yet.",
@@ -9827,7 +9844,8 @@
       "start": "Start",
       "stop": "Stop",
       "bridgeTitle": "OpenAI-compatible bridge",
-      "bridgeHint": "Lets any app that speaks OpenAI use your agents at omniget/<agent>. Off by default: whoever holds the bridge token spends your tokens."
+      "bridgeHint": "Lets any app that speaks OpenAI use your agents at omniget/<agent>. Off by default: whoever holds the bridge token spends your tokens.",
+      "explanation": "Local model management is not available here yet. Configure an existing local provider in Models & Routing."
     },
     "error": {
       "ERR_LLM_NO_AGENT": "That agent no longer exists.",
@@ -9931,7 +9949,11 @@
       "repo_title": "Install from GitHub",
       "repo_add": "Install",
       "repo_installing": "Installing…",
-      "repo_hint": "Same spelling as `npx skills add`. The repository is cloned and goes through the scanner like any other install."
+      "repo_hint": "Same spelling as `npx skills add`. The repository is cloned and goes through the scanner like any other install.",
+      "unlicensed_badge": "License not provided",
+      "assign": "Assign to an agent",
+      "explore": "Explore",
+      "search_installed": "Search installed skills"
     },
     "mcp": {
       "title": "MCP",
@@ -10119,7 +10141,8 @@
       "acp_add": "Add as agent",
       "acp_missing": "not installed",
       "acp_added": "{{name}} joined the roster",
-      "acp_custom_name": "Name"
+      "acp_custom_name": "Name",
+      "acp_command": "Command"
     },
     "rules": {
       "title": "Always rules",
@@ -10175,7 +10198,25 @@
       "undone_full": "Undone: {{count}} file(s) restored, {{messages}} message(s) removed",
       "undo_not_restored": "These commands also ran in that turn; whatever they changed outside the folder was not undone: {{commands}}",
       "undo_unavailable": "Undo unavailable: git not found",
-      "undone": "Undone: {{count}} file(s) restored"
+      "undone": "Undone: {{count}} file(s) restored",
+      "chat": "Chat",
+      "agents": "Agents",
+      "activity": "Activity",
+      "configure": "Configure",
+      "tasks": "Tasks",
+      "routines": "Routines",
+      "performance": "Usage and performance",
+      "monitor": "Usage monitor",
+      "off": "Off",
+      "on": "On",
+      "attention": "Needs attention",
+      "quotas": "Subscription limits",
+      "usage": "Recorded usage",
+      "activity_hint": "View agent activity",
+      "monitor_hint": "Turning off the strip stops its readers. History and task telemetry remain available.",
+      "sources": "Sources and preferences",
+      "updated": "Last read",
+      "unknown": "Unavailable"
     },
     "jobs": {
       "title": "Jobs",
@@ -10237,7 +10278,12 @@
         "fired": "Trigger fired",
         "fired_count": "Fired {{count}}×",
         "copy_curl": "Copy curl"
-      }
+      },
+      "filter_all": "All tasks",
+      "filter_active": "In progress",
+      "filter_attention": "Needs attention",
+      "filter_done": "Finished",
+      "no_matches": "No tasks in this filter."
     },
     "loops": {
       "title": "Loops",
@@ -10269,7 +10315,12 @@
         "done": "Done",
         "failed": "Failed",
         "cancelled": "Cancelled"
-      }
+      },
+      "check_passed": "Condition met",
+      "summary": "Up to {{rounds}} rounds. Stops earlier when a configured condition or time limit is reached.",
+      "no_check": "No check command: completion will be controlled by the round or time limit.",
+      "review": "Review loop",
+      "edit": "Edit configuration"
     },
     "limits": {
       "title": "Limits strip",
@@ -10332,6 +10383,18 @@
           "error": "Could not read."
         }
       }
+    },
+    "chat": {
+      "details": "Agent details"
+    },
+    "nav": {
+      "work": "Work",
+      "configure": "Configure",
+      "monitor": "Monitor",
+      "experimental": "Experimental"
+    },
+    "arena": {
+      "explanation": "Compare the same task across models. This feature is not available yet; use Chat to work with a configured agent."
     }
   },
   "omni": {
@@ -10369,5 +10432,18 @@
       "deny": "Deny",
       "hint": "Click Omni to choose"
     }
+  },
+  "design": {
+    "title": "Workspace appearance",
+    "hint": "Applies to Home, Downloads and AI agents. Preview before applying.",
+    "apply": "Apply appearance",
+    "reset": "Restore Amber Minimal",
+    "applied": "Appearance applied on this device.",
+    "error": "Could not save appearance on this device.",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "preview": "Your workspace",
+    "preview_body": "Agents, files and tasks in one place."
   }
 }

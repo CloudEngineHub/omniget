@@ -81,6 +81,19 @@ pub fn current_turn() -> Option<std::sync::Arc<TurnCtx>> {
     TURN.try_with(|c| c.clone()).ok()
 }
 
+tokio::task_local! {
+    static TOOL_CALL_ID: String;
+}
+
+/// Add the broker's real call id without changing the enclosing turn context.
+pub async fn scope_tool_call<F: std::future::Future>(id: &str, fut: F) -> F::Output {
+    TOOL_CALL_ID.scope(id.to_owned(), fut).await
+}
+
+pub fn current_tool_call() -> Option<String> {
+    TOOL_CALL_ID.try_with(Clone::clone).ok()
+}
+
 /// The broker calls this after the user answered an `external_directory` ask:
 /// the next path check of this call may leave the workspace, once.
 pub fn allow_external_once() {
@@ -981,4 +994,17 @@ pub fn preview(tool: &str, input: &Value) -> String {
         _ => input.to_string(),
     };
     cap(s, 2000)
+}
+
+#[cfg(test)]
+mod tool_call_context_tests {
+    #[tokio::test]
+    async fn real_call_id_is_local_to_its_scope() {
+        assert!(super::current_tool_call().is_none());
+        super::scope_tool_call("call-real", async {
+            assert_eq!(super::current_tool_call().as_deref(), Some("call-real"));
+        })
+        .await;
+        assert!(super::current_tool_call().is_none());
+    }
 }

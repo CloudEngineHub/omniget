@@ -236,8 +236,17 @@ pub async fn limits_strip_set_prefs(
     let mut p = prefs;
     p.adopt(&engine::known());
     p.thresholds = p.sane_thresholds();
+    let previous = load_adopted();
     prefs::save(&p)?;
-    apply(&app, &p)?;
+    if let Err(error) = apply(&app, &p) {
+        // Restore both durable preference and engine/window state. Otherwise a
+        // failed window creation leaves an enabled preference behind the UI.
+        let saved = prefs::save(&previous);
+        let restored = apply(&app, &previous);
+        return Err(format!(
+            "{error}; preference rollback: {saved:?}; runtime rollback: {restored:?}"
+        ));
+    }
     Ok(describe(&app, &p).await)
 }
 
@@ -263,8 +272,17 @@ fn apply(app: &AppHandle, p: &StripPrefs) -> Result<(), String> {
 pub async fn limits_strip_open(app: AppHandle) -> Result<serde_json::Value, String> {
     let mut p = load_adopted();
     p.enabled = true;
+    let previous = load_adopted();
     prefs::save(&p)?;
-    apply(&app, &p)?;
+    if let Err(error) = apply(&app, &p) {
+        // Restore both durable preference and engine/window state. Otherwise a
+        // failed window creation leaves an enabled preference behind the UI.
+        let saved = prefs::save(&previous);
+        let restored = apply(&app, &previous);
+        return Err(format!(
+            "{error}; preference rollback: {saved:?}; runtime rollback: {restored:?}"
+        ));
+    }
     Ok(describe(&app, &p).await)
 }
 
@@ -272,8 +290,17 @@ pub async fn limits_strip_open(app: AppHandle) -> Result<serde_json::Value, Stri
 pub async fn limits_strip_close(app: AppHandle) -> Result<serde_json::Value, String> {
     let mut p = load_adopted();
     p.enabled = false;
+    let previous = load_adopted();
     prefs::save(&p)?;
-    apply(&app, &p)?;
+    if let Err(error) = apply(&app, &p) {
+        // Restore both durable preference and engine/window state. Otherwise a
+        // failed window creation leaves an enabled preference behind the UI.
+        let saved = prefs::save(&previous);
+        let restored = apply(&app, &previous);
+        return Err(format!(
+            "{error}; preference rollback: {saved:?}; runtime rollback: {restored:?}"
+        ));
+    }
     Ok(describe(&app, &p).await)
 }
 

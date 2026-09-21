@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Presentation follows 21st AI Input by Hayden Bleasel (1887): one autosizing input and a compact action row. Original Svelte implementation with no simulated attachments or capabilities.
   /**
    * Composer: one auto-growing textarea, Enter sends, Shift+Enter breaks the
    * line. While a turn runs the primary action becomes Stop, so there is only
@@ -7,20 +8,23 @@
   import { t } from "$lib/i18n";
 
   let {
+    value = $bindable(""),
     disabled = false,
     running = false,
     onsend,
     onstop,
   }: {
+    value?: string;
     disabled?: boolean;
     running?: boolean;
-    onsend: (text: string) => void;
+    onsend: (text: string) => boolean | Promise<boolean>;
     onstop: () => void;
   } = $props();
 
   const MAX_HEIGHT = 200;
 
-  let value = $state("");
+  let sending = $state(false);
+  $effect(() => { value; queueMicrotask(autosize); });
   let textarea = $state<HTMLTextAreaElement | null>(null);
 
   function autosize() {
@@ -30,12 +34,15 @@
     el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
   }
 
-  function send() {
+  async function send() {
     const text = value.trim();
-    if (!text || disabled || running) return;
-    value = "";
-    queueMicrotask(autosize);
-    onsend(text);
+    if (!text || disabled || running || sending) return;
+    sending = true;
+    try {
+      const accepted = await onsend(text);
+      // Keep text typed during startup, and retain the entire draft on failure.
+      if (accepted && value.trim() === text) value = "";
+    } finally { sending = false; queueMicrotask(autosize); }
   }
 
   function onKeydown(event: KeyboardEvent) {
@@ -68,7 +75,7 @@
       <button
         type="button"
         class="button primary composer-send"
-        disabled={disabled || value.trim().length === 0}
+        disabled={disabled || sending || value.trim().length === 0}
         onclick={send}
       >
         {$t("llm.composer.send")}
@@ -83,12 +90,24 @@
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-5) var(--space-4);
-    border-top: var(--hairline) solid var(--separator);
+    width: calc(100% - 40px);
+    max-width: 760px;
+    box-sizing: border-box;
+    align-self: center;
+    margin: 12px 20px 20px;
+    border: 1px solid var(--separator);
+    border-radius: var(--radius-xl);
+    background: var(--fill-1);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 4%, transparent);
   }
 
   .composer-input {
     width: 100%;
     resize: none;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    font-size: 15px;
     min-height: 40px;
     max-height: 200px;
     line-height: var(--leading-base);
@@ -101,6 +120,8 @@
     justify-content: space-between;
     gap: var(--space-3);
   }
+
+  @media (max-width: 480px) { .composer-actions { flex-wrap: wrap; } .composer-hint { flex: 1 1 140px; } }
 
   .composer-hint {
     font-size: var(--text-caption);

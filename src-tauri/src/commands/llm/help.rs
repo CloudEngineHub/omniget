@@ -24,14 +24,37 @@ fn normalized(s: &str) -> String {
         .collect::<String>()
         .to_lowercase()
 }
-fn locale(a: &Value) -> &str {
-    let wanted = a["locale"].as_str().unwrap_or("en");
+/// Locale of the help turn that is running. The assistant asks for articles
+/// through tool calls, and the model is free to leave `locale` out on a
+/// follow-up call, so an unset field has to mean "the language the user is
+/// already talking to us in" - it used to mean English for everyone.
+static TURN_LOCALE: OnceLock<Mutex<String>> = OnceLock::new();
+
+pub(crate) fn remember_turn_locale(locale: &str) {
+    if let Ok(mut guard) = TURN_LOCALE.get_or_init(|| Mutex::new(String::new())).lock() {
+        *guard = locale.to_string();
+    }
+}
+
+fn turn_locale() -> String {
+    TURN_LOCALE
+        .get_or_init(|| Mutex::new(String::new()))
+        .lock()
+        .map(|guard| guard.clone())
+        .unwrap_or_default()
+}
+
+fn locale(a: &Value) -> String {
+    let wanted = a["locale"]
+        .as_str()
+        .map(str::to_string)
+        .unwrap_or_else(turn_locale);
     if wanted.starts_with("pt") {
-        "pt"
+        "pt".into()
     } else if wanted.starts_with("ru") {
-        "ru"
+        "ru".into()
     } else {
-        "en"
+        "en".into()
     }
 }
 fn hash(s: &str) -> String {
@@ -302,6 +325,7 @@ pub async fn help_turn_start(
 ) -> Result<Value, String> {
     safe_id(&json!({"intent":intent_id}), "intent")?;
     super::ensure_wired(&app);
+    remember_turn_locale(&locale);
     let sources = dispatch(
         &app,
         "help_docs_search",
@@ -361,5 +385,14 @@ mod tests {
     fn journal_identifiers_cannot_escape_directory() {
         assert!(safe_id(&json!({"id":"../x"}), "id").is_err());
         assert!(safe_id(&json!({"id":"abc-123"}), "id").is_ok());
+    }
+    #[test]
+    fn an_omitted_locale_falls_back_to_the_running_turn() {
+        remember_turn_locale("ru");
+        assert_eq!(locale(&json!({})), "ru");
+        assert_eq!(locale(&json!({"query":"как скачать"})), "ru");
+        assert_eq!(locale(&json!({"locale":"pt-BR"})), "pt");
+        assert_eq!(locale(&json!({"locale":"de"})), "en");
+        remember_turn_locale("en");
     }
 }

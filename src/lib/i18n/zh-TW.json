@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "下載進度",
+      "active": "{{count}} 個下載中",
+      "queued": "{{count}} 個佇列中",
+      "paused_all": "全部已暫停",
+      "eta": "約剩 {{eta}}",
+      "open": "檢視下載",
+      "indeterminate": "正在下載，總大小未知",
+      "complete": "下載完成",
+      "paused": "{{count}} 個已暫停",
+      "failed": "{{count}} 個失敗",
+      "dismiss": "關閉通知",
+      "transferred": "已下載 {{size}}"
+    }
   },
   "toast": {
     "download_preparing": "正在準備下載...",
@@ -3793,6 +3807,7 @@
     "qr_instruction": "在手機開啟 Telegram，前往 設定 > 裝置 > 連結桌面裝置",
     "qr_loading": "正在產生 QR Code...",
     "qr_error": "產生 QR Code 失敗",
+    "qr_error_network": "Cannot reach Telegram. Note: the Telegram connection does not go through the app proxy yet — it needs direct network access (or a system-level VPN/TUN proxy).",
     "or_separator": "或",
     "use_phone": "改用電話號碼",
     "back_to_qr": "返回 QR Code",
@@ -3875,6 +3890,7 @@
       "default_output_dir": "預設資料夾",
       "path_too_long": "此資料夾路徑過長（{{current}}/{{limit}} 個字元）。檔名較長時下載可能失敗 — 請選擇更短的資料夾。",
       "choose_folder": "選擇",
+      "remove_saved_dir": "Remove",
       "always_ask_path": "每次都詢問儲存位置",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "影片品質",
@@ -10445,5 +10461,12 @@
     "dark": "Dark",
     "preview": "Your workspace",
     "preview_body": "Agents, files and tasks in one place."
+  },
+  "tray": {
+    "quit": "Quit",
+    "downloads_none": "No active downloads",
+    "downloads_active": "Downloads: {{count}} active",
+    "tooltip_active": "OmniGet — {{count}} active",
+    "tooltip_speed": "OmniGet — {{count}} active · {{speed}}"
   }
 }

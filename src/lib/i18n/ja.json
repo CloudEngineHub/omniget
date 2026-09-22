@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "ダウンロードの進行状況",
+      "active": "{{count}} 件ダウンロード中",
+      "queued": "{{count}} 件キュー待ち",
+      "paused_all": "すべて一時停止中",
+      "eta": "残り約 {{eta}}",
+      "open": "ダウンロードを表示",
+      "indeterminate": "ダウンロード中、合計サイズ不明",
+      "complete": "ダウンロード完了",
+      "paused": "{{count}} 件一時停止中",
+      "failed": "{{count}} 件失敗",
+      "dismiss": "通知を閉じる",
+      "transferred": "{{size}} ダウンロード済み"
+    }
   },
   "toast": {
     "download_preparing": "ダウンロードを準備中...",
@@ -3793,6 +3807,7 @@
     "qr_instruction": "スマートフォンでTelegramを開き、設定 > デバイス > デスクトップデバイスをリンク に進んでください",
     "qr_loading": "QRコードを生成中...",
     "qr_error": "QRコードの生成に失敗しました",
+    "qr_error_network": "Cannot reach Telegram. Note: the Telegram connection does not go through the app proxy yet — it needs direct network access (or a system-level VPN/TUN proxy).",
     "or_separator": "または",
     "use_phone": "電話番号でログイン",
     "back_to_qr": "QRコードに戻る",
@@ -3875,6 +3890,7 @@
       "default_output_dir": "既定のフォルダ",
       "path_too_long": "このフォルダのパスが長すぎます（{{current}}/{{limit}} 文字）。ファイル名が長いとダウンロードが失敗することがあります — もっと短いフォルダを選んでください。",
       "choose_folder": "選択",
+      "remove_saved_dir": "Remove",
       "always_ask_path": "保存先を毎回確認する",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "動画の画質",
@@ -10445,5 +10461,12 @@
     "dark": "Dark",
     "preview": "Your workspace",
     "preview_body": "Agents, files and tasks in one place."
+  },
+  "tray": {
+    "quit": "Quit",
+    "downloads_none": "No active downloads",
+    "downloads_active": "Downloads: {{count}} active",
+    "tooltip_active": "OmniGet — {{count}} active",
+    "tooltip_speed": "OmniGet — {{count}} active · {{speed}}"
   }
 }

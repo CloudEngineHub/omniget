@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "Avanzamento download",
+      "active": "{{count}} in download",
+      "queued": "{{count}} in coda",
+      "paused_all": "Tutti in pausa",
+      "eta": "Circa {{eta}} rimanenti",
+      "open": "Vedi download",
+      "indeterminate": "Download in corso, dimensione totale sconosciuta",
+      "complete": "Download completati",
+      "paused": "{{count}} in pausa",
+      "failed": "{{count}} non riusciti",
+      "dismiss": "Chiudi avviso",
+      "transferred": "{{size}} scaricati"
+    }
   },
   "toast": {
     "download_preparing": "Preparazione download...",
@@ -3793,6 +3807,7 @@
     "qr_instruction": "Apri Telegram sul telefono, vai su Impostazioni > Dispositivi > Collega dispositivo desktop",
     "qr_loading": "Generazione codice QR...",
     "qr_error": "Impossibile generare il codice QR",
+    "qr_error_network": "Cannot reach Telegram. Note: the Telegram connection does not go through the app proxy yet — it needs direct network access (or a system-level VPN/TUN proxy).",
     "or_separator": "oppure",
     "use_phone": "Usa il numero di telefono",
     "back_to_qr": "Torna al codice QR",
@@ -3875,6 +3890,7 @@
       "default_output_dir": "Cartella predefinita",
       "path_too_long": "Il percorso di questa cartella è lungo ({{current}}/{{limit}} caratteri). I download con nomi lunghi possono fallire — scegli una cartella più breve.",
       "choose_folder": "Scegli",
+      "remove_saved_dir": "Remove",
       "always_ask_path": "Chiedi sempre dove salvare",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "Qualità video",
@@ -10445,5 +10461,12 @@
     "dark": "Dark",
     "preview": "Your workspace",
     "preview_body": "Agents, files and tasks in one place."
+  },
+  "tray": {
+    "quit": "Quit",
+    "downloads_none": "No active downloads",
+    "downloads_active": "Downloads: {{count}} active",
+    "tooltip_active": "OmniGet — {{count}} active",
+    "tooltip_speed": "OmniGet — {{count}} active · {{speed}}"
   }
 }

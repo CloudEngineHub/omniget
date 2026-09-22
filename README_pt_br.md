@@ -87,7 +87,7 @@ Novidade da 0.10 e agora o centro do app. Um comando, cerca de 15 segundos, test
 - **Claude Code, Codex e Gemini CLI com interface.** As contas entram em **LLM → Contas** com a cota na tela. Qualquer CLI que fale o Agent Client Protocol (Gemini CLI, goose, opencode) vira agente.
 - **Agentes locais com Ollama, LM Studio ou llama-server**, offline e sem chave. O `qwen3:8b` corrige o bug de demonstração em cerca de 3 minutos.
 - **Jobs, Loops e gatilhos.** O trabalho continua com a janela fechada. Um Loop repete rodadas até o seu comando de checagem (`npm test`) passar. Cron e webhook disparam jobs.
-- **Servidor MCP com 49 tools** para Claude Code, Cursor e VS Code.
+- **Servidor MCP com 56 tools** para Claude Code, Cursor e VS Code.
 - **O Mundo.** Uma casa isométrica onde cada agente anda até a sua bancada, mostra a tool num balão e acena quando precisa de você. Abra a casa, passe o código e um amigo entra para visitar.
 
 A descrição completa está no [README em inglês](README.md#agents-and-the-world).

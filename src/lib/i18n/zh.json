@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "下载进度",
+      "active": "{{count}} 个下载中",
+      "queued": "{{count}} 个排队中",
+      "paused_all": "全部已暂停",
+      "eta": "约剩 {{eta}}",
+      "open": "查看下载",
+      "indeterminate": "正在下载，总大小未知",
+      "complete": "下载完成",
+      "paused": "{{count}} 个已暂停",
+      "failed": "{{count}} 个失败",
+      "dismiss": "关闭通知",
+      "transferred": "已下载 {{size}}"
+    }
   },
   "toast": {
     "download_preparing": "正在准备下载...",
@@ -3793,6 +3807,7 @@
     "qr_instruction": "打开手机上的 Telegram，前往 设置 > 设备 > 关联桌面设备",
     "qr_loading": "正在生成二维码...",
     "qr_error": "生成二维码失败",
+    "qr_error_network": "Cannot reach Telegram. Note: the Telegram connection does not go through the app proxy yet — it needs direct network access (or a system-level VPN/TUN proxy).",
     "or_separator": "或",
     "use_phone": "使用手机号登录",
     "back_to_qr": "返回二维码",
@@ -3875,6 +3890,7 @@
       "default_output_dir": "默认文件夹",
       "path_too_long": "此文件夹路径过长（{{current}}/{{limit}} 个字符）。文件名较长时下载可能失败 — 请选择更短的文件夹。",
       "choose_folder": "选择",
+      "remove_saved_dir": "Remove",
       "always_ask_path": "每次都询问保存位置",
       "always_ask_path_desc": "每次下载前询问保存位置。",
       "video_quality": "视频质量",
@@ -10445,5 +10461,12 @@
     "dark": "Dark",
     "preview": "Your workspace",
     "preview_body": "Agents, files and tasks in one place."
+  },
+  "tray": {
+    "quit": "Quit",
+    "downloads_none": "No active downloads",
+    "downloads_active": "Downloads: {{count}} active",
+    "tooltip_active": "OmniGet — {{count}} active",
+    "tooltip_speed": "OmniGet — {{count}} active · {{speed}}"
   }
 }

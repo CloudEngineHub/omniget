@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "Πρόοδος λήψεων",
+      "active": "{{count}} σε λήψη",
+      "queued": "{{count}} σε αναμονή",
+      "paused_all": "Όλες σε παύση",
+      "eta": "Απομένουν περίπου {{eta}}",
+      "open": "Προβολή λήψεων",
+      "indeterminate": "Λήψη σε εξέλιξη, άγνωστο συνολικό μέγεθος",
+      "complete": "Οι λήψεις ολοκληρώθηκαν",
+      "paused": "{{count}} σε παύση",
+      "failed": "{{count}} απέτυχαν",
+      "dismiss": "Απόκρυψη ειδοποίησης",
+      "transferred": "Έγινε λήψη {{size}}"
+    }
   },
   "toast": {
     "download_preparing": "Προετοιμασία λήψης...",

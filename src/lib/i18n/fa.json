@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "پیشرفت دانلود",
+      "active": "{{count}} در حال دانلود",
+      "queued": "{{count}} در صف",
+      "paused_all": "همه متوقف شده",
+      "eta": "حدود {{eta}} باقی مانده",
+      "open": "مشاهده دانلودها",
+      "indeterminate": "در حال دانلود، حجم کل نامشخص",
+      "complete": "دانلودها کامل شد",
+      "paused": "{{count}} متوقف‌شده",
+      "failed": "{{count}} ناموفق",
+      "dismiss": "بستن اعلان",
+      "transferred": "{{size}} دانلود شده"
+    }
   },
   "toast": {
     "download_preparing": "در حال آماده‌سازی دانلود…",

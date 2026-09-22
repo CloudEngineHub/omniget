@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "Progression des téléchargements",
+      "active": "{{count}} en cours",
+      "queued": "{{count}} en file",
+      "paused_all": "Tout en pause",
+      "eta": "Environ {{eta}} restantes",
+      "open": "Voir les téléchargements",
+      "indeterminate": "Téléchargement, taille totale inconnue",
+      "complete": "Téléchargements terminés",
+      "paused": "{{count}} en pause",
+      "failed": "{{count}} en échec",
+      "dismiss": "Masquer le message",
+      "transferred": "{{size}} téléchargés"
+    }
   },
   "toast": {
     "download_preparing": "Préparation du téléchargement...",

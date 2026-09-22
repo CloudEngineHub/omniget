@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "ダウンロードの進行状況",
+      "active": "{{count}} 件ダウンロード中",
+      "queued": "{{count}} 件キュー待ち",
+      "paused_all": "すべて一時停止中",
+      "eta": "残り約 {{eta}}",
+      "open": "ダウンロードを表示",
+      "indeterminate": "ダウンロード中、合計サイズ不明",
+      "complete": "ダウンロード完了",
+      "paused": "{{count}} 件一時停止中",
+      "failed": "{{count}} 件失敗",
+      "dismiss": "通知を閉じる",
+      "transferred": "{{size}} ダウンロード済み"
+    }
   },
   "toast": {
     "download_preparing": "ダウンロードを準備中...",

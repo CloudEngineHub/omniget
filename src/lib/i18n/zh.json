@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "下载进度",
+      "active": "{{count}} 个下载中",
+      "queued": "{{count}} 个排队中",
+      "paused_all": "全部已暂停",
+      "eta": "约剩 {{eta}}",
+      "open": "查看下载",
+      "indeterminate": "正在下载，总大小未知",
+      "complete": "下载完成",
+      "paused": "{{count}} 个已暂停",
+      "failed": "{{count}} 个失败",
+      "dismiss": "关闭通知",
+      "transferred": "已下载 {{size}}"
+    }
   },
   "toast": {
     "download_preparing": "正在准备下载...",

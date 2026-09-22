@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
+  import { reserveShellBottom } from "$lib/stores/shell-layout.svelte";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
@@ -782,7 +783,7 @@
 {@render children()}
 
 {#if musicPlayer.currentTrack && !$page.url.pathname.startsWith("/study/watch") && !$page.url.pathname.startsWith("/study/course/") && !$page.url.pathname.startsWith("/study/anki/study") && !$page.url.pathname.startsWith("/study/music")}
-  <div class="global-player-bar">
+  <div class="global-player-bar" use:reserveShellBottom>
     <PlayerBar />
   </div>
 {/if}
@@ -1364,8 +1365,5 @@
     left: var(--sidebar-width, 0px);
     right: 0;
     z-index: 80;
-  }
-  :global(body:has(.global-player-bar)) {
-    padding-bottom: 80px;
   }
 </style>

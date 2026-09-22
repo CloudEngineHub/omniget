@@ -37,6 +37,8 @@
   import AppSidebar from "$components/shell/AppSidebar.svelte";
   import AppToolbar from "$components/shell/AppToolbar.svelte";
   import CommandPalette from "$components/shell/CommandPalette.svelte";
+  import DownloadStatusBar from "$components/download/DownloadStatusBar.svelte";
+  import { shellLayout } from "$lib/stores/shell-layout.svelte";
   import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
   import { accountPaletteItems, activateAccount, getAccounts } from "$lib/stores/llm-accounts-store.svelte";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
@@ -397,7 +399,7 @@
     <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} />
   {/if}
 
-  <div class="shell-body">
+  <div class="shell-body" style:--shell-bottom-inset={`${shellLayout.bottomInset}px`}>
     <AppToolbar />
 
     {#if ytdlpMissing && !ytdlpDismissed}
@@ -438,6 +440,10 @@
         {/if}
       </div>
     </main>
+
+    {#if !hideAppSidebar}
+      <DownloadStatusBar />
+    {/if}
   </div>
 </div>
 {/if}
@@ -484,6 +490,7 @@
   }
 
   .shell-body {
+    padding-block-end: var(--shell-bottom-inset, 0px);
     flex: 1;
     display: flex;
     flex-direction: column;

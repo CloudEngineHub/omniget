@@ -3689,7 +3689,21 @@
     "error_details": "Technical details",
     "view_queue": "Downloads",
     "view_history": "History",
-    "view_tools": "Tools"
+    "view_tools": "Tools",
+    "status_bar": {
+      "region_label": "Прогресс загрузок",
+      "active": "Загружается: {{count}}",
+      "queued": "В очереди: {{count}}",
+      "paused_all": "Все на паузе",
+      "eta": "Осталось около {{eta}}",
+      "open": "Открыть загрузки",
+      "indeterminate": "Загрузка, общий размер неизвестен",
+      "complete": "Загрузки завершены",
+      "paused": "Приостановлено: {{count}}",
+      "failed": "С ошибкой: {{count}}",
+      "dismiss": "Скрыть уведомление",
+      "transferred": "Загружено {{size}}"
+    }
   },
   "toast": {
     "download_preparing": "Подготовка к скачиванию…",

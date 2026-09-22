@@ -3793,6 +3793,7 @@
     "qr_instruction": "スマートフォンでTelegramを開き、設定 > デバイス > デスクトップデバイスをリンク に進んでください",
     "qr_loading": "QRコードを生成中...",
     "qr_error": "QRコードの生成に失敗しました",
+    "qr_error_network": "Cannot reach Telegram. Note: the Telegram connection does not go through the app proxy yet — it needs direct network access (or a system-level VPN/TUN proxy).",
     "or_separator": "または",
     "use_phone": "電話番号でログイン",
     "back_to_qr": "QRコードに戻る",

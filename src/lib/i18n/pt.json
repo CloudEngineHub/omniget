@@ -10446,5 +10446,12 @@
     "dark": "Escuro",
     "preview": "Seu espaço de trabalho",
     "preview_body": "Agentes, arquivos e tarefas em um só lugar."
+  },
+  "tray": {
+    "quit": "Quit",
+    "downloads_none": "No active downloads",
+    "downloads_active": "Downloads: {{count}} active",
+    "tooltip_active": "OmniGet — {{count}} active",
+    "tooltip_speed": "OmniGet — {{count}} active · {{speed}}"
   }
 }

@@ -10446,5 +10446,12 @@
     "dark": "Dark",
     "preview": "Your workspace",
     "preview_body": "Agents, files and tasks in one place."
+  },
+  "tray": {
+    "quit": "Выход",
+    "downloads_none": "Нет активных загрузок",
+    "downloads_active": "Активных загрузок: {{count}}",
+    "tooltip_active": "OmniGet — активных: {{count}}",
+    "tooltip_speed": "OmniGet — активных: {{count}} · {{speed}}"
   }
 }

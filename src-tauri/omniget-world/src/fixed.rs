@@ -14,7 +14,9 @@ pub const ONE: i32 = 256;
 pub const SHIFT: u32 = 8;
 
 /// A position or distance in 1/256 of a tile.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Hash, serde::Serialize, serde::Deserialize,
+)]
 #[serde(transparent)]
 pub struct Fixed(pub i32);
 

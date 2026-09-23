@@ -22,6 +22,8 @@
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import WorldCanvas from "$components/world/WorldCanvas.svelte";
   import HousePanel from "$components/world/HousePanel.svelte";
+  import CityCanvas from "$components/world/CityCanvas.svelte";
+  import CityPanel from "$components/world/CityPanel.svelte";
   import ActivityPanel from "$components/world/ActivityPanel.svelte";
   import type { AgentRow } from "$lib/world/activity";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -36,6 +38,11 @@
   // Home, or a visit to someone's open house. Changing it remounts the canvas,
   // which is what closes one session and opens the other.
   let visit = $state<{ code: string; server: string | null } | null>(null);
+  // The city: the persistent world on an OmniDisc instance. Set, it replaces
+  // the house on screen; the house keeps ticking in the backend meanwhile.
+  let cityMode = $state<{ city: string; server: string | null } | null>(null);
+  let cityState = $state<{ region: string; ent: number; tick: number; interior: boolean } | null>(null);
+  let cityRef = $state<{ say: (ent: number, text: string) => void; goTo: (tile: [number, number]) => Promise<void> } | null>(null);
   let canvasRef = $state<{ say: (ent: number, text: string) => void; focus: (ent: number) => void; frameHouse: () => void } | null>(null);
   let residents = $state<AgentRow[]>([]);
   let demoBusy = $state(false);
@@ -113,6 +120,33 @@
         <p class="bench-note bench-error">{$t("world.error")} {errorCode}</p>
       {/if}
     </div>
+  {:else if enabled && cityMode}
+    <div class="world-main">
+      {#key cityMode.city + (cityMode.server ?? "")}
+        <CityCanvas
+          bind:this={cityRef}
+          city={cityMode.city}
+          server={cityMode.server}
+          onstate={(s) => (cityState = s)}
+          onfailed={(error) => {
+            showToast("error", error);
+            cityMode = null;
+            cityState = null;
+          }}
+        />
+      {/key}
+    </div>
+    <CityPanel
+      city={cityMode}
+      where={cityState}
+      onenter={(c) => (cityMode = c)}
+      onleave={() => {
+        cityMode = null;
+        cityState = null;
+      }}
+      onsay={(ent, text) => cityRef?.say(ent, text)}
+      ongoto={(tile) => void cityRef?.goTo(tile)}
+    />
   {:else if enabled}
     <div class="world-main">
       {#key visit?.code ?? "home"}
@@ -142,6 +176,15 @@
       onvisit={(v) => (visit = v)}
       onleave={() => (visit = null)}
       onsay={(ent, text) => canvasRef?.say(ent, text)}
+    />
+    <CityPanel
+      city={null}
+      where={null}
+      onenter={(c) => {
+        visit = null;
+        cityMode = c;
+      }}
+      onleave={() => (cityMode = null)}
     />
   {:else}
     <p class="world-off">{$t("world.disabled")}</p>

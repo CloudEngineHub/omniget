@@ -9595,6 +9595,33 @@
         "walking": "Walking",
         "resting": "Free"
       }
+    },
+    "city": {
+      "title": "City",
+      "enter": "Enter the city",
+      "entering": "Entering the city…",
+      "leave": "Leave the city",
+      "server": "server",
+      "server_hint": "OmniDisc instance that hosts the city. Empty uses Settings, then chat.tonho.wtf. You must be signed in to OmniDisc there.",
+      "hint": "A persistent town on the server: your house has an address, the residents keep living while the app is closed, and everyone sees the same streets.",
+      "in": "In {{city}}",
+      "inside": "inside",
+      "outside": "outside",
+      "address": "Your address",
+      "go_home": "Go home",
+      "claim": "Claim a plot",
+      "claim_hint": "Picks a free plot and builds your house on it.",
+      "claimed": "Your house is at {{address}}",
+      "chat_placeholder": "Say something to whoever is near…",
+      "reconnecting": "Reconnecting…",
+      "canvas_label": "The city",
+      "sign_in": "Sign in",
+      "username": "username",
+      "password": "password",
+      "create_account": "Create account",
+      "have_account": "I already have an account",
+      "no_account": "Create an account",
+      "sign_out": "Sign out"
     }
   },
   "llm": {

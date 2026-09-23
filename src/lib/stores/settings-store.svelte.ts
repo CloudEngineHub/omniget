@@ -104,6 +104,7 @@ export type AppSettings = {
     thinking?: boolean;
     think_interval_s?: number;
     room_server?: string;
+    city_server?: string;
   };
   league?: {
     enabled?: boolean;

@@ -9,7 +9,6 @@
    * and nothing else.
    */
 
-  import { surfaceCopy } from "./surface-copy";
   import RailAvatar from "$components/omni/RailAvatar.svelte";
   import { t } from "$lib/i18n";
   import { agentTint, roleLabelKey, roleText, type AgentDef } from "$lib/llm/types";
@@ -46,7 +45,7 @@
       <span class="rail-item-name">{agent.name}</span>
 
     </span>
-    <span class="rail-item-preview">{speaking ? $surfaceCopy.working : preview || (typeof agent.role === "string" && agent.role in $surfaceCopy ? $surfaceCopy[agent.role as "worker"] : roleLabel)}</span>
+    <span class="rail-item-preview">{speaking ? $t("llm.surface.working") : preview || (typeof agent.role === "string" && ["worker", "coordinator", "advisor"].includes(agent.role) ? $t(`llm.surface.${agent.role}`) : roleLabel)}</span>
   </span>
 </button>
 

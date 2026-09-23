@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /** Roster tab: the agent list, the editor and the team templates. */
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
@@ -85,11 +84,11 @@
       {$t("llm.roster.new")}
     </button>
   </header>
-  <SurfaceGuide text={$surfaceCopy.rosterHint} href="/help?article=agent#guide" />
+  <SurfaceGuide text={$t("llm.surface.roster_hint")} href="/help?article=agent#guide" />
 
   {#if !isRosterAvailable()}
     <p class="notice" role="status">{$t("llm.roster.unavailable")}</p>
-    <button type="button" class="button" onclick={() => void loadRoster(true)}>{$surfaceCopy.retry}</button>
+    <button type="button" class="button" onclick={() => void loadRoster(true)}>{$t("llm.surface.retry")}</button>
   {/if}
 
   {#if saveError}<p class="notice" role="alert">{$t("llm.roster.save_error")}</p>{/if}
@@ -107,7 +106,7 @@
     />
     {/key}
   {:else}
-    <label class="agent-search"><span>{$surfaceCopy.search}</span><input class="input" type="search" bind:value={query} /></label>
+    <label class="agent-search"><span>{$t("llm.surface.search")}</span><input class="input" type="search" bind:value={query} /></label>
     <div class="group">
       {#each filtered as agent (agent.id)}
         <button type="button" class="group-row agent-row" onclick={() => (editing = agent)}>
@@ -115,7 +114,7 @@
           <span class="group-row-content">
             <span class="group-row-title">{agent.name}</span>
             <span class="group-row-sub">
-              {agent.system_prompt.split("\n")[0] || (typeof agent.role === "string" && agent.role in $surfaceCopy ? $surfaceCopy[agent.role as "worker"] : roleText(agent.role))}
+              {agent.system_prompt.split("\n")[0] || (typeof agent.role === "string" && ["worker", "coordinator", "advisor"].includes(agent.role) ? $t(`llm.surface.${agent.role}`) : roleText(agent.role))}
               <span class="agent-connection">{modelLabel(agent.model)}</span>
             </span>
           </span>
@@ -124,8 +123,8 @@
       {/each}
     </div>
 
-    {#if filtered.length === 0 && query}<p role="status">{$surfaceCopy.noMatches}</p>{/if}
-    <details class="team-templates"><summary>{$surfaceCopy.team}</summary><p>{$surfaceCopy.templatesImpact}</p><TemplatePicker disabled={saving} onapply={onTemplate} /></details>
+    {#if filtered.length === 0 && query}<p role="status">{$t("llm.surface.no_matches")}</p>{/if}
+    <details class="team-templates"><summary>{$t("llm.surface.team")}</summary><p>{$t("llm.surface.templates_impact")}</p><TemplatePicker disabled={saving} onapply={onTemplate} /></details>
   {/if}
 </div>
 

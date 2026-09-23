@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Skills tab: the installed Agent Skills (origin, allowed tools, agents
    * using each one), the three install sources and the OpenRouterTeam
@@ -117,7 +116,7 @@
       {$t("llm.skills.install_title")}
     </button>
   </header>
-  <SurfaceGuide text={$surfaceCopy.skillsHint} href="/help?article=skills#guide" />
+  <SurfaceGuide text={$t("llm.surface.skills_hint")} href="/help?article=skills#guide" />
 
   {#if isDemoSkills()}
     <p class="notice" role="status">{$t("llm.skills.demo")}</p>
@@ -133,7 +132,7 @@
 
   {#if errorKey && !installing}
     <p class="notice error" role="alert">{$t(errorKey)}</p>
-    <button type="button" class="button" disabled={isSkillsLoading()} onclick={() => { void loadSkills(true); void loadCatalog(true); }}>{$surfaceCopy.retry}</button>
+    <button type="button" class="button" disabled={isSkillsLoading()} onclick={() => { void loadSkills(true); void loadCatalog(true); }}>{$t("llm.surface.retry")}</button>
   {/if}
 
   {#if getLastInstalled()}

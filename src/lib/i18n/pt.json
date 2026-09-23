@@ -9621,7 +9621,22 @@
       "create_account": "Criar conta",
       "have_account": "Já tenho conta",
       "no_account": "Criar uma conta",
-      "sign_out": "Sair da conta"
+      "sign_out": "Sair da conta",
+      "inventory": "Colheita na sua casa",
+      "plant": "Plantar",
+      "crop_carrot": "cenoura",
+      "crop_tomato": "tomate",
+      "crop_wheat": "trigo",
+      "farm_empty": "Esse canteiro está vazio",
+      "farm_not_ripe": "Ainda não está pronto; regue e espere",
+      "farm_not_withered": "Nada para limpar",
+      "farm_occupied": "Esse canteiro já tem cultura",
+      "farm_unknown_crop": "Cultura desconhecida",
+      "farm_conflict": "O canteiro mudou, tente de novo",
+      "farm_bad_action": "Nada a fazer aí",
+      "farm_not_your_plot": "Esse canteiro é de outra pessoa",
+      "farm_no_home": "Reivindique um lote primeiro",
+      "farm_no_cell": "Não há canteiro aí"
     }
   },
   "llm": {

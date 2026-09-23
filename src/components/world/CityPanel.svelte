@@ -17,10 +17,14 @@
     onleave: () => void;
     onsay?: (ent: number, text: string) => void;
     ongoto?: (tile: [number, number]) => void;
+    /** The crop a click on an empty bed plants; the canvas reads it. */
+    crop?: string;
+    oncrop?: (crop: string) => void;
   }
-  let { city, where, onenter, onleave, onsay, ongoto }: Props = $props();
+  let { city, where, onenter, onleave, onsay, ongoto, crop = "carrot", oncrop }: Props = $props();
 
-  type Home = { home: { id: string; name: string; plot: string; interior_region: string }; plot: { id: string; address: string; entrance: [number, number]; region: string } | null };
+  type Home = { home: { id: string; name: string; plot: string; interior_region: string; inventory?: Record<string, number> }; plot: { id: string; address: string; entrance: [number, number]; region: string; kind?: string } | null };
+  const CROPS = ["carrot", "tomato", "wheat"];
 
   let cityId = $state("cidade-piloto");
   let server = $state(getSettings()?.world?.city_server ?? "");
@@ -89,6 +93,11 @@
       chat = [];
     }
   });
+
+  /** The canvas tells the page a farm action landed; refresh the inventory. */
+  export function refreshHome(): void {
+    void loadHome();
+  }
 
   async function loadHome(): Promise<void> {
     if (!city) return;
@@ -184,6 +193,14 @@
         <span class="label">{$t("world.city.address")}</span>
         <span class="chip host">{home.plot.address}</span>
         <button type="button" class="btn" onclick={goHome}>{$t("world.city.go_home")}</button>
+        {#if home.home.inventory && Object.keys(home.home.inventory).length > 0}
+          <span class="chip" title={$t("world.city.inventory") as string}>{Object.entries(home.home.inventory).map(([k, v]) => `${$t(`world.city.crop_${k}`)} ×${v}`).join(" · ")}</span>
+        {/if}
+        <label class="label">{$t("world.city.plant")}
+          <select value={crop} onchange={(e) => oncrop?.((e.currentTarget as HTMLSelectElement).value)}>
+            {#each CROPS as c}<option value={c}>{$t(`world.city.crop_${c}`)}</option>{/each}
+          </select>
+        </label>
       {:else}
         <button type="button" class="btn primary" onclick={claim} disabled={busy}>{$t("world.city.claim")}</button>
         <span class="hint">{$t("world.city.claim_hint")}</span>
@@ -235,6 +252,16 @@
   .btn:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+  select {
+    padding: 0.3rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(127, 127, 127, 0.3);
+    background: rgba(127, 127, 127, 0.08);
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    margin-left: 0.3rem;
   }
   input {
     padding: 0.35rem 0.6rem;

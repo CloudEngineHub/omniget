@@ -12,6 +12,7 @@ pub mod mcp;
 pub mod models;
 pub mod observatory;
 pub mod prune;
+pub mod prompts;
 pub mod roster;
 pub mod skills;
 pub mod wire_probe;

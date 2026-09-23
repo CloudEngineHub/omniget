@@ -183,7 +183,10 @@ fn prompt_slot() -> &'static RwLock<PromptDefaults> {
 
 /// The prompts for the active locale; English until the frontend pushes them.
 pub fn prompt_defaults() -> PromptDefaults {
-    prompt_slot().read().map(|guard| guard.clone()).unwrap_or_default()
+    prompt_slot()
+        .read()
+        .map(|guard| guard.clone())
+        .unwrap_or_default()
 }
 
 /// Called by `sync_llm_prompts` on startup and on every locale change.
@@ -578,7 +581,8 @@ mod tests {
             help: "help-ru".into(),
         };
         let roster = roster_with_prompts(&prompts);
-        let prompts_in_roster: Vec<&str> = roster.iter().map(|a| a.system_prompt.as_str()).collect();
+        let prompts_in_roster: Vec<&str> =
+            roster.iter().map(|a| a.system_prompt.as_str()).collect();
         assert_eq!(prompts_in_roster, ["omni-ru", "builder-ru", "scout-ru"]);
         // Localizing the text must not change what the agents may do.
         assert!(roster[2].tools.iter().all(|g| g.mode == GrantMode::Auto));

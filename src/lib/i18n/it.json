@@ -9621,7 +9621,22 @@
       "create_account": "Create account",
       "have_account": "I already have an account",
       "no_account": "Create an account",
-      "sign_out": "Sign out"
+      "sign_out": "Sign out",
+      "inventory": "Harvest in your house",
+      "plant": "Plant",
+      "crop_carrot": "carrot",
+      "crop_tomato": "tomato",
+      "crop_wheat": "wheat",
+      "farm_empty": "That bed is empty",
+      "farm_not_ripe": "Not ripe yet; water it and wait",
+      "farm_not_withered": "Nothing to clear",
+      "farm_occupied": "That bed already has a crop",
+      "farm_unknown_crop": "Unknown crop",
+      "farm_conflict": "The bed changed under you, try again",
+      "farm_bad_action": "Nothing to do there",
+      "farm_not_your_plot": "That bed belongs to someone else",
+      "farm_no_home": "Claim a plot first",
+      "farm_no_cell": "No bed there"
     }
   },
   "llm": {

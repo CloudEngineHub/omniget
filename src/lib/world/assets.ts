@@ -19,6 +19,8 @@ export const OMNI_ATLAS_URL = '/world/omni/atlas.json';
 export const CASA_ATLAS_URL = '/world/tiles/casa-v1/atlas.json';
 /** Visual theme only: the same tile keys and collision metadata as casa-v1. */
 export const CRAFT_ATLAS_URL = '/world/tiles/craft-v1/atlas.json';
+/** The workshop's town art (ground, houses, props, crops), for the city. */
+export const VALE_ATLAS_URL = '/world/tiles/vale-v1/atlas.json';
 export const HOUSE_MAP_URL = '/world/house-v1.json';
 
 export const ERR_ASSETS = {
@@ -237,16 +239,17 @@ async function json<T>(url: string, code: string): Promise<T> {
 }
 
 /** Loads both published atlases plus the generated HUD page. */
-export async function loadWorldAtlas(tileAtlasUrl = CRAFT_ATLAS_URL): Promise<WorldAtlas> {
-  const [omni, casa] = await Promise.all([
+export async function loadWorldAtlas(tileAtlasUrl = CRAFT_ATLAS_URL, extraTileAtlasUrls: string[] = []): Promise<WorldAtlas> {
+  const urls = [tileAtlasUrl, ...extraTileAtlasUrls];
+  const [omni, ...tileAtlases] = await Promise.all([
     json<RawAtlas>(OMNI_ATLAS_URL, ERR_ASSETS.ATLAS_MISSING),
-    json<RawAtlas>(tileAtlasUrl, ERR_ASSETS.ATLAS_MISSING),
+    ...urls.map((u) => json<RawAtlas>(u, ERR_ASSETS.ATLAS_MISSING)),
   ]);
   const hud = buildHudAtlasPart();
-  const merged = mergeAtlases([omni, casa, hud.part]);
+  const merged = mergeAtlases([omni, ...tileAtlases, hud.part]);
   const pages = await Promise.all([
     ...omni.pages.map((p) => bitmap(`/world/omni/${p}`)),
-    ...casa.pages.map((p) => bitmap(`${tileAtlasUrl.slice(0, tileAtlasUrl.lastIndexOf('/') + 1)}${p}`)),
+    ...tileAtlases.flatMap((atlas, i) => atlas.pages.map((p) => bitmap(`${urls[i].slice(0, urls[i].lastIndexOf('/') + 1)}${p}`))),
     hudBitmap(hud.draw),
   ]);
   return { json: merged.json, pages };

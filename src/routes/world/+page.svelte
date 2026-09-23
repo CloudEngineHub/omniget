@@ -43,6 +43,8 @@
   let cityMode = $state<{ city: string; server: string | null } | null>(null);
   let cityState = $state<{ region: string; ent: number; tick: number; interior: boolean } | null>(null);
   let cityRef = $state<{ say: (ent: number, text: string) => void; goTo: (tile: [number, number]) => Promise<void> } | null>(null);
+  let cityPanelRef = $state<{ refreshHome: () => void } | null>(null);
+  let cityCrop = $state("carrot");
   let canvasRef = $state<{ say: (ent: number, text: string) => void; focus: (ent: number) => void; frameHouse: () => void } | null>(null);
   let residents = $state<AgentRow[]>([]);
   let demoBusy = $state(false);
@@ -127,6 +129,11 @@
           bind:this={cityRef}
           city={cityMode.city}
           server={cityMode.server}
+          crop={cityCrop}
+          onfarm={(r) => {
+            if (r.ok) cityPanelRef?.refreshHome();
+            else showToast("error", $t(`world.city.farm_${r.code.toLowerCase().replace(/^err_world_(farm_)?/, "")}`) as string);
+          }}
           onstate={(s) => (cityState = s)}
           onfailed={(error) => {
             showToast("error", error);
@@ -137,8 +144,11 @@
       {/key}
     </div>
     <CityPanel
+      bind:this={cityPanelRef}
       city={cityMode}
       where={cityState}
+      crop={cityCrop}
+      oncrop={(c) => (cityCrop = c)}
       onenter={(c) => (cityMode = c)}
       onleave={() => {
         cityMode = null;

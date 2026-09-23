@@ -54,7 +54,8 @@ export type CityInput =
   | { type: 'wave'; ent: number }
   | { type: 'sit'; object: number }
   | { type: 'idle' }
-  | { type: 'enter'; portal: string };
+  | { type: 'enter'; portal: string }
+  | { type: 'farm'; cell?: string; tile?: [number, number]; action: 'water' | 'harvest' | 'clear' | 'plant'; crop?: string };
 
 export interface CityChat {
   from_ent: number;

@@ -15,7 +15,7 @@
   import { t } from "$lib/i18n";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { codecErrorCode } from "$lib/world/codec";
-  import { agentSprite, buildChunkTiles, loadWorldAtlas, objectFrame, type MapDef } from "$lib/world/assets";
+  import { agentSprite, buildChunkTiles, loadWorldAtlas, objectFrame, CRAFT_ATLAS_URL, VALE_ATLAS_URL, type MapDef } from "$lib/world/assets";
   import { buildHud, capAgents, gameClockLabel, type AgentFrame } from "$lib/world/hud";
   import { attachInput, type Pickable } from "$lib/world/input";
   import { sample } from "$lib/world/interp";
@@ -27,12 +27,16 @@
   interface Props {
     city: string;
     server?: string | null;
+    /** What a click on an empty bed plants. */
+    crop?: string;
+    /** A farm action was acknowledged (or refused, with the code). */
+    onfarm?: (result: { ok: boolean; code: string; action: string }) => void;
     onready?: (ready: CityReady) => void;
     onfailed?: (error: string) => void;
     onstate?: (state: { region: string; ent: number; tick: number; interior: boolean }) => void;
     onstats?: (stats: FrameStats, fps: number, tier: Tier) => void;
   }
-  let { city, server = null, onready, onfailed, onstate, onstats }: Props = $props();
+  let { city, server = null, crop = "carrot", onready, onfailed, onstate, onstats, onfarm }: Props = $props();
 
   /** A chat line over someone's head. */
   export function say(ent: number, text: string): void {
@@ -202,6 +206,23 @@
     }
   }
 
+  /** The crop bed drawn on a tile, if any: its kind decides the action. */
+  function bedAt(x: number, y: number): { kind: string } | null {
+    for (const o of world.objects.values()) {
+      if (o.tx === x && o.ty === y && (o.kind.startsWith("crop/") || o.kind === "prop/soil-empty")) return { kind: o.kind };
+    }
+    return null;
+  }
+
+  /** Water, harvest, clear or plant, by what the bed shows. */
+  async function farm(x: number, y: number, kind: string): Promise<void> {
+    const stage = kind.split("/")[2] ?? "";
+    const action = kind === "prop/soil-empty" ? "plant" : stage === "ripe" ? "harvest" : stage === "withered" ? "clear" : "water";
+    const seq = await session?.send({ type: "farm", tile: [x, y], action, crop: action === "plant" ? crop : undefined });
+    if (seq !== undefined) pendingFarm.set(seq, action);
+  }
+  const pendingFarm = new Map<number, string>();
+
   /** The door marker on a tile of the current region, if any. */
   function portalAt(x: number, y: number): string | null {
     const map = maps.get(region);
@@ -225,6 +246,12 @@
     try {
       await bootRender();
       session = createCitySession({ city, server });
+      stops.push(session.onAck((ack) => {
+        const action = pendingFarm.get(ack.seq);
+        if (!action) return;
+        pendingFarm.delete(ack.seq);
+        onfarm?.({ ok: ack.status === 0, code: ack.code, action });
+      }));
       stops.push(session.onClosed((reason) => {
         if (reason !== "left") {
           errorCode = `ERR_CITY_${reason.toUpperCase()}`;
@@ -255,7 +282,8 @@
     const r = mod.createRenderer();
     const caps = await r.init(canvas!, { tier });
     tier = caps.tier;
-    const loaded = await loadWorldAtlas();
+    // The house furniture (craft-v1) and the town (vale-v1) in one atlas.
+    const loaded = await loadWorldAtlas(CRAFT_ATLAS_URL, [VALE_ATLAS_URL]);
     r.loadAtlas(loaded.json, loaded.pages);
     atlas = mod.parseAtlas(loaded.json);
     const rect = canvas!.getBoundingClientRect();
@@ -302,6 +330,11 @@
           const portal = portalAt(tile.x, tile.y);
           if (portal) {
             void send({ type: "enter", portal });
+            return;
+          }
+          const bed = bedAt(tile.x, tile.y);
+          if (bed) {
+            void farm(tile.x, tile.y, bed.kind);
             return;
           }
           void send({ type: "move", to: [tile.x, tile.y] });

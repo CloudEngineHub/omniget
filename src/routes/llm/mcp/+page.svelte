@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * MCP tab, two halves.
    *
@@ -150,7 +149,7 @@
       </button>
     </div>
   </header>
-  <SurfaceGuide text={$surfaceCopy.mcpHint} href="/help?article=mcp#guide" />
+  <SurfaceGuide text={$t("llm.surface.mcp_hint")} href="/help?article=mcp#guide" />
 
   {#if half === "server"}
     <ServerHalf />
@@ -187,7 +186,7 @@
     {/if}
     {#if getErrorKey()}
       <p class="notice notice-danger" role="alert">{$t(getErrorKey()!)}</p>
-      <button type="button" class="button" disabled={isLoading()} onclick={() => void loadServers(true)}>{$surfaceCopy.retry}</button>
+      <button type="button" class="button" disabled={isLoading()} onclick={() => void loadServers(true)}>{$t("llm.surface.retry")}</button>
     {/if}
 
     <section class="stack">
@@ -217,7 +216,7 @@
       {/if}
     </section>
 
-    <details class="import-settings"><summary>{$surfaceCopy.advanced} · {$t("llm.mcp.import")}</summary>
+    <details class="import-settings"><summary>{$t("llm.surface.advanced")} · {$t("llm.mcp.import")}</summary>
     <section class="stack">
       <h2 class="section-header-title">{$t("llm.mcp.import")}</h2>
       <p class="hint">{$t("llm.mcp.import_hint")}</p>

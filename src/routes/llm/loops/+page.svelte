@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Loops: the same prompt run round after round until a check command
    * passes or the round/minute budget runs out.
@@ -88,13 +87,13 @@
 <div class="page page-wide loops-page">
   <header class="page-head">
     <div>
-      <h1 class="page-title">{$surfaceCopy.routines}</h1>
+      <h1 class="page-title">{$t("llm.surface.routines")}</h1>
       <p class="page-lede">{$t("llm.loops.lede")}</p>
     </div>
   </header>
-  <SurfaceGuide text={$surfaceCopy.loopsHint} href="/help?article=routines#guide" />
+  <SurfaceGuide text={$t("llm.surface.loops_hint")} href="/help?article=routines#guide" />
 
-  <details class="creation-panel"><summary>{$surfaceCopy.createRoutine}</summary>
+  <details class="creation-panel"><summary>{$t("llm.surface.create_routine")}</summary>
   <section class="surface-card form">
     <h2 class="section-header-title">{$t("llm.loops.new_title")}</h2>
     <div class="form-row">

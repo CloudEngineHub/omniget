@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Models & Routing: the providers the user has keys for, the routing rule and
    * "Sign in with OpenRouter".
@@ -102,7 +101,7 @@
       {$t("llm.models.sign_in_openrouter")}
     </button>
   </header>
-  <SurfaceGuide text={$surfaceCopy.modelsHint} href="/help?article=models#guide" />
+  <SurfaceGuide text={$t("llm.surface.models_hint")} href="/help?article=models#guide" />
 
   <div class="group">
     <div class="group-label">{$t("llm.models.providers")}</div>
@@ -131,7 +130,7 @@
   </div>
 
   <a class="button" href="/settings?tab=ai">{$t("llm.models.connect")} →</a>
-  <details class="routing-details"><summary>{$surfaceCopy.advanced}</summary>
+  <details class="routing-details"><summary>{$t("llm.surface.advanced")}</summary>
   <RoutingRules />
   </details>
   <PruneSettings />

@@ -7,7 +7,6 @@
    * nothing is silently dropped on save.
    */
   import { onMount, untrack } from "svelte";
-  import { surfaceCopy } from "./surface-copy";
   import { modelLabel } from "$lib/llm/types";
   import { t } from "$lib/i18n";
   import type { AgentDef, AgentRole, Candidate, ModelRef } from "$lib/llm/types";
@@ -29,7 +28,7 @@
   } = $props();
 
   let step = $state(0);
-  let steps = $derived([$surfaceCopy.identity, $surfaceCopy.model, $surfaceCopy.review]);
+  let steps = $derived([$t("llm.surface.identity"), $t("llm.surface.model"), $t("llm.surface.review")]);
   const ROLES = ["coordinator", "worker", "advisor"] as const;
 
   function cloneAgent(source: AgentDef): AgentDef {
@@ -98,7 +97,7 @@
 </script>
 
 <form class="editor" aria-busy={busy} onsubmit={(e) => { e.preventDefault(); if (!busy && step === 2 && draft.name.trim() && validModel) save(); }}>
-  <ol class="setup-steps" aria-label={$surfaceCopy.configure}>
+  <ol class="setup-steps" aria-label={$t("llm.surface.configure")}>
     {#each steps as label, index}<li class:current={step === index} class:complete={step > index} aria-current={step === index ? "step" : undefined}><span>{index + 1}</span>{label}</li>{/each}
   </ol>
   <fieldset class="editor-fields" disabled={busy}>
@@ -112,7 +111,7 @@
     <span class="field-label">{$t("llm.roster.role")}</span>
     <select class="input" bind:value={roleValue}>
       {#each ROLES as r (r)}
-        <option value={r}>{$surfaceCopy[r]}</option>
+        <option value={r}>{$t(`llm.surface.${r}`)}</option>
       {/each}
       <option value="custom">{$t("llm.role.custom")}</option>
     </select>
@@ -126,7 +125,7 @@
   {/if}
 
   <label class="field">
-    <span class="field-label">{$surfaceCopy.purpose}</span>
+    <span class="field-label">{$t("llm.surface.purpose")}</span>
     <textarea class="input prompt" rows="4" bind:value={draft.system_prompt}></textarea>
   </label>
 
@@ -181,8 +180,8 @@
 
   {/if}
   {#if step === 2}
-  <section class="agent-review"><h2>{draft.name}</h2><p>{draft.system_prompt || $surfaceCopy.worker}</p><span>{modelLabel(draft.model)}</span></section>
-  <details class="agent-advanced"><summary>{$surfaceCopy.customize}</summary>
+  <section class="agent-review"><h2>{draft.name}</h2><p>{draft.system_prompt || $t("llm.surface.worker")}</p><span>{modelLabel(draft.model)}</span></section>
+  <details class="agent-advanced"><summary>{$t("llm.surface.customize")}</summary>
   <fieldset class="group-block">
     <legend class="field-label">{$t("llm.roster.tools")}</legend>
     {#if (draft.tools ?? []).length === 0}

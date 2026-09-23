@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { isLinux } from "$lib/platform";
   import { t } from "$lib/i18n";
   import { convertFileSrc } from "@tauri-apps/api/core";
   import SkipGapsButton from "./SkipGapsButton.svelte";
@@ -48,6 +49,8 @@
     onTheaterToggle: () => void;
     onClose: () => void;
     onVideoEl?: (el: HTMLVideoElement | null) => void;
+    /** Fired when the media element fails to load (missing file, CORS, decode). */
+    onError?: () => void;
   };
 
   let {
@@ -82,6 +85,7 @@
     onTheaterToggle,
     onClose,
     onVideoEl,
+    onError,
   }: Props = $props();
 
   $effect(() => {
@@ -100,6 +104,7 @@
   let volumePopoverOpen = $state(false);
   let isFullscreen = $state(false);
   let isLoading = $state(true);
+  let loadFailed = $state(false);
   let lastSeekFromMs = 0;
   let controlsVisible = $state(true);
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -269,6 +274,18 @@
     isLoading = false;
   }
 
+  function onErrorInternal() {
+    isLoading = false;
+    loadFailed = true;
+    onError?.();
+  }
+
+  $effect(() => {
+    void videoSrc;
+    isLoading = true;
+    loadFailed = false;
+  });
+
   $effect(() => {
     if (!videoEl) return;
     videoEl.playbackRate = initialPlaybackSpeed;
@@ -370,7 +387,7 @@
     <video
       bind:this={videoEl}
       src={videoSrc}
-      crossorigin="anonymous"
+      crossorigin={isLinux() ? undefined : "anonymous"}
       playsinline
       preload="metadata"
       disablepictureinpicture
@@ -384,6 +401,7 @@
       onloadedmetadata={onLoadedMetadataInternal}
       onwaiting={onWaiting}
       onplaying={onPlaying}
+      onerror={onErrorInternal}
       onclick={togglePlay}
       ondblclick={toggleFullscreen}
     >
@@ -399,7 +417,7 @@
     </video>
   {/key}
 
-  {#if isLoading}
+  {#if isLoading && !loadFailed}
     <div class="spinner" aria-hidden="true">
       <div class="ring"></div>
     </div>

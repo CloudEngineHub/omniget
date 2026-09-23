@@ -19,6 +19,14 @@ export function isMac(): boolean {
   return /mac/i.test(raw);
 }
 
+/** `true` no Linux (WebKitGTK), onde o `<video>` local não carrega com `crossorigin`. */
+export function isLinux(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const uaData = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData;
+  const raw = uaData?.platform || navigator.platform || "";
+  return /linux/i.test(raw) && !/android/i.test(raw);
+}
+
 /** `⌘` no macOS, `Ctrl` no resto. */
 export function modKey(): string {
   return isMac() ? "⌘" : "Ctrl";

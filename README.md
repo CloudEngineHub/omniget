@@ -73,7 +73,7 @@ mcp-server, ollama, local-llm
 
 ## Contents
 
-- [**AI agents and the World**: Claude Code, Codex, Gemini CLI, Ollama, jobs, loops, MCP, the house and visits](#agents-and-the-world)
+- [**AI agents and the World**: Claude Code, Codex, Gemini CLI, Ollama, jobs, loops, MCP, the house, the city and visits](#agents-and-the-world)
 - [Why OmniGet](#why-omniget)
 - [Download and install](#download-and-install)
 - [Your first download in one minute](#your-first-download-in-one-minute)
@@ -214,6 +214,21 @@ A house is made on your first visit and the agents of your roster move in, CLI a
 - **It keeps serving while you work.** With the house open the world stays awake when the window is covered or you are on another tab, and a guest that misses a frame asks for a fresh picture instead of freezing.
 - **Closing the house closes the only socket there is.**
 - **The public relay** is `wss://chat.tonho.wtf/v1/room`. To host your own, `omniworld-server` is a single binary with a `Dockerfile` and a `docker-compose.yml` in `scripts/omniworld-server/`; put it behind a proxy that terminates TLS and set the address in **Settings → World → Room server**.
+
+### The City: a persistent town on the server, with an address for your house
+
+<p align="center">
+  <img src="assets/readme/illustration-city.gif" alt="An isometric cartoon town at night: a cobblestone plaza with a lantern, streets in a grid, small cottages with warm windows on their own plots, a river with two wooden bridges and apple trees. Robot agents walk the streets and chat in pairs, and Loop stands in the plaza holding up a glowing house key with an orange address tag. A dotted line links the plaza to a small padlocked server tower on a hill" width="820" />
+</p>
+
+The house is yours alone; the city is shared. **World → City → Enter the city** (create an account on the instance, or sign in) puts your avatar in the plaza of `cidade-piloto`, a town of nine blocks, 72 plots and a river, generated from a seed and served by the same OmniDisc server that hosts the visits relay. Everyone who enters walks the same streets and sees the same residents, and the town keeps living after you close the app.
+
+- **Claim a plot.** One click picks a free plot, builds your house on it and gives you a stable address such as `cidade-piloto/chunk:-1:-1/plot:-1:-1:1`. The address never moves, even when the town grows. Walk to your door and go in: the interior is the same house you know, with furniture in slots, and every edit is confirmed by the server before it shows.
+- **Residents.** Give your home up to eight residents with a name and a persona. They walk, sit, work at the bench, sleep when their energy runs out and follow a daily routine on their own. If you point the server at a model, they decide with it, under a budget per resident, per account and per city; without a model, or when the budget is spent, the built-in routine keeps them going. An *assistant* resident is the only kind that can receive a real task, and the task runs in your app under your own permission prompts, never on the server.
+- **Walk anywhere.** Blocks are stitched at the borders, so crossing the town is one click on the far side; the server plans the route block by block. The eight blocks around you are drawn with their residents in them.
+- **The server is the authority.** It refuses a teleport, a repeated command and a fake owner, rejects an edit made on an old revision, and logs every input it applies. Each block is one Rust simulation, checkpointed every minute and replayable from its log to the same fingerprint. A block with nobody in it goes to sleep and wakes up when someone arrives.
+- **Voice by proximity.** A voice token is scoped to the block you stand in, and a closed home stays silent to visitors.
+- **Measured.** 32 people walking in the same plaza cost the server 1.3 ms of simulation per 100 ms tick (p99) and about 3 KiB/s per client. The instance at `chat.tonho.wtf` runs it; to host your own, the server is [`omnidisc-server`](https://github.com/tonhowtf/omnidisc-server) and the town comes from a package you import with one call. Point the app at it in **Settings → World → City server**.
 
 **The pet.** A floating Omni reacts to what the agents do, including Claude Code or Codex running in a terminal outside the app, and answers permission prompts with Allow, Always or Deny.
 

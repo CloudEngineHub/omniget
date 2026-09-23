@@ -110,7 +110,7 @@
   // (see $lib/agent-prompts).
   $effect(() => {
     const payload = agentPrompts($rawTranslations, $locale);
-    invoke("sync_llm_prompts", payload).catch(() => {
+    invoke("sync_llm_prompts", { prompts: payload }).catch(() => {
       // prompt sync is best-effort (no backend in browser/dev)
     });
   });

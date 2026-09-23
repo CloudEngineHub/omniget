@@ -11,28 +11,37 @@
 //! existing roster entries are never rewritten — the user may have edited them.
 
 use omniget_core::core::llm::roster_store::{set_prompt_defaults, PromptDefaults};
+use serde::Deserialize;
+
+/// The nine prompts for the active locale, as pushed by the frontend.
+///
+/// One struct instead of nine command arguments: the payload is one object and
+/// nine parameters would trip `clippy::too_many_arguments`.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PromptPayload {
+    pub omni: String,
+    pub builder: String,
+    pub scout: String,
+    pub template_chief: String,
+    pub template_researcher: String,
+    pub template_writer: String,
+    pub template_em: String,
+    pub template_reviewer: String,
+    pub help: String,
+}
 
 #[tauri::command]
-pub fn sync_llm_prompts(
-    omni: String,
-    builder: String,
-    scout: String,
-    template_chief: String,
-    template_researcher: String,
-    template_writer: String,
-    template_em: String,
-    template_reviewer: String,
-    help: String,
-) {
+pub fn sync_llm_prompts(prompts: PromptPayload) {
     set_prompt_defaults(PromptDefaults {
-        omni,
-        builder,
-        scout,
-        template_chief,
-        template_researcher,
-        template_writer,
-        template_em,
-        template_reviewer,
-        help,
+        omni: prompts.omni,
+        builder: prompts.builder,
+        scout: prompts.scout,
+        template_chief: prompts.template_chief,
+        template_researcher: prompts.template_researcher,
+        template_writer: prompts.template_writer,
+        template_em: prompts.template_em,
+        template_reviewer: prompts.template_reviewer,
+        help: prompts.help,
     });
 }

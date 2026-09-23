@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Jobs: background agent runs. A form to start one, the list with live
    * state, the pending permission ask inline, and the triggers (cron and
@@ -188,13 +187,13 @@
 <div class="page page-wide jobs-page">
   <header class="page-head">
     <div>
-      <h1 class="page-title">{$surfaceCopy.tasks}</h1>
+      <h1 class="page-title">{$t("llm.surface.tasks")}</h1>
       <p class="page-lede">{$t("llm.jobs.lede")}</p>
     </div>
   </header>
-  <SurfaceGuide text={$surfaceCopy.jobsHint} href="/help?article=tasks#guide" />
+  <SurfaceGuide text={$t("llm.surface.jobs_hint")} href="/help?article=tasks#guide" />
 
-  <details class="creation-panel"><summary>{$surfaceCopy.create}</summary>
+  <details class="creation-panel"><summary>{$t("llm.surface.create")}</summary>
   <section class="surface-card form">
     <h2 class="section-header-title">{$t("llm.jobs.new_title")}</h2>
     <div class="form-row">

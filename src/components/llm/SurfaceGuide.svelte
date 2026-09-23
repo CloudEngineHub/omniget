@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { surfaceCopy } from "./surface-copy";
+  import { t } from "$lib/i18n";
   let { text, steps = [], href = "/help", label }: { text: string; steps?: string[]; href?: string; label?: string } = $props();
 </script>
 <!-- Original Svelte composition informed by 21st Agent Plan (2127) and Sidebar 1 (19371). -->
 <aside class="surface-guide">
   <div><p>{text}</p>{#if steps.length}<ol>{#each steps as step}<li>{step}</li>{/each}</ol>{/if}</div>
-  <a href={href}>{label ?? $surfaceCopy.help}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m9 5 7 7-7 7"/></svg></a>
+  <a href={href}>{label ?? $t("llm.surface.help")}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m9 5 7 7-7 7"/></svg></a>
 </aside>
 <style>
 .surface-guide { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:16px 0 24px; margin-bottom:16px; border-bottom:1px solid var(--separator); }

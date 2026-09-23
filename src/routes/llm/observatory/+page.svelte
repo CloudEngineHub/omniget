@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfaceGuide from "$components/llm/SurfaceGuide.svelte";
-  import { surfaceCopy } from "$components/llm/surface-copy";
   /**
    * Observatory — the instrument panel of the LLM section.
    *
@@ -113,7 +112,7 @@
       {/each}
     </div>
   </header>
-  <SurfaceGuide text={$surfaceCopy.observatoryHint} href="/help?article=activity#guide" />
+  <SurfaceGuide text={$t("llm.surface.observatory_hint")} href="/help?article=activity#guide" />
 
   {#if dataState === "unavailable" && snapshot.agents.length === 0 && !demo}
     <div class="empty-state">
@@ -175,7 +174,7 @@
     </section>
 
     <details class="diagnostic-disclosure" ontoggle={(event) => diagnosticsOpen = event.currentTarget.open}>
-      <summary>{$surfaceCopy.advanced}</summary>
+      <summary>{$t("llm.surface.advanced")}</summary>
       {#if diagnosticsOpen}<WireProbePanel />{/if}
     </details>
 

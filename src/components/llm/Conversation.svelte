@@ -1,6 +1,5 @@
 <script lang="ts">
   // Presentation follows 21st Agent Chat by Serafim (12402): a bounded reading column, contextual empty state and an in-flow composer. Original Svelte implementation; backend contracts stay local.
-  import { surfaceCopy } from "./surface-copy";
   import WorkspaceChip from "./WorkspaceChip.svelte";
   /**
    * Centre column: header (agent, effective model, switch-model, new chat),
@@ -155,7 +154,7 @@
   {#if pickerOpen}
     <div class="conv-picker">
       <ModelPicker value={conversation?.model ?? (agent?.model.policy === "fixed" ? agent.model.model : null)} onchange={onSwitch} explicit busy={switching} />
-      {#if switchFailed}<p role="alert">{$surfaceCopy.unavailable}</p>{/if}
+      {#if switchFailed}<p role="alert">{$t("llm.surface.unavailable")}</p>{/if}
     </div>
   {/if}
 
@@ -166,10 +165,10 @@
         <p class="empty-state-title">{$t("llm.conv.empty_title")}</p>
         <p class="empty-state-body">{$t("llm.conv.empty_body")}</p>
         {#if !agent}
-          <a class="button primary" href="/llm/accounts">{$surfaceCopy.connect}</a>
+          <a class="button primary" href="/llm/accounts">{$t("llm.surface.connect")}</a>
         {:else}
           <div class="task-suggestions">
-            {#each [$surfaceCopy.suggestion1, $surfaceCopy.suggestion2, $surfaceCopy.suggestion3] as suggestion}
+            {#each [$t("llm.surface.suggestion_1"), $t("llm.surface.suggestion_2"), $t("llm.surface.suggestion_3")] as suggestion}
               <button type="button" onclick={() => draft = suggestion}>{suggestion}</button>
             {/each}
           </div>
@@ -224,8 +223,8 @@
     {/if}
     </div>
   </div>
-  {#if actionFailed || (runtimeError && turn)}<p class="send-error" role="alert">{$surfaceCopy.actionError}</p>{/if}
-  {#if sendFailed}<p class="send-error" role="alert">{$surfaceCopy.error}</p>{/if}
+  {#if actionFailed || (runtimeError && turn)}<p class="send-error" role="alert">{$t("llm.surface.action_error")}</p>{/if}
+  {#if sendFailed}<p class="send-error" role="alert">{$t("llm.surface.error")}</p>{/if}
 
   <Composer
     bind:value={draft}

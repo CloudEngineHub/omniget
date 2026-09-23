@@ -1487,6 +1487,7 @@ pub fn run() {
             commands::llm::roster::llm_roster_update,
             commands::llm::roster::llm_roster_delete,
             commands::llm::roster::llm_roster_apply_template,
+            commands::llm::prompts::sync_llm_prompts,
             commands::llm::chat::llm_conversation_list,
             commands::llm::chat::llm_conversation_get,
             commands::llm::chat::llm_conversation_delete,

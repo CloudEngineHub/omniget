@@ -11,6 +11,7 @@ pub mod local;
 pub mod mcp;
 pub mod models;
 pub mod observatory;
+pub mod prompts;
 pub mod prune;
 pub mod roster;
 pub mod skills;

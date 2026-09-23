@@ -50,6 +50,7 @@
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { rawTranslations, t, locale, isRtlLocale } from "$lib/i18n";
   import { trayStrings } from "$lib/tray-strings";
+  import { agentPrompts } from "$lib/agent-prompts";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import { TOOLS, toolHref } from "$lib/tools/catalog";
@@ -100,6 +101,17 @@
     const payload = trayStrings($rawTranslations, $locale);
     invoke("sync_tray_strings", payload).catch(() => {
       // tray sync is best-effort (no backend in browser/dev)
+    });
+  });
+
+  // Same push-based pattern for the prompts of the agents the backend seeds:
+  // they are shown to the user, so they follow the interface language, while
+  // the compiled-in English set in roster_store.rs stays the fallback
+  // (see $lib/agent-prompts).
+  $effect(() => {
+    const payload = agentPrompts($rawTranslations, $locale);
+    invoke("sync_llm_prompts", { prompts: payload }).catch(() => {
+      // prompt sync is best-effort (no backend in browser/dev)
     });
   });
 

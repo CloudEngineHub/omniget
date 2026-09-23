@@ -9,7 +9,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="OmniGet: cole um link, receba o arquivo. Downloads, ferramentas e biblioteca de estudo em um só app para Windows, macOS e Linux." width="100%" />
+  <img src="assets/readme/hero.png" alt="OmniGet: cole um link, receba o arquivo. Downloads, ferramentas e biblioteca de estudo em um só app para Windows, macOS e Linux." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -26,7 +26,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 </p>
 
 <p align="center">
-  <b>Baixe cursos da Udemy e da Hotmart, YouTube, Instagram, X, Pinterest, TikTok e mais de 1.800 outros sites.<br/>Depois transcreva, converta, leia e estude o que salvou. Um único app de desktop, gratuito, sem terminal.</b>
+  <b>Uma interface para o yt-dlp, um programa para baixar cursos da Udemy e da Hotmart e vídeos do YouTube, e um app de desktop para agentes de IA.<br/>Gratuito e open source para Windows, macOS e Linux. Sem terminal.</b><br/>Baixe de Instagram, TikTok, X, Pinterest e mais de 1.800 sites, depois transcreva, converta, leia e estude o que salvou.<br/>Rode Claude Code, Codex, Gemini CLI e modelos locais do Ollama como agentes, com permissões, desfazer, jobs e loops.
 </p>
 
 <p align="center">
@@ -46,7 +46,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 
 <p align="center">
   <sub>Gratuito. Open source sob GPL-3.0. Sem conta, sem anúncios, sem telemetria do que você baixa. Seus arquivos ficam no seu computador.</sub><br/>
-  <sub>Mais de 9.500 estrelas no GitHub. O repositório mais estrelado nos tópicos <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>, <a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> e <a href="https://github.com/topics/course-downloader">course-downloader</a>.</sub>
+  <sub>Mais de 13.800 estrelas no GitHub. O repositório mais estrelado nos tópicos <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>, <a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> e <a href="https://github.com/topics/course-downloader">course-downloader</a>.</sub>
 </p>
 
 <p align="center">
@@ -75,6 +75,25 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 
 ---
 
+## Agentes de IA no seu computador: Claude Code, Codex, Gemini CLI e Ollama
+
+<p align="center">
+  <img src="assets/readme/agents-hero.gif" alt="Loop, o mascote do OmniGet, no meio de uma casa isométrica enquanto três agentes robôs trabalham cada um na sua bancada, com um balão mostrando a tool em uso" width="900" />
+</p>
+
+Novidade da 0.10 e agora o centro do app. Um comando, cerca de 15 segundos, teste verde: é o Claude Code corrigindo um teste que falhava, pelo OmniGet, pedindo permissão com o diff na tela.
+
+- **Agente de código com permissões e desfazer.** Escolha um agente, anexe uma pasta, peça uma mudança. Ele lê, edita e roda comandos só dentro daquela pasta, pergunta antes de escrever, e um clique desfaz o turno inteiro.
+- **Claude Code, Codex e Gemini CLI com interface.** As contas entram em **LLM → Contas** com a cota na tela. Qualquer CLI que fale o Agent Client Protocol (Gemini CLI, goose, opencode) vira agente.
+- **Agentes locais com Ollama, LM Studio ou llama-server**, offline e sem chave. O `qwen3:8b` corrige o bug de demonstração em cerca de 3 minutos.
+- **Jobs, Loops e gatilhos.** O trabalho continua com a janela fechada. Um Loop repete rodadas até o seu comando de checagem (`npm test`) passar. Cron e webhook disparam jobs.
+- **Servidor MCP com 56 tools** para Claude Code, Cursor e VS Code.
+- **O Mundo.** Uma casa isométrica onde cada agente anda até a sua bancada, mostra a tool num balão e acena quando precisa de você. Abra a casa, passe o código e um amigo entra para visitar.
+
+A descrição completa está no [README em inglês](README.md#agents-and-the-world).
+
+---
+
 ## Por que o OmniGet
 
 Você comprou um curso e quer ele no seu disco antes que a plataforma tire do ar. Você mantém uma colinha do yt-dlp porque as flags nunca ficam na cabeça. Tem um site para stories do Instagram, outro para vídeos do X, uma extensão de Chrome para o Pinterest, um script em Python para legendas, e nenhum deles lembra o seu login.
@@ -82,7 +101,7 @@ Você comprou um curso e quer ele no seu disco antes que a plataforma tire do ar
 O OmniGet coloca tudo isso atrás de uma única caixa de texto. Cole um link, veja a prévia com as opções de qualidade, clique em baixar. A mesma janela depois reproduz o curso, abre o PDF, transcreve o áudio e faz backup do board do Pinterest. O yt-dlp e o FFmpeg se instalam e se atualizam sozinhos, então não há nada para configurar e nenhum terminal para abrir.
 
 <p align="center">
-  <img src="assets/readme/workflow.svg" alt="Como o OmniGet funciona: cole um link ou aperte o atalho, o OmniGet detecta o site e baixa com yt-dlp ou um extrator nativo, o arquivo cai na sua pasta e abre no player, no leitor ou nas ferramentas." width="100%" />
+  <img src="assets/readme/workflow.png" alt="Como o OmniGet funciona: cole um link ou aperte o atalho, o OmniGet detecta o site e baixa com yt-dlp ou um extrator nativo, o arquivo cai na sua pasta e abre no player, no leitor ou nas ferramentas." width="100%" />
 </p>
 
 ### Como se compara
@@ -197,7 +216,7 @@ A extensão faz dois trabalhos. Em sites que ela reconhece (YouTube, Instagram, 
 Escolha o nível que combina com o seu conforto.
 
 <p align="center">
-  <img src="assets/readme/extension.svg" alt="Fluxo de pareamento: instale a extensão no Chrome, clique em Parear extensão nas Configurações do OmniGet, a extensão encontra o app no localhost e conecta. A partir daí, todo download leva seus cookies." width="100%" />
+  <img src="assets/readme/extension.png" alt="Fluxo de pareamento: instale a extensão no Chrome, clique em Parear extensão nas Configurações do OmniGet, a extensão encontra o app no localhost e conecta. A partir daí, todo download leva seus cookies." width="100%" />
 </p>
 
 ### Nível 1: de dentro do app (sem downloads, sem zip)

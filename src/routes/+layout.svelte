@@ -1,5 +1,27 @@
 <script lang="ts">
   import "../app.css";
+  import "$lib/style/workspace-design.css";
+  import { getWorkspaceDesign, initWorkspaceDesign } from "$lib/stores/workspace-design.svelte";
+  let workspaceDesign = $derived(getWorkspaceDesign());
+  let designScope = $derived(page.url.pathname === "/" || page.url.pathname === "/downloads" || page.url.pathname === "/llm" || page.url.pathname.startsWith("/llm/") || page.url.pathname === "/help" || page.url.pathname.startsWith("/help/"));
+  onMount(initWorkspaceDesign);
+  // Document-level scope includes native chrome and portals; cleanup restores
+  // the legacy module contract when leaving the workspace.
+  $effect(() => {
+    if (!designScope) return;
+    const root = document.documentElement;
+    const previous = { preset: root.getAttribute("data-ds-preset"), mode: root.getAttribute("data-ds-mode"), scoped: root.classList.contains("ds-scope") };
+    root.classList.add("ds-scope");
+    root.setAttribute("data-ds-preset", workspaceDesign.preset);
+    root.setAttribute("data-ds-mode", workspaceDesign.resolvedMode);
+    return () => {
+      if (!previous.scoped) root.classList.remove("ds-scope");
+      for (const [key, value] of [["data-ds-preset", previous.preset], ["data-ds-mode", previous.mode]]) {
+        if (value === null) root.removeAttribute(key!); else root.setAttribute(key!, value!);
+      }
+    };
+  });
+
   import "$lib/style/queue-kinds.css";
   import { page } from "$app/state";
   import { isMac } from "$lib/platform";
@@ -9,19 +31,16 @@
   import { listen } from "@tauri-apps/api/event";
   import { initDownloadListener } from "$lib/stores/download-listener";
   import { getCounts } from "$lib/stores/download-store.svelte";
-  import {
-    getUnreadCount as getChatUnreadCount,
-    getMentionTotal as getChatMentionCount,
-    isImmersive,
-    initOmnidisc,
-  } from "$lib/stores/omnidisc-store.svelte";
   import { getSettings, loadSettings } from "$lib/stores/settings-store.svelte";
   import { queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
   import AppSidebar from "$components/shell/AppSidebar.svelte";
   import AppToolbar from "$components/shell/AppToolbar.svelte";
   import CommandPalette from "$components/shell/CommandPalette.svelte";
+  import DownloadStatusBar from "$components/download/DownloadStatusBar.svelte";
+  import { shellLayout } from "$lib/stores/shell-layout.svelte";
   import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
+  import { accountPaletteItems, activateAccount, getAccounts } from "$lib/stores/llm-accounts-store.svelte";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
   import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { readText } from "@tauri-apps/plugin-clipboard-manager";
@@ -29,7 +48,8 @@
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t, locale, isRtlLocale } from "$lib/i18n";
+  import { rawTranslations, t, locale, isRtlLocale } from "$lib/i18n";
+  import { trayStrings } from "$lib/tray-strings";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import { TOOLS, toolHref } from "$lib/tools/catalog";
@@ -51,7 +71,10 @@
   );
 
   let coreNavItems = $derived(
-    CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? true))
+    CORE_NAV_ITEMS.filter(
+      (item) =>
+        item.href !== "/world" || (getSettings()?.world?.enabled ?? true),
+    )
   );
 
   let allNav = $derived([...coreNavItems, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
@@ -65,12 +88,28 @@
 
   let counts = $derived(getCounts());
   let badgeLabel = $derived(counts.badge > 99 ? "99+" : String(counts.badge));
-  let chatBadgeCount = $derived(getChatMentionCount() || getChatUnreadCount());
   let settings = $derived(getSettings());
 
+  // The tray menu is native, so the frontend owns the translations and pushes
+  // them whenever the locale changes (see sync_tray_strings in channels.rs).
+  // The values come from `rawTranslations`, not `$t`: the default parser
+  // substitutes `{{placeholders}}` and would strip the `{{count}}` / `{{speed}}`
+  // tokens the Rust side fills in, leaving the tray without the number and the
+  // speed in every language (see $lib/tray-strings).
+  $effect(() => {
+    const payload = trayStrings($rawTranslations, $locale);
+    invoke("sync_tray_strings", payload).catch(() => {
+      // tray sync is best-effort (no backend in browser/dev)
+    });
+  });
+
   let isStudyRoute = $derived(page.url.pathname.startsWith("/study"));
-  let isStreamPopout = $derived(page.url.pathname === "/omnidisc/stream");
-  let hideAppSidebar = $derived(page.url.pathname.startsWith("/omnidisc") && isImmersive());
+  let isStreamPopout = false;
+  // The pet window is a bare 200x200 transparent canvas: no shell around it.
+  let isPetWindow = $derived(page.url.pathname === "/pet");
+  // Same for the limits strip: the window is exactly as big as what it draws.
+  let isLimitsStrip = $derived(page.url.pathname === "/limits-strip");
+  let hideAppSidebar = false;
   let isCoreRoute = $derived(
     page.url.pathname === "/" ||
     page.url.pathname.startsWith("/downloads") ||
@@ -137,13 +176,6 @@
       })
       .catch(() => {});
   }
-
-  let omnidiscStarted = false;
-  $effect(() => {
-    if (omnidiscStarted || !(getSettings()?.omnidisc?.enabled ?? true)) return;
-    omnidiscStarted = true;
-    void initOmnidisc();
-  });
 
   onMount(() => {
     initDownloadListener();
@@ -252,6 +284,17 @@
         keywords: [...tool.keywords, get(t)(`tools.categories.${tool.category}.name`)].join(" "),
         action: () => goto(toolHref(tool)),
       })),
+      // Contas & cota: ⌘K troca a assinatura do CLI sem abrir a aba. Lê só o
+      // estado já carregado, então não há IPC no boot.
+      ...accountPaletteItems(
+        getAccounts().accounts,
+        {
+          group: get(t)("command_palette.group_nav"),
+          switchTo: (label) => `${get(t)("llm.accounts.palette_switch")} ${label}`,
+          openTab: get(t)("llm.accounts.title"),
+        },
+        { activate: (id) => void activateAccount(id), open: () => goto("/llm/accounts") },
+      ),
       {
         id: "nav-marketplace",
         label: get(t)("nav.marketplace"),
@@ -259,6 +302,7 @@
         keywords: "plugins extensions store",
         action: () => goto("/marketplace"),
       },
+      { id: "nav-help", label: get(t)("nav.help"), group: get(t)("command_palette.group_nav"), keywords: "help ajuda guias docs assinatura agente monitor", action: () => goto("/help") },
       {
         id: "nav-about",
         label: get(t)("nav.about"),
@@ -343,17 +387,19 @@
   });
 </script>
 
-{#if isStreamPopout}
+{#if isPetWindow || isLimitsStrip}
+  {@render children()}
+{:else if isStreamPopout}
   <div class="stream-popout">
     {@render children()}
   </div>
 {:else}
 <div class="shell" data-reduce-motion={settings?.accessibility?.reduce_motion} data-reduce-transparency={settings?.accessibility?.reduce_transparency}>
   {#if !hideAppSidebar}
-    <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} {chatBadgeCount} />
+    <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} />
   {/if}
 
-  <div class="shell-body">
+  <div class="shell-body" style:--shell-bottom-inset={`${shellLayout.bottomInset}px`}>
     <AppToolbar />
 
     {#if ytdlpMissing && !ytdlpDismissed}
@@ -377,7 +423,7 @@
       </div>
     {/if}
 
-    <main id="main-content" class="content">
+    <main id="main-content" class="content" class:ds-scope={designScope} data-ds-preset={designScope ? workspaceDesign.preset : undefined} data-ds-mode={designScope ? workspaceDesign.resolvedMode : undefined}>
       <div class="mac-pane" class:mac-pane--flush={isFlushRoute}>
         {#if isStudyRoute}
           <div class="study-shell">
@@ -394,6 +440,10 @@
         {/if}
       </div>
     </main>
+
+    {#if !hideAppSidebar}
+      <DownloadStatusBar />
+    {/if}
   </div>
 </div>
 {/if}
@@ -440,6 +490,7 @@
   }
 
   .shell-body {
+    padding-block-end: var(--shell-bottom-inset, 0px);
     flex: 1;
     display: flex;
     flex-direction: column;

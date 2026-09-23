@@ -205,7 +205,7 @@
     | { kind: "review"; count: number }
     | { kind: "focus" };
 
-  const hero = $derived<Hero>(
+  const hero = $derived(
     resumeCourse
       ? { kind: "continue", course: resumeCourse }
       : dueToday > 0
@@ -268,7 +268,7 @@
           <a
             class="xp-pill"
             href="/study/achievements"
-            title={`${gamification.xp.toLocaleString()} XP · ${gamification.level_progress_pct}% para nível ${gamification.level + 1}`}
+            title={$t("study.hub.xp_tooltip", { xp: gamification.xp.toLocaleString(), pct: gamification.level_progress_pct, lvl: gamification.level + 1 })}
           >
             <span class="xp-level">L{gamification.level}</span>
             <span class="xp-bar-mini">
@@ -303,14 +303,14 @@
       <article class="hero" class:continue={hero.kind === "continue"} class:review={hero.kind === "review"} class:focus={hero.kind === "focus"}>
         {#if hero.kind === "continue"}
           <span class="hero-label">{$t("study.hub.continue_title")}</span>
-          <h2 class="hero-title">{hero.course.title}</h2>
+          <h2 class="hero-title">{hero.course?.title}</h2>
           <div class="hero-progress">
             <div class="progress-track">
-              <div class="progress-fill" style:width="{Math.round(hero.course.progress_pct ?? 0)}%"></div>
+              <div class="progress-fill" style:width="{Math.round(hero.course?.progress_pct ?? 0)}%"></div>
             </div>
-            <span class="mono hero-pct">{Math.round(hero.course.progress_pct ?? 0)}%</span>
+            <span class="mono hero-pct">{Math.round(hero.course?.progress_pct ?? 0)}%</span>
           </div>
-          <button class="hero-cta" onclick={() => openCourse(hero.course)}>
+          <button class="hero-cta" onclick={() => hero.course && openCourse(hero.course)}>
             {$t("study.hub.continue_cta")}
             <span aria-hidden="true">→</span>
           </button>
@@ -368,8 +368,8 @@
       {#if recentCourses.length > 0}
         <section class="recents-widget">
           <header class="recents-head">
-            <h2>Continuar de onde parou</h2>
-            <a href="/study/library" class="see-all">Ver todos →</a>
+            <h2>{$t("study.hub.continue_section")}</h2>
+            <a href="/study/library" class="see-all">{$t("study.hub.see_all")} →</a>
           </header>
           <ul class="recents-list">
             {#each recentCourses.slice(0, 6) as r (r.course_id)}

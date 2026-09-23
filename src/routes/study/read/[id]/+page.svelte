@@ -698,7 +698,7 @@
 
   async function createOrphanNote() {
     if (!textRects) return;
-    const note = window.prompt("Nota da página:", "");
+    const note = window.prompt($t("study.read.page_note_prompt"), "");
     if (note === null) return;
     const trimmed = note.trim();
     if (trimmed === "") return;
@@ -1425,10 +1425,10 @@
       format === "json" ? "json" : format === "pdf_burn_in" ? "pdf" : "md";
     const suffix =
       format === "md_v2"
-        ? " — anotações.v2"
+        ? $t("study.read.annotations_v2")
         : format === "pdf_burn_in"
           ? " — anotado"
-          : " — anotações";
+          : $t("study.read.annotations");
     const filterName =
       format === "json"
         ? "JSON"
@@ -1592,8 +1592,8 @@
     const total = meta.page_count;
     const author = book.author?.trim();
     const stateText = author
-      ? `${author} · pág. ${currentPage}/${total}`
-      : `pág. ${currentPage}/${total}`;
+      ? $t("study.read.page_of_author", { author, cur: currentPage, total })
+      : $t("study.read.page_of", { cur: currentPage, total });
     void rpcSetSource({
       source: "reading",
       details: book.title ?? "Lendo",
@@ -2056,8 +2056,7 @@
           {:else if sidebarTab === "notes"}
             {#if annotationsWithNotes.length === 0}
               <p class="muted small">
-                Nenhuma nota ainda. Selecione um trecho e tecle N pra anexar
-                uma nota, ou tecle N sem seleção pra criar uma nota solta.
+                {$t("study.read.no_notes_hint")}
               </p>
             {:else}
               <ul class="outline-tree">
@@ -2419,19 +2418,18 @@
     }}
   >
     <div class="meta-modal" role="dialog" aria-modal="true" aria-labelledby="meta-title">
-      <h3 id="meta-title">Editar metadados</h3>
+      <h3 id="meta-title">{$t("study.read.meta_title")}</h3>
       <p class="meta-hint">
-        Atualiza apenas o registro local da biblioteca. O arquivo no disco
-        não é modificado.
+        {$t("study.read.meta_hint")}
       </p>
 
       <label class="meta-field">
-        <span>Título</span>
+        <span>{$t("study.read.meta_title_label")}</span>
         <input
           type="text"
           bind:value={metadataDraft.title}
           disabled={savingMetadata}
-          placeholder="(sem título)"
+          placeholder={$t("study.read.untitled_placeholder")}
         />
       </label>
 

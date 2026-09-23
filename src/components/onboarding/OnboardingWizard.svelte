@@ -6,6 +6,7 @@
   import { completeOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import Mascot from "$components/mascot/Mascot.svelte";
+  import StepProfile from "./StepProfile.svelte";
 
   type DependencyStatus = {
     name: string;
@@ -13,7 +14,7 @@
     version: string | null;
   };
 
-  const TOTAL_STEPS = 3;
+  const TOTAL_STEPS = 5;
   const ENGINE_DEPS = new Set(["yt-dlp", "ffmpeg"]);
 
   const LANGUAGES: [string, string][] = [
@@ -28,6 +29,7 @@
     ["fr", "Français"],
     ["el", "Ελληνικά"],
     ["fa", "فارسی"],
+    ["lo", "ລາວ"],
   ];
 
   let step = $state(1);
@@ -198,6 +200,26 @@
               {$t("onboarding.deps_install_all")}
             </button>
           {/if}
+        </div>
+      {:else if step === 3}
+        <div class="step step-profile-wrap">
+          <StepProfile />
+        </div>
+      {:else if step === 4}
+        <div class="step step-agents">
+          <Mascot emotion="amazed" />
+          <h2>{$t("onboarding.agents_title")}</h2>
+          <p class="step-desc">{$t("onboarding.agents_desc")}</p>
+          <div class="agents-cards">
+            <div class="agents-card">
+              <strong>{$t("nav.llm")}</strong>
+              <span>{$t("onboarding.agents_llm")}</span>
+            </div>
+            <div class="agents-card">
+              <strong>{$t("nav.world")}</strong>
+              <span>{$t("onboarding.agents_world")}</span>
+            </div>
+          </div>
         </div>
       {:else}
         <div class="step step-done">
@@ -373,6 +395,24 @@
     line-height: var(--leading-base);
     max-width: 340px;
     margin: 0;
+  }
+
+  .agents-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .agents-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--surface-2, rgba(127, 127, 127, 0.12));
+    text-align: left;
+    font-size: 13px;
   }
 
   .step-note {

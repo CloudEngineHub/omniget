@@ -5,7 +5,7 @@
 //! owner and expiry, nothing else (ADR 0014 §3). The key travels in the MLS
 //! message, so it never reaches the frontend or the network in the clear.
 
-use super::api::{http_client, Api, ERR_BAD_REQUEST, ERR_SERVER, ERR_UNREACHABLE};
+use super::http::{http_client, Api, ERR_BAD_REQUEST, ERR_SERVER, ERR_UNREACHABLE};
 use super::mls::FileManifest;
 use super::{normalize_instance_url, store};
 use base64::Engine;
@@ -183,7 +183,7 @@ struct Tus {
 impl Tus {
     fn new(base: &str) -> Result<Self, String> {
         let token =
-            store::load_token(base)?.ok_or_else(|| super::api::ERR_NO_SESSION.to_string())?;
+            store::load_token(base)?.ok_or_else(|| super::http::ERR_NO_SESSION.to_string())?;
         Ok(Self {
             http: http_client(Duration::from_secs(120))?,
             base: base.to_string(),
@@ -215,7 +215,7 @@ impl Tus {
                 .map(|e| e.code)
                 .unwrap_or_default();
             tracing::warn!("[omnidisc] upload create -> {} {}", status.as_u16(), text);
-            return Err(super::api::map_error(status, &code));
+            return Err(super::http::map_error(status, &code));
         }
         let location = response
             .headers()
@@ -279,7 +279,7 @@ impl Tus {
                 .map(|e| e.code)
                 .unwrap_or_default();
             tracing::warn!("[omnidisc] upload chunk -> {} {}", status.as_u16(), text);
-            return Err(super::api::map_error(status, &code));
+            return Err(super::http::map_error(status, &code));
         }
         let next = response
             .headers()
@@ -719,7 +719,7 @@ async fn download_to(source: &url::Url, target: &Path, budget: u64) -> Result<()
         ERR_UNREACHABLE.to_string()
     })?;
     if !response.status().is_success() {
-        return Err(super::api::map_error(response.status(), ""));
+        return Err(super::http::map_error(response.status(), ""));
     }
     if response.content_length().is_some_and(|len| len > budget) {
         return Err(ERR_ATTACHMENT_TOO_LARGE.to_string());

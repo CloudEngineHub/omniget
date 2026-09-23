@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { isLinux } from "$lib/platform";
+  import { t } from "$lib/i18n";
   import { convertFileSrc } from "@tauri-apps/api/core";
   import SkipGapsButton from "./SkipGapsButton.svelte";
   import SponsorBlockOverlay from "./SponsorBlockOverlay.svelte";
@@ -379,7 +380,7 @@
   onmousemove={onMouseMove}
   onmouseleave={onMouseLeaveShell}
   role="region"
-  aria-label="Reprodutor de vídeo"
+  aria-label={$t("study.player.shell.aria")}
 >
   {#key videoSrc}
     <!-- svelte-ignore a11y_media_has_caption -->
@@ -447,10 +448,10 @@
   />
 
   {#if chapters.length > 0 && chaptersOpen}
-    <aside class="chapters-drawer" aria-label="Capítulos">
+    <aside class="chapters-drawer" aria-label={$t("study.player.shell.chapters")}>
       <header class="chapters-drawer__header">
-        <span>Capítulos</span>
-        <button type="button" class="icon-btn" onclick={() => (chaptersOpen = false)} aria-label="Fechar capítulos">
+        <span>{$t("study.player.shell.chapters")}</span>
+        <button type="button" class="icon-btn" onclick={() => (chaptersOpen = false)} aria-label={$t("study.player.shell.close_chapters")}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -521,7 +522,7 @@
             class="gap-marker outro"
             style:left="{outroMarker.startPct}%"
             style:width="{outroMarker.widthPct}%"
-            title="Créditos"
+            title={$t("study.player.shell.credits")}
           ></div>
         {/if}
         <div class="progress-fill" style:width="{progressPct}%"></div>
@@ -556,7 +557,7 @@
             <path d="M6 12h12a3 3 0 0 1 0 6h-3" />
           </svg>
         </button>
-        <button type="button" class="icon-btn" onclick={() => skipBy(10)} aria-label="Avançar 10s">
+        <button type="button" class="icon-btn" onclick={() => skipBy(10)} aria-label={$t("study.player.keys.fwd_10")}>
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="13 17 18 12 13 7" />
             <path d="M18 12H6a3 3 0 0 0 0 6h3" />
@@ -628,7 +629,7 @@
             class="icon-btn"
             class:active={toolbarPickerOpen === "audio"}
             onclick={(e) => { e.stopPropagation(); pickerToggle("audio"); }}
-            aria-label="Áudio"
+            aria-label={$t("study.player.shell.audio")}
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M11 5L6 9H2v6h4l5 4z" />
@@ -641,7 +642,7 @@
             class="icon-btn"
             class:active={chaptersOpen}
             onclick={(e) => { e.stopPropagation(); chaptersOpen = !chaptersOpen; }}
-            aria-label="Capítulos"
+            aria-label={$t("study.player.shell.chapters")}
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="8" y1="6" x2="21" y2="6" />
@@ -720,7 +721,7 @@
     </div>
   {/if}
   {#if toolbarPickerOpen === "audio"}
-    <div class="picker-pop audio-pop" role="listbox" aria-label="Áudio">
+    <div class="picker-pop audio-pop" role="listbox" aria-label={$t("study.player.shell.audio")}>
       {#each audioTracks as t (t.lang + t.path)}
         {@const sel = t.lang === selectedAudioLang}
         <button

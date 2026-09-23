@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
+  import { reserveShellBottom } from "$lib/stores/shell-layout.svelte";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
@@ -149,7 +150,7 @@
     const labels: Record<string, string> = {
       "pomodoro-25": "Pomodoro 25",
       "deep-50": "Deep Work 50",
-      "stopwatch": "Cronômetro",
+      "stopwatch": $t("study.misc.stopwatch"),
     };
     return labels[presetId] ?? presetId;
   }
@@ -309,7 +310,7 @@
   }
 
   async function actionCreatePage() {
-    const name = window.prompt("Nome da nova página:");
+    const name = window.prompt($t("study.notes.new_page_prompt"));
     if (!name || !name.trim()) return;
     try {
       const r = await (
@@ -782,7 +783,7 @@
 {@render children()}
 
 {#if musicPlayer.currentTrack && !$page.url.pathname.startsWith("/study/watch") && !$page.url.pathname.startsWith("/study/course/") && !$page.url.pathname.startsWith("/study/anki/study") && !$page.url.pathname.startsWith("/study/music")}
-  <div class="global-player-bar">
+  <div class="global-player-bar" use:reserveShellBottom>
     <PlayerBar />
   </div>
 {/if}
@@ -1098,8 +1099,7 @@
             ></div>
           </div>
           <span class="palette-hint"
-            >{xpState.level_progress_pct}% até L{xpState.level + 1} ·
-            {xpState.xp_to_next} XP</span
+            >{$t("study.layout.palette_hint", { pct: xpState.level_progress_pct, lvl: xpState.level + 1, xp: xpState.xp_to_next })}</span
           >
         </footer>
       {/if}
@@ -1365,8 +1365,5 @@
     left: var(--sidebar-width, 0px);
     right: 0;
     z-index: 80;
-  }
-  :global(body:has(.global-player-bar)) {
-    padding-bottom: 80px;
   }
 </style>

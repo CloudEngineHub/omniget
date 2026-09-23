@@ -1925,17 +1925,24 @@ async fn spawn_download_inner(
             let retry_decision = {
                 let mut q = queue.lock().await;
                 if let Some(item) = q.items.iter_mut().find(|i| i.id == item_id) {
-                    if item.downloaded_bytes > 5 * 1024 * 1024 {
-                        item.retry_count = 0;
-                    }
-                    let retryable = is_retryable_category(category);
-                    let attempt = item.retry_count;
-                    let max = item.max_retries;
-                    if retryable && attempt < max {
-                        item.retry_count = attempt + 1;
-                        Some((attempt + 1, max))
-                    } else {
+                    // `cancel()` changes the queue status and cancels the token
+                    // before the downloader future returns. Treat that terminal
+                    // state as authoritative: a cancellation must never flow
+                    // through the generic error retry path and start again.
+                    if !can_auto_retry_item(&item.status, &item.cancel_token, category) {
                         None
+                    } else {
+                        if item.downloaded_bytes > 5 * 1024 * 1024 {
+                            item.retry_count = 0;
+                        }
+                        let attempt = item.retry_count;
+                        let max = item.max_retries;
+                        if attempt < max {
+                            item.retry_count = attempt + 1;
+                            Some((attempt + 1, max))
+                        } else {
+                            None
+                        }
                     }
                 } else {
                     None
@@ -1987,6 +1994,16 @@ async fn spawn_download_inner(
 
 fn is_retryable_category(category: &str) -> bool {
     matches!(category, "unknown" | "rate_limited")
+}
+
+fn can_auto_retry_item(
+    status: &QueueStatus,
+    cancel_token: &CancellationToken,
+    category: &str,
+) -> bool {
+    can_finish_active_item(status)
+        && !cancel_token.is_cancelled()
+        && is_retryable_category(category)
 }
 
 const OUTPUT_MISSING_ERROR: &str =
@@ -2289,7 +2306,10 @@ fn is_generic_title(title: &str) -> bool {
 
 #[cfg(test)]
 mod kind_tests {
-    use super::{can_finish_active_item, kind_from_platform, QueueKind, QueueStatus};
+    use super::{
+        can_auto_retry_item, can_finish_active_item, kind_from_platform, QueueKind, QueueStatus,
+    };
+    use tokio_util::sync::CancellationToken;
 
     #[test]
     fn only_active_items_can_finish() {
@@ -2300,6 +2320,29 @@ mod kind_tests {
             message: "Cancelled".to_string(),
             retryable: false,
         }));
+    }
+
+    #[test]
+    fn cancellation_is_never_eligible_for_automatic_retry() {
+        let token = CancellationToken::new();
+        assert!(can_auto_retry_item(&QueueStatus::Active, &token, "unknown"));
+
+        token.cancel();
+        assert!(!can_auto_retry_item(
+            &QueueStatus::Active,
+            &token,
+            "unknown"
+        ));
+
+        let fresh_token = CancellationToken::new();
+        assert!(!can_auto_retry_item(
+            &QueueStatus::Error {
+                message: "Cancelled".to_string(),
+                retryable: false,
+            },
+            &fresh_token,
+            "unknown",
+        ));
     }
 
     #[test]

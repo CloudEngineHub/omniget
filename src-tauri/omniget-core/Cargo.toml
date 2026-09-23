@@ -75,3 +75,6 @@ rust_xlsxwriter = "0.99"
 # binario gerido, baixado sob demanda igual ao PDFium e ao Real-ESRGAN.
 ort = { version = "2.0.0-rc.13", default-features = false, features = ["std", "ndarray", "tracing", "load-dynamic", "api-27"] }
 ndarray = "0.16"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

@@ -1,4 +1,4 @@
-use super::api::{ERR_NO_SESSION, ERR_UNAUTHORIZED, ERR_UNREACHABLE};
+use super::http::{ERR_NO_SESSION, ERR_UNAUTHORIZED, ERR_UNREACHABLE};
 use super::{normalize_instance_url, store};
 use futures::{FutureExt, SinkExt, StreamExt};
 use omnidisc_proto::gateway::{Opcode, HEARTBEAT_INTERVAL_MS};
@@ -561,7 +561,7 @@ pub async fn omnidisc_typing(
     .await;
     match via_gateway {
         Ok(()) => Ok(()),
-        Err(_) => super::api::typing_rest(&base, &channel_id).await,
+        Err(_) => super::http::typing_rest(&base, &channel_id).await,
     }
 }
 

@@ -98,11 +98,55 @@ export type SpeedPoint = { t: number; bps: number };
 
 const SPEED_SMOOTHING = 0.3;
 const SPEED_HISTORY_MAX = 60;
+const AGGREGATE_SAMPLE_MS = 900;
 
 let downloads = $state(new Map<number, DownloadItem>());
 const speedHistory = new Map<number, SpeedPoint[]>();
 const suppressedGenericIds = new Set<number>();
 let flushScheduled = false;
+
+let aggregateSpeedHistory = $state<SpeedPoint[]>([]);
+let lastAggregateSampleAt = 0;
+let aggregateBatch = $state(new Map<number, DownloadItem>());
+let aggregateBatchId = 0;
+let batchWasPending = false;
+let batchCancelled = false;
+let acknowledgedFailures = $state(new Set<number>());
+
+function isPending(item: DownloadItem): boolean {
+  return item.status === "queued" || item.status === "downloading" || item.status === "paused";
+}
+
+function updateAggregateBatch() {
+  const pending = [...downloads.values()].some(isPending);
+  let next = new Map(aggregateBatch);
+  if (pending && !batchWasPending) {
+    next = new Map();
+    aggregateBatchId++;
+    batchCancelled = false;
+  }
+  for (const [id, previous] of next) {
+    if (!downloads.has(id) && previous.status !== "complete" && previous.status !== "seeding") {
+      next.delete(id);
+      batchCancelled = true;
+    }
+  }
+  for (const [id, item] of downloads) {
+    if (isPending(item) || next.has(id)) next.set(id, { ...item });
+    if (item.status !== "error") acknowledgedFailures.delete(id);
+  }
+  for (const id of acknowledgedFailures) {
+    if (!downloads.has(id)) acknowledgedFailures.delete(id);
+  }
+  batchWasPending = pending;
+  aggregateBatch = next;
+}
+
+export function dismissAggregateFailures() {
+  acknowledgedFailures = new Set(
+    [...downloads.values()].filter(item => item.status === "error").map(item => item.id),
+  );
+}
 
 function pushSpeedPoint(id: number, bps: number) {
   let arr = speedHistory.get(id);
@@ -124,17 +168,55 @@ function clearSpeedHistory(id: number) {
   speedHistory.delete(id);
 }
 
+function sampleAggregateSpeed(now: number) {
+  let bps = 0;
+  let anyActive = false;
+  let anyPending = false;
+  for (const item of downloads.values()) {
+    if (item.status === "downloading") {
+      bps += finiteBytes(item.speed);
+      anyActive = true;
+    } else if (item.status === "queued" || item.status === "paused") {
+      anyPending = true;
+    }
+  }
+
+  if (!anyActive && !anyPending) {
+    if (aggregateSpeedHistory.length > 0) aggregateSpeedHistory = [];
+    lastAggregateSampleAt = 0;
+    return;
+  }
+
+  if (now - lastAggregateSampleAt < AGGREGATE_SAMPLE_MS) return;
+  if (!anyActive && aggregateSpeedHistory.length === 0) return;
+
+  lastAggregateSampleAt = now;
+  const next = aggregateSpeedHistory.length >= SPEED_HISTORY_MAX
+    ? aggregateSpeedHistory.slice(aggregateSpeedHistory.length - SPEED_HISTORY_MAX + 1)
+    : aggregateSpeedHistory.slice();
+  next.push({ t: now, bps });
+  aggregateSpeedHistory = next;
+}
+
+export function getAggregateSpeedHistory(): SpeedPoint[] {
+  return aggregateSpeedHistory;
+}
+
 function scheduleFlush() {
+  updateAggregateBatch();
   if (flushScheduled) return;
   flushScheduled = true;
   requestAnimationFrame(() => {
     flushScheduled = false;
+    sampleAggregateSpeed(Date.now());
     downloads = new Map(downloads);
   });
 }
 
 function flushNow() {
+  updateAggregateBatch();
   flushScheduled = false;
+  sampleAggregateSpeed(Date.now());
   downloads = new Map(downloads);
 }
 
@@ -179,6 +261,94 @@ export function getBadgeCount(): number {
 
 export function getPausedCount(): number {
   return getCounts().paused;
+}
+
+export type DownloadAggregate = {
+  batchId: number;
+  outcome: "idle" | "working" | "complete" | "stopped";
+  activeCount: number;
+  queuedCount: number;
+  pausedCount: number;
+  failedCount: number;
+  speedBps: number;
+  downloadedBytes: number;
+  totalBytes: number | null;
+  percent: number | null;
+  etaSeconds: number | null;
+};
+
+function finiteBytes(value: number | null | undefined): number {
+  return value != null && Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+export function getAggregate(): DownloadAggregate {
+  let activeCount = 0, queuedCount = 0, pausedCount = 0, failedCount = 0;
+  let speedBps = 0;
+  for (const item of downloads.values()) {
+    if (item.status === "queued") queuedCount++;
+    if (item.status === "paused") pausedCount++;
+    if (item.status === "downloading") {
+      activeCount++;
+      speedBps += finiteBytes(item.speed);
+    }
+  }
+
+  let downloadedBytes = 0, knownTotal = 0, remainingBytes = 0;
+  let reportedPercentTotal = 0;
+  let allTotalsKnown = aggregateBatch.size > 0;
+  let allPercentsKnown = aggregateBatch.size > 0;
+  let remainingTotalsKnown = true, everyRemainingHasEta = true;
+  let allSucceeded = aggregateBatch.size > 0 && !batchCancelled;
+  let hasFailed = false;
+  let maxItemEta = 0;
+  for (const item of aggregateBatch.values()) {
+    if (item.status === "error" && !acknowledgedFailures.has(item.id)) failedCount++;
+    const finished = item.status === "complete" || item.status === "seeding";
+    allSucceeded &&= finished;
+    hasFailed ||= item.status === "error";
+    const reportedPercent = finished
+      ? 100
+      : Number.isFinite(item.percent) ? Math.min(100, Math.max(0, item.percent)) : null;
+    if (reportedPercent === null) allPercentsKnown = false;
+    else reportedPercentTotal += reportedPercent;
+    const bytes = finiteBytes(item.kind === "generic" ? item.downloadedBytes : item.bytesDownloaded);
+    const total = item.kind === "generic" && finiteBytes(item.totalBytes) > 0
+      ? finiteBytes(item.totalBytes)
+      : finished && bytes > 0 ? bytes : null;
+    downloadedBytes += finished && total !== null ? total : total !== null ? Math.min(bytes, total) : bytes;
+    if (total === null) allTotalsKnown = false;
+    else knownTotal += total;
+    if (!isPending(item)) continue;
+    if (total === null) remainingTotalsKnown = false;
+    else remainingBytes += Math.max(0, total - bytes);
+    const reportedEta = item.kind === "generic" ? item.etaSeconds : null;
+    const estimate = reportedEta != null && Number.isFinite(reportedEta) && reportedEta > 0
+      ? reportedEta
+      : total !== null && finiteBytes(item.speed) > 0 ? Math.max(0, total - bytes) / item.speed : null;
+    if (item.status !== "downloading" || finiteBytes(item.speed) === 0 || estimate === null) everyRemainingHasEta = false;
+    else maxItemEta = Math.max(maxItemEta, estimate);
+  }
+
+  const totalBytes = allTotalsKnown && knownTotal > 0 ? knownTotal : null;
+  // Some engines (notably segmented yt-dlp downloads) know logical progress
+  // before they know the final combined byte total. The item card already uses
+  // that reported percentage, so the global bar must use it as its fallback
+  // instead of switching to an unrelated indeterminate animation.
+  const percent = totalBytes !== null
+    ? Math.min(100, downloadedBytes / totalBytes * 100)
+    : allPercentsKnown ? reportedPercentTotal / aggregateBatch.size : null;
+  let etaSeconds: number | null = null;
+  if (speedBps > 0 && activeCount > 0 && pausedCount === 0 && queuedCount === 0 && !hasFailed && everyRemainingHasEta) {
+    const eta = remainingTotalsKnown ? remainingBytes / speedBps : maxItemEta;
+    if (Number.isFinite(eta) && eta > 0) etaSeconds = eta;
+  }
+  const pending = activeCount + queuedCount + pausedCount > 0;
+  return {
+    batchId: aggregateBatchId,
+    outcome: pending ? "working" : allSucceeded ? "complete" : aggregateBatch.size || batchCancelled ? "stopped" : "idle",
+    activeCount, queuedCount, pausedCount, failedCount,
+    speedBps, downloadedBytes, totalBytes, percent, etaSeconds,
+  };
 }
 
 export function upsertProgress(

@@ -4,6 +4,9 @@
   import { t } from "$lib/i18n";
   import { setToolbar } from "$lib/stores/toolbar-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import { goto } from "$app/navigation";
+  import { MCP_REGISTRY } from "$lib/llm/mcp";
+  import McpMarketplaceCard from "$components/llm/mcp/McpMarketplaceCard.svelte";
 
   type PluginNavInfo = {
     route: string;
@@ -341,6 +344,15 @@
         {/each}
       </div>
     {/if}
+
+    <!-- MCP servers live in /llm/mcp; the marketplace only points at them. -->
+    <h3 class="mcp-heading">{$t("llm.mcp.registry")}</h3>
+    <p class="mcp-hint">{$t("llm.mcp.registry_hint")}</p>
+    <div class="mcp-grid">
+      {#each MCP_REGISTRY as entry (entry.id)}
+        <McpMarketplaceCard {entry} oninstall={() => goto("/llm/mcp")} />
+      {/each}
+    </div>
   {/if}
 </div>
 
@@ -422,6 +434,20 @@
 {/snippet}
 
 <style>
+  .mcp-heading {
+    margin: var(--space-6) 0 var(--space-1);
+    font-size: var(--text-lg);
+  }
+  .mcp-hint {
+    margin: 0 0 var(--space-3);
+    color: var(--text-dim);
+    font-size: var(--text-sm);
+  }
+  .mcp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-3);
+  }
   .marketplace-page {
     display: flex;
     flex-direction: column;

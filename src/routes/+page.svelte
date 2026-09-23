@@ -9,6 +9,7 @@
   import QualityPicker from "$components/omnibox/QualityPicker.svelte";
   import FormatSelector from "$components/omnibox/FormatSelector.svelte";
   import CookieAccountPicker from "$components/omnibox/CookieAccountPicker.svelte";
+  import OutputLocationPicker from "$components/omnibox/OutputLocationPicker.svelte";
   import OmniboxAdvanced from "$components/omnibox/OmniboxAdvanced.svelte";
   import MediaPreview from "$components/omnibox/MediaPreview.svelte";
   import BatchDownload from "$components/omnibox/BatchDownload.svelte";
@@ -87,6 +88,7 @@
   let formatError = $state<string | null>(null);
   let formatFetchGeneration = $state(0);
   let referer = $state("");
+  let selectedOutputDir = $state("");
 
   // Derived quality data from real yt-dlp format info.
   // These update after the user loads formats via FormatSelector.
@@ -373,6 +375,11 @@
     }
     const pad = (n: number) => String(n).padStart(2, "0");
     scheduleAt = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function handleAnalyze() {
+    handleInput();
+    pendingAutoDownload = false;
   }
 
   function handleInput() {
@@ -683,27 +690,40 @@
       return;
     }
 
-    const isPlaylist = info.content_type === "playlist" && playlistEntries.length > 0;
+    const isPlaylist =
+      info.content_type === "playlist" && playlistEntries.length > 0;
+
     if (isPlaylist && selectedPlaylistItems.size === 0) {
       showToast("error", $t("omnibox.playlist_none_selected") as string);
       return;
     }
 
     const isTorrent = torrentEntries.length > 0;
+
     if (isTorrent && selectedTorrentFiles.size === 0) {
       showToast("error", $t("omnibox.torrent_none_selected") as string);
       return;
     }
 
     const settings = getSettings();
-    let outputDir = settings?.download.default_output_dir ?? "";
+    const hasExplicitOutputDir = !!selectedOutputDir;
 
-    if ((settings?.download.always_ask_path && !settings?.download.auto_download_on_paste) || !outputDir) {
+    let outputDir =
+      selectedOutputDir || settings?.download.default_output_dir || "";
+
+    if (
+      (!hasExplicitOutputDir &&
+        settings?.download.always_ask_path &&
+        !settings?.download.auto_download_on_paste) ||
+      !outputDir
+    ) {
       const selected = await open({
         directory: true,
         title: $t("settings.download.default_output_dir"),
       });
+
       if (!selected) return;
+
       outputDir = selected;
     }
 
@@ -714,15 +734,32 @@
     // preenche o que ele não escolheu explicitamente nesta sessão — uma regra
     // não pode sobrescrever a escolha feita agora, na frente dele.
     let ruleQuality = selectedQuality;
+
     try {
-      const hit = await invoke<{ name: string; then: { output_dir?: string | null; quality?: string | null } } | null>(
-        "preview_rule_match",
-        { url: currentUrl, platform },
-      );
+      const hit = await invoke<{
+        name: string;
+        then: {
+          output_dir?: string | null;
+          quality?: string | null;
+        };
+      } | null>("preview_rule_match", {
+        url: currentUrl,
+        platform,
+      });
+
       if (hit) {
-        if (hit.then.output_dir) outputDir = hit.then.output_dir;
-        if (hit.then.quality && !selectedQuality) ruleQuality = hit.then.quality;
-        showToast("info", $t("omnibox.rule_applied", { name: hit.name }) as string);
+        if (hit.then.output_dir && !hasExplicitOutputDir) {
+          outputDir = hit.then.output_dir;
+        }
+
+        if (hit.then.quality && !selectedQuality) {
+          ruleQuality = hit.then.quality;
+        }
+
+        showToast(
+          "info",
+          $t("omnibox.rule_applied", { name: hit.name }) as string,
+        );
       }
     } catch {
       // Regra é conveniência: se falhar, o download segue com as escolhas manuais.
@@ -736,18 +773,27 @@
       sha256: null,
       title: mediaPreview?.title ?? null,
     };
+
     try {
       const mudou = await invoke<string | null>("check_media_changed", {
         url: currentUrl,
         current: snapshot,
       });
+
       if (mudou) {
-        showToast("info", $t("omnibox.media_changed", { summary: mudou }) as string);
+        showToast(
+          "info",
+          $t("omnibox.media_changed", { summary: mudou }) as string,
+        );
       }
     } catch {
       // Aviso é cortesia: se falhar, o download segue como sempre seguiu.
     }
-    void invoke("record_media_snapshot", { url: currentUrl, snapshot }).catch(() => {});
+
+    void invoke("record_media_snapshot", {
+      url: currentUrl,
+      snapshot,
+    }).catch(() => {});
 
     omniState = { kind: "preparing", platform };
     url = "";
@@ -767,11 +813,14 @@
         scheduledAt: toEpochMs(scheduleAt),
         stopAt: toEpochMs(scheduleStop),
       });
+
       persistLastDownloadOptions();
       omniState = { kind: "idle" };
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
-      omniState = {
+      const msg =
+        typeof e === "string" ? e : e.message ?? $t("omnibox.error");
+
+    omniState = {
         kind: "error",
         message: msg,
         originalUrl: currentUrl,
@@ -792,7 +841,7 @@
     const batchUrls = omniState.urls;
 
     const settings = getSettings();
-    let outputDir = settings?.download.default_output_dir ?? "";
+    let outputDir = selectedOutputDir || settings?.download.default_output_dir || "";
 
     if ((settings?.download.always_ask_path && !settings?.download.auto_download_on_paste) || !outputDir) {
       const selected = await open({
@@ -864,7 +913,8 @@
     p2pReceiveUrl = "";
 
     const settings = getSettings();
-    let outputDir = settings?.download.default_output_dir ?? "";
+    // P2P receive has no omnibox location picker; never inherit selectedOutputDir.
+    let outputDir = settings?.download.default_output_dir || "";
 
     if ((settings?.download.always_ask_path && !settings?.download.auto_download_on_paste) || !outputDir) {
       const selected = await open({
@@ -995,6 +1045,7 @@
         bind:url
         bind:mode={homeInputMode}
         onInput={handleInput}
+        onAnalyze={handleAnalyze}
         onModeChange={handleHomeModeChange}
         onAdvanced={() => { advancedMode = true; }}
       />
@@ -1069,6 +1120,7 @@
         bind:url
         bind:mode={homeInputMode}
         onInput={handleInput}
+        onAnalyze={handleAnalyze}
         onModeChange={handleHomeModeChange}
         onAdvanced={() => { advancedMode = true; }}
       />
@@ -1199,12 +1251,13 @@
             <BilibiliPreviewExtras {url} accountSlug={selectedCookieSlug && selectedCookieSlug !== "_anonymous" ? selectedCookieSlug : null} />
           {/if}
           <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>{$t('omnibox.download')}</button>
-          {#if omniState.info.platform !== "direct_file"}
+          {#if omniState.info.platform !== "direct_file" && omniState.info.platform !== "p2p"}
             <details class="options-panel">
               <summary class="options-toggle">{$t('omnibox.options')}</summary>
               <div class="options-content">
                 <DownloadModeSelector bind:downloadMode onChange={() => { selectedFormatId = null; }} />
                 <QualityPicker bind:selectedQuality selectedFormatId {availableHeights} {hasAudioOnly} />
+                <OutputLocationPicker bind:selectedOutputDir />
                 {#if cookieAccounts.length > 1}
                   <CookieAccountPicker accounts={cookieAccounts} bind:selectedSlug={selectedCookieSlug} />
                 {/if}

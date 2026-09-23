@@ -8,7 +8,7 @@ use crate::map::Tile;
 /// An object in the world. `kind` is the atlas key, kept as a string because
 /// the catalogue grows without the simulation being rebuilt; it is interned in
 /// the string table before it goes on the wire, so it costs one varint there.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Object {
     pub id: ObjectId,
     pub kind: String,

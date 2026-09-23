@@ -36,7 +36,8 @@ pub const ENERGY_TIRED: u8 = 64;
 pub const ENERGY_SPENT: u8 = 16;
 
 /// What an agent is doing right now. The tag is what goes on the wire.
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Activity {
     #[default]
     Idle,

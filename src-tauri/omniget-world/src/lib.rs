@@ -61,6 +61,7 @@ pub use rng::Rng;
 pub use sim::{Decision, Mailbox, Routine, RoutineEntry, SleepState, TICKS_PER_DAY, TICK_MS};
 pub use snapshot::binary::{FORMAT_VERSION, MAGIC};
 pub use snapshot::{AgentState, Diff, EntDelta, Interest, ObjectState, Snapshot, WorldEvent};
+pub use world::checkpoint::{AgentCheckpoint, Checkpoint, CHECKPOINT_VERSION};
 pub use world::{Input, StepReport, World};
 
 /// Version of the wire format this build speaks, for a handshake.

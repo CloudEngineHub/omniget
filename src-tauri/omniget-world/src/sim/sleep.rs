@@ -11,7 +11,8 @@
 pub const TICK_MS: u64 = 100;
 
 /// How often the tick runs.
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum SleepState {
     /// The route is visible: 10 Hz.
     #[default]

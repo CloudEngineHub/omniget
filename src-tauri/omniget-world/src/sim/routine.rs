@@ -33,7 +33,7 @@ pub const fn hm(h: u16, m: u16) -> u16 {
     (h * 60 + m) % MINUTES_PER_DAY as u16
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct RoutineEntry {
     /// Minute of the game day, 0..1440.
     pub minute: u16,
@@ -42,7 +42,7 @@ pub struct RoutineEntry {
 
 /// An agent's day. Entries are kept sorted by minute; two entries in the same
 /// minute fire in the order they were added.
-#[derive(Clone, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, PartialEq, Eq, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct Routine {
     entries: Vec<RoutineEntry>,
 }

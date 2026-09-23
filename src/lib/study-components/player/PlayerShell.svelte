@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { isLinux } from "$lib/platform";
   import { convertFileSrc } from "@tauri-apps/api/core";
   import SkipGapsButton from "./SkipGapsButton.svelte";
   import SponsorBlockOverlay from "./SponsorBlockOverlay.svelte";
@@ -385,6 +386,7 @@
     <video
       bind:this={videoEl}
       src={videoSrc}
+      crossorigin={isLinux() ? undefined : "anonymous"}
       playsinline
       preload="metadata"
       disablepictureinpicture

@@ -105,6 +105,10 @@ pub struct WorldSettings {
     /// the built-in default; a self-hosted `omniworld-server` goes here.
     #[serde(default)]
     pub room_server: String,
+    /// OmniDisc instance that hosts the city (`/world/v1`). Empty means the
+    /// public one, `https://chat.tonho.wtf`.
+    #[serde(default)]
+    pub city_server: String,
 }
 
 fn default_world_enabled() -> bool {
@@ -126,6 +130,7 @@ impl Default for WorldSettings {
             thinking: false,
             think_interval_s: default_think_interval_s(),
             room_server: String::new(),
+            city_server: String::new(),
         }
     }
 }

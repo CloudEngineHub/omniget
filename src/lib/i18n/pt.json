@@ -9595,6 +9595,33 @@
         "walking": "Andando",
         "resting": "Livre"
       }
+    },
+    "city": {
+      "title": "Cidade",
+      "enter": "Entrar na cidade",
+      "entering": "Entrando na cidade…",
+      "leave": "Sair da cidade",
+      "server": "servidor",
+      "server_hint": "Instância do OmniDisc que hospeda a cidade. Vazio usa as Configurações e depois chat.tonho.wtf. É preciso estar logado no OmniDisc lá.",
+      "hint": "Uma cidade persistente no servidor: sua casa tem endereço, os moradores continuam vivendo com o app fechado e todo mundo vê as mesmas ruas.",
+      "in": "Em {{city}}",
+      "inside": "dentro",
+      "outside": "fora",
+      "address": "Seu endereço",
+      "go_home": "Ir para casa",
+      "claim": "Reivindicar um lote",
+      "claim_hint": "Escolhe um lote livre e constrói sua casa nele.",
+      "claimed": "Sua casa fica em {{address}}",
+      "chat_placeholder": "Diga algo para quem está perto…",
+      "reconnecting": "Reconectando…",
+      "canvas_label": "A cidade",
+      "sign_in": "Entrar na conta",
+      "username": "usuário",
+      "password": "senha",
+      "create_account": "Criar conta",
+      "have_account": "Já tenho conta",
+      "no_account": "Criar uma conta",
+      "sign_out": "Sair da conta"
     }
   },
   "llm": {

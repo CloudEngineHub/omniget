@@ -6,6 +6,8 @@
 //! which is what lets the same struct run at 10 Hz behind a visible route, at
 //! 0.2 Hz behind a closed one, and at whatever rate a room server wants.
 
+pub mod checkpoint;
+
 use std::collections::{BTreeMap, VecDeque};
 
 use crate::ents::agent::Activity;
@@ -36,7 +38,8 @@ pub const HISTORY_OBJ: usize = 256;
 
 /// Something the outside asks the world to do. Everything that enters the
 /// simulation enters here: there is no other setter.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum Input {
     /// Put an agent in the world.
     Spawn {
@@ -844,7 +847,7 @@ impl World {
         }
     }
 
-    fn record_frame(&mut self) {
+    pub(crate) fn record_frame(&mut self) {
         let mut frame = if self.frames.len() >= HISTORY_TICKS {
             self.frames.pop_front().unwrap_or_default()
         } else {

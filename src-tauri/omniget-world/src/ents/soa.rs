@@ -22,7 +22,7 @@ pub const WORK_HURRY: i32 = 2;
 
 /// The route an agent is walking, as tiles left to visit. The `Vec` is reused
 /// across paths so a walking agent allocates nothing per tick.
-#[derive(Clone, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, PartialEq, Eq, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct Path {
     steps: Vec<Tile>,
     cursor: usize,
@@ -66,7 +66,8 @@ impl Path {
 
 /// What an agent means to do when it gets where it is going. Walking is a
 /// journey, not a decision, so the decision is parked here until arrival.
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Intent {
     #[default]
     None,

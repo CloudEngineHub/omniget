@@ -26,6 +26,7 @@
 
 pub mod brain;
 pub mod brain_store;
+pub mod city;
 pub mod demo;
 pub mod house;
 pub mod input;

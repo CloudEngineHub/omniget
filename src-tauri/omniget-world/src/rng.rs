@@ -6,7 +6,7 @@
 //! bytes in the snapshot.
 
 /// Deterministic pseudo random generator. Same seed, same sequence, forever.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Rng {
     state: u64,
 }

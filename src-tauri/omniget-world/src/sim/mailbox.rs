@@ -19,7 +19,8 @@ pub const MAX_SAY_BYTES: usize = 200;
 pub const MAILBOX_DEPTH: usize = 4;
 
 /// What an agent decided to do next.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Decision {
     GoTo(Tile),
     Sit(ObjectId),
@@ -65,7 +66,7 @@ impl Decision {
 }
 
 /// Pending decisions, one queue per agent, in id order.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, PartialEq, Eq, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct Mailbox {
     queues: BTreeMap<EntId, Vec<Decision>>,
     /// Decisions thrown away because a queue was full. Reported by the step so

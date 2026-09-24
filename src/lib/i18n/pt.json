@@ -4911,6 +4911,7 @@
     "drm_protected": "Os streams baixados são protegidos por DRM e não podem ser mesclados. Este conteúdo não é suportado.",
     "output_missing": "O download terminou, mas nenhum arquivo apareceu na pasta (ou está vazio). Verifique o espaço em disco e o antivírus e tente novamente.",
     "course_platform_url": "Plataformas de cursos não podem ser baixadas por URL. Abra a página Cursos (requer o plugin de Cursos e uma conta conectada).",
+    "platform_opted_out": "O dono deste site pediu que o OmniGet não oferecesse suporte a ele.",
     "plugin_outdated": "Este plugin está desatualizado e não suporta esta ação. Atualize-o no Marketplace e reinicie o OmniGet."
   },
   "debug": {

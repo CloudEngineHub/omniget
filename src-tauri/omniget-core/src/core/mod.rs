@@ -28,6 +28,7 @@ pub mod omni;
 pub mod onnxrt;
 pub mod paths;
 pub mod pdfium;
+pub mod platform_optout;
 pub mod pokemon_names;
 pub mod pot_provider;
 pub mod process;

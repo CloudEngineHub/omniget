@@ -93,6 +93,7 @@ pub async fn queue_url_with_defaults(
     from_hotkey: bool,
     download_mode: Option<String>,
 ) -> Result<QueueUrlOutcome, String> {
+    omniget_core::core::platform_optout::ensure_allowed(&url)?;
     let state = app.state::<AppState>();
     let settings = config::load_settings(app);
     let download_queue = state.download_queue.clone();
@@ -319,6 +320,7 @@ pub async fn handle_external_url(
     if !is_external_url(&url) {
         return Err("Invalid external URL".to_string());
     }
+    omniget_core::core::platform_optout::ensure_allowed(&url)?;
 
     let settings = config::load_settings(app);
     let can_queue_directly = (!settings.download.always_ask_path

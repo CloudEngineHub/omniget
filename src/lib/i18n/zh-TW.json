@@ -5038,7 +5038,7 @@
     "refresh": "重新整理",
     "unknown_error": "未知錯誤",
     "captcha_detected": "偵測到 Captcha — 請在登入視窗中完成驗證。",
-    "external_platform_hint": "This course is delivered outside Hotmart Club, so OmniGet cannot download it from here. Open it on the creator's platform; if that platform is Udemy or Kiwify, sign in to it in Courses.",
+    "external_platform_hint": "This course is delivered outside Hotmart Club, so OmniGet cannot download it from here. Open it on the creator's platform; if that platform is Udemy, sign in to it in Courses.",
     "open_external": "Open on the platform"
   },
   "torrent": {

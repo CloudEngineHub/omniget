@@ -442,7 +442,7 @@ sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav   # Arch
 ## 隐私，以及 OmniGet 拒绝做的事
 
 <p align="center">
-  <img src="assets/readme/illustration-privacy.png" alt="Loop 抱着一台笔记本电脑，屏幕上是 OmniGet 的下载图标和一把绿色的锁，周围是一面发光的盾牌" width="700" />
+  <img src="assets/readme/illustration-privacy.webp" alt="Loop 捧着一台笔记本电脑，上面是 OmniGet 的下载图标和一把绿色的锁，身后是一面橙色的盾牌" width="700" />
 </p>
 
 一切都在你的电脑上运行。没有账号，中间没有我们的服务器，也不会上报你下载了什么。Cookie 和 API 密钥保存在你的本地配置里。OmniGet 自己联网只为三件事：访问你要求下载的网站、去 GitHub 检查更新，以及在你使用 AI 功能时连接你配置的 AI 服务商。

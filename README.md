@@ -432,7 +432,7 @@ Extra abilities you switch on when you need them, in **Superpowers** in the side
 ## Privacy and what OmniGet refuses to do
 
 <p align="center">
-  <img src="assets/readme/illustration-privacy.png" alt="Loop hugging a laptop with the OmniGet download icon and a green padlock, inside a glowing shield" width="700" />
+  <img src="assets/readme/illustration-privacy.webp" alt="Loop holding a laptop with the OmniGet download icon and a green padlock, in front of an orange shield" width="700" />
 </p>
 
 Everything runs on your computer. There is no account, no server of ours in the middle and no telemetry about what you download. Cookies and API keys live in your local profile. OmniGet only goes online by itself to reach the sites you asked it to download from, GitHub for updates, and the AI provider you configured when you use it.

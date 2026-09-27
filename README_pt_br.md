@@ -442,7 +442,7 @@ Habilidades extras que você liga quando precisa, em **Superpoderes** na barra l
 ## Privacidade e o que o OmniGet se recusa a fazer
 
 <p align="center">
-  <img src="assets/readme/illustration-privacy.png" alt="O Loop abraçando um notebook com o ícone de download do OmniGet e um cadeado verde, dentro de um escudo brilhante" width="700" />
+  <img src="assets/readme/illustration-privacy.webp" alt="O Loop segurando um notebook com o ícone de download do OmniGet e um cadeado verde, na frente de um escudo laranja" width="700" />
 </p>
 
 Tudo roda no seu computador. Não há conta, não há servidor nosso no meio e não há telemetria do que você baixa. Cookies e chaves de API ficam no seu perfil local. O OmniGet só acessa a internet por conta própria para chegar aos sites de onde você pediu para baixar, ao GitHub para buscar atualizações e ao provedor de IA que você configurou, quando você usa.

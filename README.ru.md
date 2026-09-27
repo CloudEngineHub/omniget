@@ -144,8 +144,8 @@ claude mcp add --transport http --scope project omniget <address from the page> 
 Папка [`claude-plugin/`](claude-plugin/omniget) — это плагин для [Claude Code](https://claude.com/claude-code), который работает без приложения. Вставьте ссылку на видео или пост из соцсети вместе с просьбой, и его навыки скачают файл или сделают транскрипцию. Команды тоже есть, на случай если хочется указать всё явно:
 
 ```text
-/plugin marketplace add /path/to/omniget/claude-plugin
-/plugin install omniget
+/plugin marketplace add tonhowtf/omniget
+/plugin install omniget@omniget
 /omniget:setup                       # ставит yt-dlp, ffmpeg и omniget-cli после одного подтверждения
 /omniget:fetch <url> [--audio]       # медиафайл, в ~/Downloads/omniget
 /omniget:transcribe <url|file>       # субтитры, затем локальный whisper.cpp, затем Gemini или OpenAI, если вы добавили ключ

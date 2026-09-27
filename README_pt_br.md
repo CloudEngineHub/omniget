@@ -140,8 +140,8 @@ O token nunca vai na linha de comando, então ele fica fora do histórico do she
 A pasta [`claude-plugin/`](claude-plugin/omniget) é um plugin para o [Claude Code](https://claude.com/claude-code) que funciona sem o app. Cole o link de um vídeo ou de um post de rede social junto com um pedido, e as skills dele baixam ou transcrevem. Os comandos estão lá para quando você quiser ser explícito:
 
 ```text
-/plugin marketplace add /path/to/omniget/claude-plugin
-/plugin install omniget
+/plugin marketplace add tonhowtf/omniget
+/plugin install omniget@omniget
 /omniget:setup                       # instala yt-dlp, ffmpeg e omniget-cli depois de uma confirmação
 /omniget:fetch <url> [--audio]       # o arquivo de mídia, em ~/Downloads/omniget
 /omniget:transcribe <url|file>       # legendas, depois whisper.cpp local, depois Gemini ou OpenAI se você adicionou uma chave

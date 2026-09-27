@@ -140,8 +140,8 @@ claude mcp add --transport http --scope project omniget <address from the page> 
 [`claude-plugin/`](claude-plugin/omniget) 文件夹是一个 [Claude Code](https://claude.com/claude-code) 插件，不需要桌面应用也能用。把视频或社交帖子的链接连同你的要求一起粘贴进去，它的技能就会把内容下载下来或转写出来。想要明确指定时，也有对应的命令：
 
 ```text
-/plugin marketplace add /path/to/omniget/claude-plugin
-/plugin install omniget
+/plugin marketplace add tonhowtf/omniget
+/plugin install omniget@omniget
 /omniget:setup                       # 确认一次后安装 yt-dlp、ffmpeg 和 omniget-cli
 /omniget:fetch <url> [--audio]       # 媒体文件，保存到 ~/Downloads/omniget
 /omniget:transcribe <url|file>       # 先用字幕，再用本地 whisper.cpp，如果你添加了密钥再用 Gemini 或 OpenAI
